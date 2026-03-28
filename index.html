@@ -6,8 +6,14 @@
     <title>Digital Rezwan OS</title>
     
     <!-- Chosen Palette: Fluid Minimalist (Slate 50 background, Blue 600 primary, Emerald 500 success, Rose 500 sentiment) -->
-    <!-- Application Structure Plan: This SPA uses React compiled in-browser. It features a professional OS-like interface with dynamic routing via state management. The latest update implements a robust real-time comment system and a unique per-post sharing mechanism using URL query parameters (?post=ID). When a unique link is accessed, the app automatically scrolls to and highlights the target post. -->
-    <!-- Visualization & Content Choices: Dashboard -> Firestore integration. Unique Sharing -> Window Location API with query param detection. Confirming NO SVG/Mermaid used. -->
+    <!-- Application Structure Plan: This SPA is built with React compiled in-browser. The design implements a high-end Glassmorphism UI. 
+         The Profile/About section is divided into clear functional blocks for Work, Education, and Contact. 
+         Work/Education rendering handles start/end dates, locations, and descriptions. 
+         Choice modals allow users to select their preferred platform for following or messaging. -->
+    <!-- Visualization & Content Choices: 
+         - Icons: FontAwesome 6 for a professional look.
+         - Database: Firestore for real-time syncing of profile and feed data.
+         - Interaction: Custom modals for intent-based navigation. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <!-- FontAwesome for Professional Icons -->
@@ -19,32 +25,117 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap');
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        
+        body { background-color: #F8FAFC; overflow-x: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        @keyframes shimmer { 
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+        .shimmer-loader {
+            background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+            background-size: 800px 104px;
+            animation: shimmer 2s infinite linear;
+        }
+
         @keyframes pulseRipple {
             0% { transform: scale(0.8); opacity: 0.8; }
             100% { transform: scale(2.5); opacity: 0; }
         }
         .ripple-effect { animation: pulseRipple 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
-        .comment-enter { animation: slideDown 0.3s ease-out forwards; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
         }
-        .highlight-post { border: 2px solid #2563EB !important; ring: 4px; ring-color: rgba(37,99,235,0.2); }
+
+        .highlight-post { 
+            border: 2px solid #2563EB !important; 
+            box-shadow: 0 0 40px rgba(37, 99, 235, 0.15) !important;
+        }
+
+        .modal-enter { animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes modalIn { 
+            from { opacity: 0; transform: scale(0.9) translateY(20px); } 
+            to { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 24px;
+            bottom: -24px;
+            width: 2px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+        .timeline-line:last-child::before { display: none; }
     </style>
 </head>
-<body class="bg-[#F8FAFC]">
+<body class="font-['Outfit']">
     <div id="root"></div>
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const { useState, useEffect, useRef } = React;
+
+        // =====================================================
+        // ১. কনফিগারেশন এবং কনস্ট্যান্ট
+        // =====================================================
+
+        const DEFAULT_PROFILE_IMG = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
+            authDomain: "rezwan-86f26.firebaseapp.com",
+            projectId: "rezwan-86f26",
+            storageBucket: "rezwan-86f26.firebasestorage.app",
+            messagingSenderId: "809789923238",
+            appId: "1:809789923238:web:5c2251345ada0b50f07967",
+            measurementId: "G-31MPTM1V8W"
+        };
+
+        const TRANSLATIONS = {
+            en: {
+                timeline: "Timeline", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "Profile",
+                available: "Active for Hiring", recentUpdates: "Recent Activity",
+                chatTitle: "Personal AI", chatPlaceholder: "Ask me anything...", digitalSpace: "Rezwan OS",
+                saving: "Capturing sync...", awaitingData: "Awaiting data...",
+                follow: "Follow Me", message: "Send Message", linkMissing: "Link not configured.",
+                workEd: "Work & Education", places: "Places Lived", contactInfo: "Connect & Info",
+                cameraError: "Camera blocked.", openingCamera: "Init Camera...",
+                bio: "Software Architect focusing on robust digital products.", resume: "View Details", noDetails: "Nothing here yet.",
+                shareSuccess: "Link Copied!", commentPh: "Write a comment...", postComment: "Send",
+                choosePlatform: "Select Platform", cancel: "Cancel", present: "Present"
+            },
+            bn: {
+                timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল",
+                available: "কাজের জন্য প্রস্তুত", recentUpdates: "সাম্প্রতিক কার্যক্রম",
+                chatTitle: "এআই অ্যাসিস্ট্যান্ট", chatPlaceholder: "রেজওয়ান সম্পর্কে জানুন...", digitalSpace: "রেজওয়ান ওএস",
+                saving: "সিঙ্ক হচ্ছে...", awaitingData: "সার্ভার থেকে ডেটা আসছে...",
+                follow: "ফলো করুন", message: "মেসেজ পাঠান", linkMissing: "লিংকটি এখনো যুক্ত করা হয়নি।",
+                workEd: "কর্ম ও শিক্ষা", places: "বসবাসের স্থান", contactInfo: "যোগাযোগ ও তথ্য",
+                cameraError: "ক্যামেরা পারমিশন দিন!", openingCamera: "ক্যামেরা লোড হচ্ছে...",
+                bio: "সফটওয়্যার আর্কিটেক্ট হিসেবে ডিজিটাল ইকোসিস্টেম তৈরি করছি।", resume: "বিস্তারিত দেখুন", noDetails: "এখনো কোনো তথ্য নেই।",
+                shareSuccess: "লিংক কপি হয়েছে!", commentPh: "কমেন্ট লিখুন...", postComment: "পোস্ট",
+                choosePlatform: "প্ল্যাটফর্ম নির্বাচন করুন", cancel: "বাতিল", present: "বর্তমান"
+            }
+        };
+
+        // =====================================================
+        // ২. আইকন এবং হেল্পার কম্পোনেন্ট
+        // =====================================================
 
         const Icon = ({ name, className = "", size = 20, fill }) => {
             const faMap = {
@@ -74,6 +165,7 @@
                 MapPin: 'fa-solid fa-location-dot',
                 Share2: 'fa-solid fa-share-nodes',
                 UserCircle: 'fa-solid fa-circle-user',
+                PlusCircle: 'fa-solid fa-plus-circle',
                 Briefcase: 'fa-solid fa-briefcase',
                 Mail: 'fa-solid fa-envelope',
                 Phone: 'fa-solid fa-phone',
@@ -82,79 +174,70 @@
                 LinkIcon: 'fa-solid fa-link',
                 AlertCircle: 'fa-solid fa-circle-exclamation',
                 Trophy: 'fa-solid fa-trophy',
-                Sparkles: 'fa-solid fa-wand-magic-sparkles'
+                Sparkles: 'fa-solid fa-wand-magic-sparkles',
+                Facebook: 'fa-brands fa-facebook-f',
+                LinkedIn: 'fa-brands fa-linkedin-in',
+                WhatsApp: 'fa-brands fa-whatsapp',
+                Messenger: 'fa-brands fa-facebook-messenger',
+                Building: 'fa-solid fa-building',
+                Calendar: 'fa-solid fa-calendar-day'
             };
 
             let iconClass = faMap[name] || 'fa-solid fa-circle';
-            if (name === 'Heart' && fill !== 'currentColor') {
-                iconClass = 'fa-regular fa-heart';
-            }
+            if (name === 'Heart' && fill !== 'currentColor') iconClass = 'fa-regular fa-heart';
 
             return <i className={`${iconClass} ${className}`} style={{ fontSize: `${size}px` }}></i>;
         };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
-            authDomain: "rezwan-86f26.firebaseapp.com",
-            projectId: "rezwan-86f26",
-            storageBucket: "rezwan-86f26.firebasestorage.app",
-            messagingSenderId: "809789923238",
-            appId: "1:809789923238:web:5c2251345ada0b50f07967",
-            measurementId: "G-31MPTM1V8W"
+        const GlassCard = ({ children, className = "", id }) => (
+            <div id={id} className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2rem] transition-all duration-300 ${className}`}>
+                {children}
+            </div>
+        );
+
+        const ShimmerCard = () => (
+            <div className="glass-card rounded-[2.5rem] p-8 mb-6 w-full shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 shimmer-loader rounded-full"></div>
+                    <div className="flex-1 space-y-3">
+                        <div className="h-5 shimmer-loader rounded w-1/3"></div>
+                        <div className="h-3 shimmer-loader rounded w-1/4"></div>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <div className="h-4 shimmer-loader rounded w-full"></div>
+                    <div className="h-4 shimmer-loader rounded w-5/6"></div>
+                </div>
+            </div>
+        );
+
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
+            return (
+                <div className="fixed bottom-24 right-6 z-[200] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
+                    <Icon name="AlertCircle" size={18} className="text-amber-400"/>
+                    <span className="text-sm font-bold">{message}</span>
+                </div>
+            );
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rezwan-portfolio-v1';
-        const apiKey = "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8"; 
+        // =====================================================
+        // ৩. ইউটিলিটি ফাংশন
+        // =====================================================
 
-        const DEFAULT_PROFILE_IMG = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
-
-        const TRANSLATIONS = {
-            en: {
-                timeline: "Timeline", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "Profile (About)",
-                available: "Available for work", recentUpdates: "News Feed",
-                chatTitle: "Rezwan's Assistant", chatPlaceholder: "Ask about Rezwan's skills...", digitalSpace: "Digital Space",
-                saving: "Syncing feeling...", awaitingData: "Awaiting uploads from admin...",
-                follow: "Follow", message: "Message", linkMissing: "Link not added by admin yet.",
-                workEd: "Work & Education", places: "Places Lived", contactInfo: "Contact & Basic Info",
-                cameraError: "Please allow camera access.", openingCamera: "Accessing camera...",
-                bio: "Passionate software architect building robust digital ecosystems.", resume: "View Profile", noDetails: "No details added yet.",
-                shareSuccess: "Unique post link copied!", commentPh: "Write a comment...", postComment: "Post"
-            },
-            bn: {
-                timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল (About)",
-                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "নিউজ ফিড",
-                chatTitle: "রেজওয়ানের অ্যাসিস্ট্যান্ট", chatPlaceholder: "রেজওয়ানের স্কিল সম্পর্কে জানুন...", digitalSpace: "ডিজিটাল স্পেস",
-                saving: "অনুভূতি পাঠানো হচ্ছে...", awaitingData: "অ্যাডমিনের ডেটা আপডেটের অপেক্ষায়...",
-                follow: "ফলো করুন", message: "মেসেজ দিন", linkMissing: "অ্যাডমিন এখনো লিংক যুক্ত করেননি।",
-                workEd: "কর্ম ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগ ও সাধারণ তথ্য",
-                cameraError: "অনুগ্রহ করে ক্যামেরা পারমিশন দিন!", openingCamera: "ক্যামেরা ওপেন হচ্ছে...",
-                bio: "একজন সফটওয়্যার আর্কিটেক্ট হিসেবে শক্তিশালী ডিজিটাল ইকোসিস্টেম তৈরি করতে ভালোবাসি।", resume: "প্রোফাইল দেখুন", noDetails: "কোনো তথ্য যোগ করা হয়নি।",
-                shareSuccess: "পোস্টের ইউনিক লিঙ্ক কপি হয়েছে!", commentPh: "একটি কমেন্ট লিখুন...", postComment: "পোস্ট"
-            }
-        };
+        const apiKey_gemini = "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8";
 
         const callGeminiAPI = async (prompt) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey_gemini}`;
             const payload = { 
                 contents: [{ parts: [{ text: prompt }] }],
-                systemInstruction: { parts: [{ text: "You are the personal AI assistant for Rezwan Ahammed inside his Fluid OS. Answer ONLY professional questions about his work, Robotics, Engineering, and Projects. If users express feelings or use heart emojis, be very kind and appreciate it. Use Markdown." }] }
+                systemInstruction: { parts: [{ text: "You are the personal AI assistant for Rezwan Ahammed. Talk about his engineering work. Use Markdown." }] }
             };
-            
-            const delays = [1000, 2000, 4000];
-            for (let i = 0; i <= delays.length; i++) {
-                try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) throw new Error("API Error");
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                } catch (e) {
-                    if (i === delays.length) return "AI is resting. Please try again later.";
-                    await new Promise(r => setTimeout(r, delays[i]));
-                }
-            }
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+            } catch (e) { return "System Busy."; }
         };
 
         const renderMarkdown = (text) => {
@@ -170,32 +253,21 @@
 
         const triggerSelfie = async () => {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return null;
-            let stream = null;
-            let video = null;
+            let stream = null; let video = null;
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 video = document.createElement('video');
-                video.style.position = 'fixed';
-                video.style.top = '-9999px';
-                video.setAttribute('autoplay', 'true'); 
-                video.setAttribute('muted', 'true'); 
-                video.setAttribute('playsinline', 'true');
+                video.style.position = 'fixed'; video.style.top = '-9999px';
+                video.setAttribute('autoplay', 'true'); video.setAttribute('muted', 'true'); video.setAttribute('playsinline', 'true');
                 document.body.appendChild(video); 
                 video.srcObject = stream;
-                
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => reject(new Error("Timeout")), 6000);
-                    video.onplaying = () => { clearTimeout(timeout); resolve(); };
-                    video.play().catch(e => console.warn(e));
-                });
-                
+                await new Promise((resolve) => { video.onplaying = resolve; setTimeout(resolve, 5000); });
                 await new Promise(r => setTimeout(r, 400));
                 const canvas = document.createElement('canvas');
-                canvas.width = 320; 
-                canvas.height = 240;
+                canvas.width = 320; canvas.height = 240;
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const base64Image = canvas.toDataURL('image/jpeg', 0.5); 
-                return base64Image;
+                const img = canvas.toDataURL('image/jpeg', 0.5); 
+                return img;
             } catch (err) { return null; }
             finally {
                 if (stream) stream.getTracks().forEach(t => t.stop());
@@ -203,28 +275,9 @@
             }
         };
 
-        const ShimmerCard = () => (
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 mb-6 w-full animate-pulse shadow-sm">
-                <div className="flex items-center gap-4 mb-6"><div className="w-12 h-12 bg-slate-200/70 rounded-full"></div><div className="flex-1 space-y-3"><div className="h-4 bg-slate-200/70 rounded w-1/3"></div><div className="h-3 bg-slate-200/70 rounded w-1/4"></div></div></div>
-                <div className="space-y-3"><div className="h-4 bg-slate-200/70 rounded w-full"></div><div className="h-4 bg-slate-200/70 rounded w-5/6"></div></div>
-            </div>
-        );
-
-        const GlassCard = ({ children, className = "", id }) => (
-            <div id={id} className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2rem] transition-all duration-300 ${className}`}>
-                {children}
-            </div>
-        );
-
-        const Toast = ({ message, onClose }) => {
-            useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
-            return (
-                <div className="fixed bottom-24 right-6 z-[200] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-                    <Icon name="AlertCircle" size={18} className="text-amber-400"/>
-                    <span className="text-sm font-bold">{message}</span>
-                </div>
-            );
-        };
+        // =====================================================
+        // ৪. এআই চ্যাট এবং সিলেকশন মডাল
+        // =====================================================
 
         const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
             const [isOpen, setIsOpen] = useState(false);
@@ -237,17 +290,13 @@
 
             const handleSend = async () => {
                 if (!input.trim() || isTyping) return;
-                const userMsg = input;
-                setInput('');
+                const userMsg = input; setInput('');
                 setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
                 const feelingsRegex = /(love|like|feelings|crush|adore|sweetheart|beautiful|cute|pretty|marry|date|awesome|amazing|gorgeous|wonderful|fantastic|ভালোবাসা|পছন্দ|ভালবাসি|ভালবাসা|ক্রাশ|ভালোবাসি|প্রেম|মিষ্টি|সুন্দর|বিয়ে|বিয়|ভাল্লাগে|মুগ্ধ|চমৎকার|অপূর্ব|প্রিয়|মনোহর|দারুণ|অসাধারণ|❤️|💖|💗|💓|💞|💕|💌|💘|💝|💟|😍|🥰|😘|😗|😙|😚|🌹|🌷|🌸|❤️‍🔥|🫶|😻)/i;
                 if (feelingsRegex.test(userMsg)) onFeelingDetected(userMsg);
                 setIsTyping(true);
                 const botReply = await callGeminiAPI(userMsg);
                 setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
-                try {
-                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), { userId: user?.uid || 'guest', text: userMsg, timestamp: new Date().toISOString(), role: 'visitor' });
-                } catch(e) {}
                 setIsTyping(false);
             };
 
@@ -260,13 +309,13 @@
                                 <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform"><Icon name="X" size={20}/></button>
                             </div>
                             <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40 custom-scrollbar">
-                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Assistant Online</div>}
+                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Active Link</div>}
                                 {messages.map((m, i) => (
                                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[88%] p-3.5 rounded-2xl text-[13px] leading-relaxed ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-white/80 text-slate-700 rounded-tl-none shadow-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
+                                        <div className={`max-w-[88%] p-3.5 rounded-2xl text-[13px] leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-white/80 text-slate-700 rounded-tl-none'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
                                     </div>
                                 ))}
-                                {isTyping && <div className="text-[10px] font-bold text-blue-500 animate-pulse px-2 flex items-center gap-1"><Icon name="Zap" size={10} /> AI Thinking...</div>}
+                                {isTyping && <div className="text-[10px] font-bold text-blue-500 animate-pulse px-2 flex items-center gap-1"><Icon name="Zap" size={10} /> Thinking...</div>}
                             </div>
                             <div className="p-3 border-t border-white bg-white/80 flex gap-2">
                                 <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50" />
@@ -282,6 +331,40 @@
                 </div>
             );
         };
+
+        const SelectionModal = ({ title, options, onClose, onSelect, t }) => (
+            <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-950/40 backdrop-blur-md">
+                <div className="bg-white/90 backdrop-blur-3xl border border-white p-8 rounded-[3rem] shadow-[0_25px_100px_rgba(0,0,0,0.2)] max-w-sm w-full modal-enter">
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-2xl font-extrabold text-slate-900 tracking-tighter">{title}</h3>
+                        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full hover:bg-rose-50 hover:text-rose-500 transition-all"><Icon name="X" size={16}/></button>
+                    </div>
+                    <div className="space-y-4">
+                        {options.map((opt, i) => (
+                            <button 
+                                key={i} 
+                                onClick={() => onSelect(opt.url)}
+                                className="w-full flex items-center gap-5 p-5 rounded-3xl bg-white border border-slate-100 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 transition-all group active:scale-95"
+                            >
+                                <div className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-slate-50 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner`}>
+                                    <Icon name={opt.icon} size={24}/>
+                                </div>
+                                <div className="text-left">
+                                    <p className="font-extrabold text-slate-800 text-base">{opt.label}</p>
+                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{opt.sub}</p>
+                                </div>
+                                <Icon name="ArrowRight" className="ml-auto text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" size={16}/>
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={onClose} className="w-full mt-8 py-4 rounded-2xl font-black text-slate-400 text-xs uppercase tracking-widest hover:text-slate-600 transition-all">{t.cancel}</button>
+                </div>
+            </div>
+        );
+
+        // =====================================================
+        // ৫. মেইন অ্যাপলিকেশন
+        // =====================================================
 
         const App = () => {
             const [lang, setLang] = useState('en');
@@ -301,315 +384,357 @@
             const [activeCommentPostId, setActiveCommentPostId] = useState(null);
             const [commentText, setCommentText] = useState('');
             const [highlightedPostId, setHighlightedPostId] = useState(null);
+            const [activeModal, setActiveModal] = useState(null);
+
+            const appId_str = 'rezwan-portfolio-v1';
+
+            const app_init = initializeApp(firebaseConfig);
+            const app_auth = getAuth(app_init);
+            const app_db = getFirestore(app_init);
 
             useEffect(() => {
-                const initAuth = async () => {
-                    try { await signInAnonymously(auth); } catch (err) {}
-                };
+                const initAuth = async () => { try { await signInAnonymously(app_auth); } catch (e) {} };
                 initAuth();
-                const unsub = onAuthStateChanged(auth, u => setUser(u));
-                return () => unsub();
+                onAuthStateChanged(app_auth, u => setUser(u));
             }, []);
 
             useEffect(() => {
                 if (!user) return;
-                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => {
-                    const fetchedPosts = snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    setPosts(fetchedPosts);
-                    setIsLoading(false);
-
-                    // Logic for deep-linking/scrolling to a specific post via URL ?post=ID
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const postId = urlParams.get('post');
-                    if (postId && activeMenu === 'Home') {
-                        setTimeout(() => {
-                            const el = document.getElementById(`post-${postId}`);
-                            if (el) {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                setHighlightedPostId(postId);
-                                setTimeout(() => setHighlightedPostId(null), 3000); // Clear highlight after 3s
-                            }
-                        }, 800);
-                    }
-                });
-                const unsubProjects = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), (snap) => {
-                    setProjects(snap.docs.map(d => ({ ...d.data(), id: d.id })));
-                });
-                const unsubAcademics = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'academics'), (snap) => {
-                    setAcademics(snap.docs.map(d => ({ ...d.data(), id: d.id })));
-                });
-                const unsubPerspectives = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'perspectives'), (snap) => {
-                    setPerspectives(snap.docs.map(d => ({ ...d.data(), id: d.id })));
-                });
-                const unsubProfile = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profile'), (snap) => {
-                    if (!snap.empty) setProfileData(snap.docs[0].data());
-                });
-                return () => { unsubPosts(); unsubProjects(); unsubAcademics(); unsubPerspectives(); unsubProfile(); };
+                const unsub = [
+                    onSnapshot(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'posts'), (s) => {
+                        setPosts(s.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                        setIsLoading(false);
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const pId = urlParams.get('post');
+                        if (pId && activeMenu === 'Home') {
+                            setTimeout(() => {
+                                const el = document.getElementById(`post-${pId}`);
+                                if (el) {
+                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    setHighlightedPostId(pId);
+                                    setTimeout(() => setHighlightedPostId(null), 4000);
+                                }
+                            }, 1000);
+                        }
+                    }),
+                    onSnapshot(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'projects'), s => setProjects(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                    onSnapshot(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'academics'), s => setAcademics(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                    onSnapshot(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'perspectives'), s => setPerspectives(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                    onSnapshot(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'profile'), s => { if(!s.empty) setProfileData(s.docs[0].data()); })
+                ];
+                return () => unsub.forEach(f => f());
             }, [user, activeMenu]);
 
             const handleFeelingDetected = async (triggerText) => {
                 if (isCapturing || isSaving) return;
                 setIsCapturing(true);
-                try {
-                    const selfie = await triggerSelfie();
-                    if (selfie) {
-                        setIsSaving(true);
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'feelings'), { userId: user?.uid || 'guest', text: triggerText, photo: selfie, timestamp: new Date().toISOString() });
-                        setTimeout(() => setIsSaving(false), 2000);
-                    } else { setToastMessage(t.cameraError); }
-                } catch (error) { setToastMessage(t.cameraError); }
-                finally { setIsCapturing(false); }
+                const selfie = await triggerSelfie();
+                if (selfie) {
+                    setIsSaving(true);
+                    await addDoc(collection(app_db, 'artifacts', appId_str, 'public', 'data', 'feelings'), { userId: user.uid, text: triggerText, photo: selfie, timestamp: new Date().toISOString() });
+                    setTimeout(() => setIsSaving(false), 2000);
+                } else setToastMessage(t.cameraError);
+                setIsCapturing(false);
             };
 
-            const handleToggleLike = async (postId, likedBy) => {
+            const handleToggleLike = async (pId, likedBy) => {
                 if (!user) return;
                 const isLiked = (likedBy || []).includes(user.uid);
-                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) }); } catch(e) {}
+                await updateDoc(doc(app_db, 'artifacts', appId_str, 'public', 'data', 'posts', pId), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
             };
 
-            const handleCommentSubmit = async (postId) => {
-                if (!commentText.trim() || !user) return;
-                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
-                const newComment = {
-                    text: commentText,
-                    userId: user.uid,
-                    timestamp: new Date().toISOString()
-                };
-                try {
-                    await updateDoc(postRef, {
-                        comments: arrayUnion(newComment)
-                    });
-                    setCommentText('');
-                } catch(e) { console.error(e); }
+            const handleCommentSubmit = async (pId) => {
+                if (!commentText.trim()) return;
+                await updateDoc(doc(app_db, 'artifacts', appId_str, 'public', 'data', 'posts', pId), {
+                    comments: arrayUnion({ text: commentText, userId: user.uid, timestamp: new Date().toISOString() })
+                });
+                setCommentText('');
             };
 
             const handleShare = (post) => {
-                // Generate a unique URL for this specific post
                 const uniqueUrl = `${window.location.origin}${window.location.pathname}?post=${post.id}`;
-                
-                const shareData = {
-                    title: 'Digital Rezwan OS',
-                    text: post.content || 'Check out this post on Rezwan Ahammed\'s portfolio!',
-                    url: uniqueUrl
-                };
-
-                if (navigator.share) {
-                    navigator.share(shareData).catch(console.error);
-                } else {
-                    // Fallback to clipboard with the UNIQUE link
-                    const dummy = document.createElement('input');
-                    document.body.appendChild(dummy);
-                    dummy.value = uniqueUrl;
-                    dummy.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(dummy);
+                if (navigator.share) navigator.share({ title: 'Rezwan OS', text: post.content, url: uniqueUrl });
+                else {
+                    navigator.clipboard.writeText(uniqueUrl);
                     setToastMessage(t.shareSuccess);
                 }
             };
 
-            const handleNav = (id) => { setIsLoading(true); setActiveMenu(id); setIsSidebarOpen(false); setTimeout(() => setIsLoading(false), 300); };
+            const handleNav = (id) => { setIsLoading(true); setActiveMenu(id); setIsSidebarOpen(false); setTimeout(() => setIsLoading(false), 400); };
 
-            const handleFollow = () => {
-                const url = profileData?.facebookUrl || profileData?.linkedinUrl;
-                if (url) window.open(url, '_blank'); else setToastMessage(t.linkMissing);
-            };
-
-            const handleMessage = () => {
-                const url = profileData?.messengerUrl || profileData?.whatsappUrl;
-                if (url) window.open(url, '_blank'); else setToastMessage(t.linkMissing);
-            };
-
-            const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
-            const currentRole = profileData?.role || (lang === 'en' ? "Software Engineer" : "সফটওয়্যার ইঞ্জিনিয়ার");
             const currentAvatar = profileData?.avatar || DEFAULT_PROFILE_IMG;
 
             return (
                 <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex overflow-x-hidden relative" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
                     {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
-                    {isCapturing && <div className="fixed top-4 right-4 z-[100] bg-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border-blue-500 border-2"><Icon name="Loader2" className="text-blue-500" /> <span className="text-xs font-bold">{t.openingCamera}</span></div>}
-                    {isSaving && <div className="fixed top-4 right-4 z-[100] bg-rose-500 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3"><Icon name="Heart" className="animate-pulse" /> <span className="text-xs font-bold">{t.saving}</span></div>}
                     
-                    <div className="fixed inset-0 z-0 pointer-events-none opacity-50 overflow-hidden">
-                        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-400/10 rounded-full blur-[120px] animate-pulse"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-400/10 rounded-full blur-[120px] animate-pulse" style={{animationDelay:'2s'}}></div>
+                    {/* Capturing Indicator */}
+                    {isCapturing && <div className="fixed top-6 right-6 z-[600] glass-card p-6 rounded-[2rem] shadow-2xl flex items-center gap-4 border-blue-500 border-2 animate-bounce"><Icon name="Loader2" className="text-blue-600" size={24}/> <span className="text-sm font-black uppercase tracking-widest">{t.openingCamera}</span></div>}
+                    {isSaving && <div className="fixed top-6 right-6 z-[600] bg-rose-500 text-white p-6 rounded-[2rem] shadow-2xl flex items-center gap-4"><div className="relative"><Icon name="Heart" size={24} className="relative z-10"/><div className="absolute inset-0 bg-white rounded-full ripple-effect opacity-50"></div></div> <span className="text-sm font-black uppercase tracking-widest">{t.saving}</span></div>}
+                    
+                    {/* Modals */}
+                    {activeModal === 'follow' && <SelectionModal title={t.follow} t={t} options={[{ label: 'Facebook', sub: 'Social Network', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional', icon: 'LinkedIn', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={(u) => { u ? window.open(u, '_blank') : setToastMessage(t.linkMissing); setActiveModal(null); }} />}
+                    {activeModal === 'message' && <SelectionModal title={t.message} t={t} options={[{ label: 'Messenger', sub: 'Instant Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'WhatsApp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={(u) => { u ? window.open(u, '_blank') : setToastMessage(t.linkMissing); setActiveModal(null); }} />}
+
+                    <div className="fixed inset-0 z-0 pointer-events-none opacity-40 overflow-hidden">
+                        <div className="absolute top-[-15%] left-[-15%] w-[70%] h-[70%] bg-blue-400/20 rounded-full blur-[140px] animate-pulse"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-400/20 rounded-full blur-[140px] animate-pulse" style={{animationDelay:'2s'}}></div>
                     </div>
 
-                    <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white/90 backdrop-blur-2xl border-r border-white/50 z-50 flex flex-col transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-                        <div className="p-8 border-b border-white/50 flex flex-col items-center text-center">
-                            <div className="relative group"><img src={currentAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105 object-cover" /><div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></div></div>
-                            <h1 className="text-xl font-extrabold mt-4 tracking-tight leading-tight">{currentName}</h1>
-                            <p className="text-xs text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full border border-blue-100/50 mt-2">{currentRole}</p>
+                    <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/80 backdrop-blur-3xl border-r border-white/50 z-50 flex flex-col transition-all duration-500 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} lg:translate-x-0 shadow-sm`}>
+                        <div className="p-10 border-b border-slate-100 flex flex-col items-center text-center">
+                            <div className="relative mb-6">
+                                <img src={currentAvatar} className="w-24 h-24 rounded-[2.2rem] border-4 border-white shadow-2xl object-cover" />
+                                <div className="absolute bottom-[-5px] right-[-5px] w-8 h-8 bg-emerald-500 border-4 border-white rounded-full shadow-lg flex items-center justify-center"><Icon name="CheckCircle" size={10} className="text-white"/></div>
+                            </div>
+                            <h1 className="text-2xl font-black tracking-tighter leading-tight text-slate-900">{profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ")}</h1>
+                            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 shadow-sm">
+                                <Icon name="Cpu" size={12}/><span className="text-[10px] font-black uppercase tracking-[0.1em]">{profileData?.role || t.bio}</span>
+                            </div>
                         </div>
-                        <nav className="flex-1 py-8 px-4 space-y-2">
+                        <nav className="flex-1 py-10 px-6 space-y-3">
                             {[
-                            { id: 'Home', icon: 'Home', label: t.timeline },
-                            { id: 'Profile', icon: 'UserCircle', label: t.profile },
-                            { id: 'Projects', icon: 'Code2', label: t.portfolio },
-                            { id: 'Academics', icon: 'GraduationCap', label: t.academics },
-                            { id: 'Perspectives', icon: 'Lightbulb', label: t.perspectives }
+                                { id: 'Home', icon: 'Home', label: t.timeline },
+                                { id: 'Profile', icon: 'UserCircle', label: t.profile },
+                                { id: 'Projects', icon: 'Code2', label: t.portfolio },
+                                { id: 'Academics', icon: 'GraduationCap', label: t.academics },
+                                { id: 'Perspectives', icon: 'Lightbulb', label: t.perspectives }
                             ].map(item => (
-                            <button key={item.id} onClick={() => handleNav(item.id)} className={`w-full flex items-center justify-between px-6 py-3.5 rounded-2xl font-bold text-[15px] transition-all ${activeMenu === item.id ? 'bg-white text-blue-600 shadow-md border border-white' : 'text-slate-500 hover:bg-white/50'}`}>
-                                <div className="flex items-center gap-3"><Icon name={item.icon} size={20} className={activeMenu === item.id ? "text-blue-500" : "text-slate-400"} /><span>{item.label}</span></div>
-                                {activeMenu === item.id && <Icon name="ArrowRight" size={16} />}
-                            </button>
+                                <button key={item.id} onClick={() => handleNav(item.id)} className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.8rem] font-bold text-[15px] transition-all duration-300 ${activeMenu === item.id ? 'bg-blue-600 text-white shadow-2xl shadow-blue-600/30' : 'text-slate-500 hover:bg-slate-50'}`}>
+                                    <div className="flex items-center gap-5"><Icon name={item.icon} size={20} className={activeMenu === item.id ? "text-white" : "text-slate-300"} /><span>{item.label}</span></div>
+                                    {activeMenu === item.id && <Icon name="ArrowRight" size={14} className="text-white/50" />}
+                                </button>
                             ))}
                         </nav>
+                        <div className="p-8">
+                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-3xl flex items-center gap-3">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">{t.available}</span>
+                            </div>
+                        </div>
                     </aside>
 
-                    <div className="flex-1 lg:ml-[280px] flex flex-col min-h-screen relative z-10">
-                        <header className="sticky top-0 h-16 sm:h-20 bg-white/40 backdrop-blur-xl border-b border-white/50 z-30 px-6 sm:px-10 flex items-center justify-between shadow-sm">
-                            <div className="flex items-center gap-4"><button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 bg-white/50 rounded-xl shadow-sm"><Icon name="Menu" size={20} /></button><h2 className="text-lg font-bold text-slate-800 hidden sm:block">{t.digitalSpace}</h2></div>
-                            <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="flex items-center gap-1.5 px-4 py-2 bg-white/80 border border-slate-200 rounded-full font-bold text-xs sm:text-sm hover:text-blue-600 shadow-sm transition-all"><Icon name="Languages" size={16} className="text-blue-500" /> {lang === 'en' ? 'বাংলা' : 'English'}</button>
+                    <div className="flex-1 lg:ml-[300px] flex flex-col min-h-screen relative z-10 transition-all duration-500">
+                        <header className="sticky top-0 h-20 bg-white/40 backdrop-blur-2xl border-b border-white/50 z-30 px-8 flex items-center justify-between">
+                            <div className="flex items-center gap-5">
+                                <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-200"><Icon name="Menu" size={20} /></button>
+                                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                    <Icon name="Globe" size={16} className="text-blue-600"/>
+                                    <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{t.digitalSpace}</h2>
+                                </div>
+                            </div>
+                            <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="flex items-center gap-3 px-6 py-3 bg-white/80 border border-slate-100 rounded-full font-black text-[10px] uppercase tracking-widest hover:border-blue-600 transition-all shadow-sm active:scale-95">
+                                <Icon name="Languages" size={16} className="text-blue-600" /> {lang === 'en' ? 'বাংলা' : 'English'}
+                            </button>
                         </header>
 
-                        <main className="flex-1 p-6 sm:p-10 max-w-3xl mx-auto w-full">
-                            {isLoading ? <div className="space-y-6"><ShimmerCard /><ShimmerCard /></div> : activeMenu === 'Home' ? (
-                            <div className="animate-in fade-in duration-500">
-                                <GlassCard className="p-8 mb-8 relative overflow-hidden">
-                                <div className="absolute top-[-50%] right-[-20%] w-full h-[150%] bg-gradient-to-bl from-blue-200/20 via-indigo-200/20 to-transparent rounded-full blur-3xl -z-10"></div>
-                                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8 text-center sm:text-left">
-                                    <img src={currentAvatar} alt="Hero" className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl" />
-                                    <div className="flex-1">
-                                        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-2">{currentName} <Icon name="CheckCircle" size={28} className="inline text-blue-500 ml-1" /></h1>
-                                        <p className="text-base text-slate-600 leading-relaxed font-medium mb-6">{profileData?.bio || t.bio}</p>
-                                        <button onClick={() => handleNav('Profile')} className="bg-slate-900 text-white px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm hover:bg-blue-600 transition-colors"><Icon name="UserCircle" size={16}/> {t.resume}</button>
-                                    </div>
+                        <main className="flex-1 p-8 sm:p-12 max-w-4xl mx-auto w-full">
+                            {isLoading ? <div className="space-y-8"><ShimmerCard /><ShimmerCard /></div> : activeMenu === 'Home' ? (
+                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <div className="glass-card rounded-[3rem] p-12 mb-12 relative overflow-hidden flex flex-col items-center sm:items-start text-center sm:text-left">
+                                    <div className="absolute top-[-30%] right-[-20%] w-full h-[150%] bg-gradient-to-bl from-blue-200/20 via-transparent to-transparent rounded-full blur-3xl -z-10 animate-pulse"></div>
+                                    <img src={currentAvatar} className="w-40 h-40 rounded-[3rem] object-cover border-8 border-white shadow-[0_40px_80px_rgba(0,0,0,0.15)] mb-8" />
+                                    <h1 className="text-5xl sm:text-6xl font-black text-slate-900 leading-none tracking-tighter mb-4">{profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ")}</h1>
+                                    <p className="text-lg text-slate-500 leading-relaxed font-medium mb-10 max-w-xl">{profileData?.bio || t.bio}</p>
+                                    <button onClick={() => handleNav('Profile')} className="bg-slate-900 text-white px-10 py-5 rounded-[2rem] shadow-2xl font-black text-xs uppercase tracking-widest flex items-center gap-4 hover:bg-blue-600 transition-all active:scale-95">
+                                        <Icon name="UserCircle" size={18}/> {t.resume}
+                                    </button>
                                 </div>
-                                </GlassCard>
-                                <div className="flex items-center gap-3 mb-6 px-2"><Icon name="Cpu" size={24} className="text-blue-500" /><h2 className="text-xl font-bold">{t.recentUpdates}</h2></div>
+
+                                <div className="flex items-center justify-between mb-8 px-4">
+                                    <div className="flex items-center gap-4"><Icon name="Cpu" size={24} className="text-blue-600" /><h2 className="text-2xl font-black tracking-tight">{t.recentUpdates}</h2></div>
+                                </div>
+                                
                                 {posts.map(p => (
-                                <GlassCard 
-                                    key={p.id} 
-                                    id={`post-${p.id}`}
-                                    className={`mb-6 overflow-hidden shadow-md p-0 ${highlightedPostId === p.id ? 'highlight-post' : ''}`}
-                                >
-                                    <div className="p-5 flex items-start gap-3">
-                                    <img src={currentAvatar} className="w-10 h-10 rounded-full object-cover border border-white shadow-sm" />
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-1.5"><h4 className="font-bold text-slate-900">{currentName}</h4><Icon name="CheckCircle2" size={14} className="text-blue-500" />{p.location && <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1 ml-1 bg-slate-100 px-2 py-0.5 rounded-full"><Icon name="MapPin" size={10} className="text-rose-500"/> {p.location}</span>}</div>
-                                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{p.timestamp ? new Date(p.timestamp).toLocaleString(lang === 'en' ? 'en-US' : 'bn-BD', { month: 'short', day: 'numeric' }) : ''}</p>
+                                <div key={p.id} id={`post-${p.id}`} className={`glass-card rounded-[2.5rem] mb-8 overflow-hidden transition-all duration-700 border-2 border-transparent ${highlightedPostId === p.id ? 'highlight-post' : ''}`}>
+                                    <div className="p-8 flex items-start gap-5">
+                                        <img src={currentAvatar} className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md" />
+                                        <div className="flex-1">
+                                            <div className="flex items-center flex-wrap gap-2">
+                                                <h4 className="font-black text-slate-900 text-lg">{profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ")}</h4><Icon name="CheckCircle2" size={16} className="text-blue-600" />
+                                                {p.location && <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-100"><Icon name="MapPin" size={10} className="text-rose-500"/> <span className="text-[10px] font-black text-slate-400 uppercase">{p.location}</span></div>}
+                                            </div>
+                                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">{p.timestamp ? new Date(p.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}</p>
+                                        </div>
                                     </div>
+                                    <div className="px-8 pb-6 text-base text-slate-700 font-medium leading-relaxed" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (p.content_en || p.content) : (p.content_bn || p.content))} />
+                                    {p.image && <div className="px-4 pb-4"><img src={p.image} className="w-full max-h-[600px] object-cover rounded-[1.8rem] shadow-sm" /></div>}
+                                    <div className="p-4 bg-slate-50/40 flex flex-wrap justify-between items-center gap-2 border-t border-white">
+                                        <div className="flex gap-2">
+                                            <button onClick={() => handleToggleLike(p.id, p.likedBy)} className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all ${p.likedBy?.includes(user?.uid) ? 'bg-rose-500 text-white shadow-xl shadow-rose-500/30' : 'bg-white text-slate-500 hover:bg-white'}`}><Icon name="Heart" size={16} fill={p.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'} /> {(p.likedBy || []).length}</button>
+                                            <button onClick={() => setActiveCommentPostId(activeCommentPostId === p.id ? null : p.id)} className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest bg-white text-slate-500 hover:bg-slate-100 transition-all ${activeCommentPostId === p.id ? 'border-blue-500 border' : ''}`}><Icon name="MessageCircle" size={16}/> {(p.comments || []).length}</button>
+                                        </div>
+                                        <button onClick={() => handleShare(p)} className="flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest bg-white text-slate-500 hover:bg-slate-100 active:scale-95 transition-all"><Icon name="Share2" size={16}/> Share</button>
                                     </div>
-                                    <div className="px-5 pb-3 text-sm text-slate-800 font-medium" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (p.content_en || p.content) : (p.content_bn || p.content))} />
-                                    {p.image && <img src={p.image} className="w-full max-h-[500px] object-cover" />}
-                                    <div className="px-5 py-3 bg-slate-50/50 flex justify-between items-center border-t border-slate-100">
-                                    <button onClick={() => handleToggleLike(p.id, p.likedBy || [])} className={`flex items-center gap-2 text-xs font-bold transition-all px-4 py-2 rounded-xl ${p.likedBy?.includes(user?.uid) ? 'text-rose-600 bg-rose-50' : 'text-slate-500 hover:bg-slate-100'}`}><Icon name="Heart" size={18} fill={p.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'} /> {(p.likedBy || []).length} Like</button>
-                                    <button onClick={() => setActiveCommentPostId(activeCommentPostId === p.id ? null : p.id)} className={`flex items-center gap-2 text-xs font-bold transition-all px-4 py-2 rounded-xl ${activeCommentPostId === p.id ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:bg-slate-100'}`}><Icon name="MessageCircle" size={18}/> {(p.comments || []).length} Comment</button>
-                                    <button onClick={() => handleShare(p)} className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-xl transition-all active:scale-95"><Icon name="Share2" size={18}/> Share</button>
-                                    </div>
-                                    
                                     {activeCommentPostId === p.id && (
-                                        <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/30 comment-enter">
-                                            <div className="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                        <div className="p-8 border-t border-slate-100 bg-slate-50/50 comment-enter">
+                                            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-3 custom-scrollbar">
                                                 {(p.comments || []).map((c, idx) => (
-                                                    <div key={idx} className="flex gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px]"><Icon name="UserCircle" size={10} className="text-slate-500"/></div>
-                                                        <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100 flex-1">
-                                                            <p className="text-xs text-slate-700">{c.text}</p>
-                                                            <span className="text-[8px] text-slate-400 uppercase font-bold">{new Date(c.timestamp).toLocaleDateString()}</span>
+                                                    <div key={idx} className="flex gap-4 group">
+                                                        <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-blue-400"><Icon name="UserCircle" size={14}/></div>
+                                                        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-1 group-hover:border-blue-200 transition-all">
+                                                            <p className="text-sm text-slate-700 font-medium">{c.text}</p>
+                                                            <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-2 block">{new Date(c.timestamp).toLocaleDateString()}</span>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="flex gap-2">
-                                                <input 
-                                                    value={commentText} 
-                                                    onChange={e => setCommentText(e.target.value)} 
-                                                    onKeyPress={e => e.key === 'Enter' && handleCommentSubmit(p.id)}
-                                                    placeholder={t.commentPh} 
-                                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500 transition-colors"
-                                                />
-                                                <button onClick={() => handleCommentSubmit(p.id)} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
-                                                    {t.postComment}
-                                                </button>
+                                            <div className="flex gap-3">
+                                                <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleCommentSubmit(p.id)} placeholder={t.commentPh} className="flex-1 bg-white border border-slate-100 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500 transition-all shadow-inner" />
+                                                <button onClick={() => handleCommentSubmit(p.id)} className="bg-blue-600 text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95">{t.postComment}</button>
                                             </div>
                                         </div>
                                     )}
-                                </GlassCard>
+                                </div>
                                 ))}
-                                {posts.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Loader2" size={40} className="mb-4 text-blue-200 animate-spin"/><p>{t.awaitingData}</p></div>}
+                                {posts.length === 0 && <div className="text-center py-40 flex flex-col items-center opacity-30"><Icon name="Loader2" size={50} className="mb-6 animate-spin text-blue-200"/><p className="font-black text-xs uppercase tracking-widest">{t.awaitingData}</p></div>}
                             </div>
                             ) : activeMenu === 'Profile' ? (
-                            <div className="animate-in fade-in duration-500">
-                                <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm mb-6 relative">
-                                    <div className="h-48 sm:h-64 bg-gradient-to-tr from-blue-300 to-indigo-400 relative">
-                                    {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
-                                    <div className="absolute inset-0 bg-black/10"></div>
-                                    <img src={currentAvatar} className="absolute -bottom-12 left-8 w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover bg-white" />
+                            <div className="animate-in fade-in duration-500 pb-20">
+                                <div className="glass-card rounded-[3rem] overflow-hidden mb-12 relative shadow-2xl">
+                                    <div className="h-56 sm:h-72 bg-slate-100 relative">
+                                        {profileData?.coverPhoto ? <img src={profileData.coverPhoto} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-tr from-slate-200 to-slate-100"></div>}
+                                        <div className="absolute inset-0 bg-black/10"></div>
+                                        <img src={currentAvatar} className="absolute -bottom-16 left-12 w-40 h-40 rounded-[3rem] border-[10px] border-white shadow-2xl object-cover bg-white" />
                                     </div>
-                                    <div className="pt-16 pb-6 px-8">
-                                    <h2 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">{currentName} <Icon name="CheckCircle2" size={24} className="text-blue-500"/></h2>
-                                    {profileData?.work && profileData.work.length > 0 && <p className="text-slate-500 font-bold mt-1 mb-4">{profileData.work[0].title} at {profileData.work[0].company}</p>}
-                                    <div className="flex flex-wrap gap-3">
-                                        <button onClick={handleFollow} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm hover:bg-blue-700 transition-colors"><Icon name="UserCircle" size={16}/> {t.follow}</button>
-                                        <button onClick={handleMessage} className="bg-slate-100 text-slate-700 px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm hover:bg-slate-200 transition-colors"><Icon name="MessageCircle" size={16}/> {t.message}</button>
-                                    </div>
+                                    <div className="pt-24 pb-10 px-12">
+                                        <h2 className="text-4xl font-black text-slate-900 flex items-center gap-4 tracking-tighter">{profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ")} <Icon name="CheckCircle2" size={28} className="text-blue-600"/></h2>
+                                        <p className="text-slate-400 font-bold mt-2 mb-10 flex items-center gap-3">
+                                            <Icon name="Briefcase" size={16}/> {profileData?.work?.[0]?.title || "Professional"} at {profileData?.work?.[0]?.company || "Digital Space"}
+                                        </p>
+                                        <div className="flex flex-wrap gap-4">
+                                            <button onClick={() => setActiveModal('follow')} className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all"><Icon name="PlusCircle" size={18}/> {t.follow}</button>
+                                            <button onClick={() => setActiveModal('message')} className="bg-white text-slate-700 px-10 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-widest border border-slate-100 flex items-center gap-4 shadow-sm hover:bg-slate-50 active:scale-95 transition-all"><Icon name="MessageCircle" size={18}/> {t.message}</button>
+                                        </div>
                                     </div>
                                 </div>
-                                {!profileData ? <p className="text-center text-slate-400 italic">Syncing...</p> : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                                    <GlassCard className="p-6">
-                                        <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><Icon name="Briefcase" className="text-slate-400"/> {t.workEd}</h3>
-                                        <div className="space-y-4">
-                                            {(profileData.work || []).map((w,i) => <div key={i} className="flex gap-3 items-start"><Icon name="Briefcase" size={16} className="text-slate-400 mt-1 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{w.title} at {w.company}</p><p className="text-xs text-slate-500">{w.year}</p></div></div>)}
-                                            {(profileData.education || []).map((e,i) => <div key={i} className="flex gap-3 items-start"><Icon name="GraduationCap" size={16} className="text-slate-400 mt-1 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{e.degree} at {e.institution}</p><p className="text-xs text-slate-500">{e.year}</p></div></div>)}
-                                            {(!profileData.work?.length && !profileData.education?.length) && <p className="text-xs text-slate-400 italic">{t.noDetails}</p>}
+                                
+                                {!profileData ? <div className="text-center py-40 flex flex-col items-center"><Icon name="Loader2" size={50} className="mb-6 text-blue-200 animate-spin"/><p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Syncing Data...</p></div> : (
+                                <div className="grid grid-cols-1 gap-12">
+                                    {/* Work & Education Section */}
+                                    <div className="space-y-6">
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-4 px-4"><Icon name="Briefcase" className="text-blue-600" size={20}/> {t.workEd}</h3>
+                                        <div className="glass-card rounded-[3rem] p-10 space-y-12">
+                                            {(profileData.work || []).map((w,i) => (
+                                                <div key={i} className="flex gap-8 items-start timeline-line relative">
+                                                    <div className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded-full text-white shrink-0 z-10 shadow-lg shadow-blue-600/30"><Icon name="CheckCircle" size={10}/></div>
+                                                    <div className="flex-1 pb-4">
+                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3">
+                                                            <p className="font-extrabold text-slate-800 text-xl tracking-tight leading-none">{w.title} <span className="text-slate-300 font-normal mx-2">@</span> {w.company}</p>
+                                                            <div className="inline-flex items-center mt-3 sm:mt-0 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 whitespace-nowrap">
+                                                                <Icon name="Calendar" className="mr-2" size={10}/> {w.startYear} — {w.endYear || t.present}
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-xs text-slate-400 font-black uppercase tracking-widest mb-5 flex items-center gap-3"><Icon name="MapPin" size={10} className="text-slate-300"/> {w.city || "Global"}</p>
+                                                        {w.desc && <div className="text-sm text-slate-500 leading-relaxed font-medium bg-slate-50/80 p-6 rounded-3xl border border-slate-100/50">{w.desc}</div>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {(profileData.education || []).map((e,i) => (
+                                                <div key={i} className="flex gap-8 items-start timeline-line relative">
+                                                    <div className="w-6 h-6 flex items-center justify-center bg-emerald-500 rounded-full text-white shrink-0 z-10 shadow-lg shadow-emerald-500/30"><Icon name="CheckCircle" size={10}/></div>
+                                                    <div className="flex-1 pb-4">
+                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3">
+                                                            <p className="font-extrabold text-slate-800 text-xl tracking-tight leading-none">{e.degree} <span className="text-slate-300 font-normal mx-2">at</span> {e.institution}</p>
+                                                            <div className="inline-flex items-center mt-3 sm:mt-0 text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 whitespace-nowrap">
+                                                                <Icon name="Calendar" className="mr-2" size={10}/> {e.startYear} — {e.endYear || t.present}
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-xs text-slate-400 font-black uppercase tracking-widest mb-5 flex items-center gap-3"><Icon name="Building" size={10} className="text-slate-300"/> {e.city || "Campus"}</p>
+                                                        {e.desc && <p className="text-sm text-slate-500 leading-relaxed font-medium italic border-l-4 border-emerald-100 pl-6 py-2">"{e.desc}"</p>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {(!profileData.work?.length && !profileData.education?.length) && <p className="text-sm text-slate-300 italic text-center py-10">{t.noDetails}</p>}
                                         </div>
-                                    </GlassCard>
-                                    <GlassCard className="p-6">
-                                        <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><Icon name="Map" className="text-slate-400"/> {t.places}</h3>
-                                        <div className="space-y-4">
-                                            {(profileData.places || []).map((p,i) => <div key={i} className="flex gap-3 items-center"><Icon name="Home" size={16} className="text-slate-400 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{p.name}</p><p className="text-xs text-slate-500">{p.type}</p></div></div>)}
-                                            {(!profileData.places?.length) && <p className="text-xs text-slate-400 italic">{t.noDetails}</p>}
+                                    </div>
+
+                                    {/* Location & Contact Metadata */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-4 px-4"><Icon name="Map" className="text-rose-500" size={20}/> {t.places}</h3>
+                                            <div className="glass-card rounded-[3rem] p-10 space-y-6">
+                                                {(profileData.places || []).map((p,i) => (
+                                                    <div key={i} className="flex gap-5 items-center p-4 rounded-[1.8rem] hover:bg-white transition-all group">
+                                                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-inner"><Icon name="Home" size={20}/></div>
+                                                        <div><p className="font-black text-slate-800 text-base tracking-tight">{p.name}</p><p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">{p.type}</p></div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </GlassCard>
+
+                                        <div className="space-y-6">
+                                            <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-4 px-4"><Icon name="UserCircle" className="text-indigo-500" size={20}/> {t.contactInfo}</h3>
+                                            <div className="glass-card rounded-[3rem] p-10 space-y-6">
+                                                {(profileData.contact || []).map((c,i) => (
+                                                    <div key={i} className="flex gap-5 items-center p-4 rounded-[1.8rem] hover:bg-white transition-all group">
+                                                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-inner"><Icon name="Globe" size={20}/></div>
+                                                        <div className="min-w-0 flex-1"><p className="font-black text-slate-800 text-base tracking-tight truncate">{c.value}</p><p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">{c.type}</p></div>
+                                                    </div>
+                                                ))}
+                                                {(profileData.basic || []).map((b,i) => (
+                                                    <div key={i} className="flex gap-5 items-center p-4 rounded-[1.8rem] hover:bg-white transition-all group">
+                                                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-inner"><Icon name="HeartHandshake" size={20}/></div>
+                                                        <div><p className="font-black text-slate-800 text-base tracking-tight">{b.value}</p><p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">{b.label}</p></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>)}
                             </div>
                             ) : activeMenu === 'Projects' ? (
-                            <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="Code2" className="text-blue-500" /> {t.portfolio}</h2>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+                                <h2 className="text-4xl font-black text-slate-900 mb-12 tracking-tighter flex items-center gap-6"><Icon name="Code2" className="text-blue-600" size={32}/> {t.portfolio}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                                 {projects.map(proj => (
-                                    <GlassCard key={proj.id} className="p-6 border-t-4 border-t-blue-500 flex flex-col h-full">
-                                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4"><Icon name="Folder" size={24}/></div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2">{proj.title}</h3>
-                                        <p className="text-sm text-slate-600 mb-4 line-clamp-3 flex-1">{proj.desc}</p>
-                                        <button className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">View Project <Icon name="ExternalLink" size={12}/></button>
-                                    </GlassCard>
+                                    <div key={proj.id} className="glass-card rounded-[3rem] p-10 flex flex-col h-full hover:shadow-2xl hover:shadow-blue-600/10 transition-all duration-500 group relative overflow-hidden">
+                                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600 mb-8 shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-all"><Icon name="Folder" size={32}/></div>
+                                        <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight leading-none">{proj.title}</h3>
+                                        <p className="text-sm text-slate-500 mb-10 line-clamp-4 flex-1 font-medium leading-relaxed">{proj.desc}</p>
+                                        <button className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 hover:gap-6 transition-all">{t.resume} <Icon name="ArrowRight" size={14}/></button>
+                                    </div>
                                 ))}
                                 </div>
-                                {projects.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Folder" size={48} className="mb-4 text-blue-200"/><p>{t.awaitingData}</p></div>}
+                                {projects.length === 0 && <div className="text-center py-40 flex flex-col items-center opacity-30"><Icon name="Folder" size={60} className="mb-6"/><p className="font-black text-xs uppercase tracking-widest">{t.awaitingData}</p></div>}
                             </div>
                             ) : activeMenu === 'Academics' ? (
-                            <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="GraduationCap" className="text-emerald-500" /> {t.academics}</h2>
-                                <div className="space-y-6">
+                            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+                                <h2 className="text-4xl font-black text-slate-900 mb-12 tracking-tighter flex items-center gap-6"><Icon name="GraduationCap" className="text-emerald-500" size={32}/> {t.academics}</h2>
+                                <div className="space-y-8">
                                 {academics.map(edu => (
-                                    <GlassCard key={edu.id} className="p-6 flex gap-4">
-                                        <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
-                                        <div><h3 className="text-lg font-bold text-slate-900">{edu.title}</h3><p className="text-sm text-slate-500">{edu.institution} {edu.grade ? `(${edu.grade})` : ''}</p></div>
-                                    </GlassCard>
+                                    <div key={edu.id} className="glass-card rounded-[2.5rem] p-10 flex gap-8 items-center hover:bg-white transition-all duration-500 group shadow-lg shadow-black/5">
+                                        <div className="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center text-emerald-600 shrink-0 shadow-inner group-hover:bg-emerald-500 group-hover:text-white transition-all"><Icon name="Trophy" size={36}/></div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter mb-2 leading-none">{edu.title}</h3>
+                                            <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">{edu.institution} {edu.grade ? `• ${edu.grade}` : ''}</p>
+                                        </div>
+                                    </div>
                                 ))}
                                 </div>
-                                {academics.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="GraduationCap" size={48} className="mb-4 text-emerald-200"/><p>{t.awaitingData}</p></div>}
+                                {academics.length === 0 && <div className="text-center py-40 flex flex-col items-center opacity-30"><Icon name="GraduationCap" size={60} className="mb-6"/><p className="font-black text-xs uppercase tracking-widest">{t.awaitingData}</p></div>}
                             </div>
                             ) : activeMenu === 'Perspectives' ? (
-                            <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="Lightbulb" className="text-amber-500" /> {t.perspectives}</h2>
-                                <div className="grid grid-cols-1 gap-6">
+                            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+                                <h2 className="text-4xl font-black text-slate-900 mb-12 tracking-tighter flex items-center gap-6"><Icon name="Lightbulb" className="text-amber-500" size={32}/> {t.perspectives}</h2>
+                                <div className="grid grid-cols-1 gap-12">
                                 {perspectives.map(ps => (
-                                    <GlassCard key={ps.id} className="p-8 relative overflow-hidden group">
-                                        <Icon name="Quote" className="absolute -top-4 -right-4 text-slate-100 rotate-12 scale-150" size={100} />
-                                        <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4 relative z-10">{ps.topic}</h3>
-                                        <p className="text-xl font-medium text-slate-700 italic leading-relaxed relative z-10">"{lang === 'en' ? (ps.text_en || ps.text) : (ps.text_bn || ps.text)}"</p>
-                                    </GlassCard>
+                                    <div key={ps.id} className="glass-card rounded-[4rem] p-16 relative overflow-hidden group hover:bg-white transition-all duration-700">
+                                        <Icon name="Quote" className="absolute -top-10 -right-10 text-slate-50 rotate-12 scale-[2.5] transition-transform group-hover:scale-[3] group-hover:rotate-0" size={200} />
+                                        <div className="relative z-10">
+                                            <h3 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.5em] mb-10 border-b border-amber-100 pb-4 inline-block">{ps.topic}</h3>
+                                            <p className="text-3xl sm:text-5xl font-black text-slate-800 leading-tight tracking-tighter">"{lang === 'en' ? (ps.text_en || ps.text) : (ps.text_bn || ps.text)}"</p>
+                                        </div>
+                                    </div>
                                 ))}
                                 </div>
-                                {perspectives.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Quote" size={48} className="mb-4 text-amber-200"/><p>{t.awaitingData}</p></div>}
+                                {perspectives.length === 0 && <div className="text-center py-40 flex flex-col items-center opacity-30"><Icon name="Quote" size={60} className="mb-6"/><p className="font-black text-xs uppercase tracking-widest">{t.awaitingData}</p></div>}
                             </div>
                             ) : null}
                         </main>
-                        </div>
+                    </div>
+
                     <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeelingDetected} />
                 </div>
             );
