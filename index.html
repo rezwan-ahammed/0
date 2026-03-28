@@ -3,54 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezwan Ahammed - Portfolio</title>
+    <title>Digital Rezwan OS</title>
     
-    <!-- Tailwind CSS CDN -->
+    <!-- FontAwesome for Professional Icons (Replacing Emojis) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React, ReactDOM, and Babel for JSX compilation -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Import Map for Firebase and Lucide Icons -->
-    <script type="importmap">
-    {
-        "imports": {
-            "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-            "firebase/analytics": "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
-        }
-    }
-    </script>
-
+    
     <style>
-        body { background-color: #F8FAFC; margin: 0; padding: 0; }
-        #root { min-height: 100vh; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap');
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        @keyframes pulseRipple {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .ripple-effect { animation: pulseRipple 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
     </style>
 </head>
 <body>
     <div id="root"></div>
-
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef } from 'react';
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics, isSupported } from "firebase/analytics";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-        import { 
-          Home, GraduationCap, Lightbulb, Menu, X, Globe, Heart, MessageCircle, 
-          Send, CheckCircle, CheckCircle2, Cpu, Code2, ArrowRight, Languages, 
-          Zap, Bot, Folder, ExternalLink, Quote, Star, Award, Loader2, MapPin, 
-          Share2, UserCircle, Briefcase, Mail, Phone, Map, HeartHandshake, Link as LinkIcon,
-          AlertCircle, Trophy, Sparkles
-        } from 'lucide-react';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // =====================================================
-        // 1. Configuration (Firebase & Global)
-        // =====================================================
+        const { useState, useEffect, useRef } = React;
+
+        // Professional Icon Component mapping to FontAwesome (Fixing the emoji issue)
+        const Icon = ({ name, className = "", size = 20, fill }) => {
+            const faMap = {
+                Home: 'fa-solid fa-house',
+                GraduationCap: 'fa-solid fa-graduation-cap',
+                Lightbulb: 'fa-solid fa-lightbulb',
+                Menu: 'fa-solid fa-bars',
+                X: 'fa-solid fa-xmark',
+                Globe: 'fa-solid fa-globe',
+                Heart: 'fa-solid fa-heart', // handled conditionally below
+                MessageCircle: 'fa-solid fa-comment',
+                Send: 'fa-solid fa-paper-plane',
+                CheckCircle: 'fa-solid fa-circle-check',
+                CheckCircle2: 'fa-solid fa-circle-check',
+                Cpu: 'fa-solid fa-microchip',
+                Code2: 'fa-solid fa-code',
+                ArrowRight: 'fa-solid fa-arrow-right',
+                Languages: 'fa-solid fa-language',
+                Zap: 'fa-solid fa-bolt',
+                Bot: 'fa-solid fa-robot',
+                Folder: 'fa-solid fa-folder',
+                ExternalLink: 'fa-solid fa-arrow-up-right-from-square',
+                Quote: 'fa-solid fa-quote-right',
+                Star: 'fa-solid fa-star',
+                Award: 'fa-solid fa-medal',
+                Loader2: 'fa-solid fa-circle-notch fa-spin', // Native spinner
+                MapPin: 'fa-solid fa-location-dot',
+                Share2: 'fa-solid fa-share-nodes',
+                UserCircle: 'fa-solid fa-circle-user',
+                Briefcase: 'fa-solid fa-briefcase',
+                Mail: 'fa-solid fa-envelope',
+                Phone: 'fa-solid fa-phone',
+                Map: 'fa-solid fa-map',
+                HeartHandshake: 'fa-solid fa-handshake-angle',
+                LinkIcon: 'fa-solid fa-link',
+                AlertCircle: 'fa-solid fa-circle-exclamation',
+                Trophy: 'fa-solid fa-trophy',
+                Sparkles: 'fa-solid fa-wand-magic-sparkles'
+            };
+
+            let iconClass = faMap[name] || 'fa-solid fa-circle';
+            
+            // Custom logic for hollow/filled hearts
+            if (name === 'Heart' && fill !== 'currentColor') {
+                iconClass = 'fa-regular fa-heart';
+            }
+
+            return <i className={`${iconClass} ${className}`} style={{ fontSize: `${size}px` }}></i>;
+        };
+
         const fallbackConfig = {
             apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
             authDomain: "rezwan-86f26.firebaseapp.com",
@@ -61,243 +93,501 @@
             measurementId: "G-31MPTM1V8W"
         };
 
-        const app = initializeApp(fallbackConfig);
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'rezwan-portfolio-v1';
-        
-        // ADD YOUR GEMINI API KEY HERE
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rezwan-portfolio-v1';
         const apiKey = ""; 
 
         const DEFAULT_PROFILE_IMG = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
 
         const TRANSLATIONS = {
-          en: {
-            timeline: "Timeline", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "Profile (About)",
-            available: "Available for work", recentUpdates: "News Feed",
-            chatTitle: "Rezwan's Assistant", chatPlaceholder: "Ask about Rezwan's skills...", digitalSpace: "Digital Space",
-            saving: "Syncing feeling...", awaitingData: "Awaiting updates from admin...",
-            follow: "Follow", message: "Message", linkMissing: "Link not added by admin yet.",
-            workEd: "Work & Education", places: "Places Lived", contactInfo: "Contact & Basic Info",
-            cameraError: "Camera access denied or unsupported.", openingCamera: "Accessing camera..."
-          },
-          bn: {
-            timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল (About)",
-            available: "কাজের জন্য উন্মুক্ত", recentUpdates: "নিউজ ফিড",
-            chatTitle: "রেজওয়ানের অ্যাসিস্ট্যান্ট", chatPlaceholder: "রেজওয়ানের স্কিল সম্পর্কে জানুন...", digitalSpace: "ডিজিটাল স্পেস",
-            saving: "অনুভূতি পাঠানো হচ্ছে...", awaitingData: "অ্যাডমিনের ডেটা আপডেটের অপেক্ষায়...",
-            follow: "ফলো করুন", message: "মেসেজ দিন", linkMissing: "অ্যাডমিন এখনো লিংক যুক্ত করেননি।",
-            workEd: "কর্ম ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগ ও সাধারণ তথ্য",
-            cameraError: "ক্যামেরা পারমিশন পাওয়া যায়নি বা সাপোর্ট করে না!", openingCamera: "ক্যামেরা ওপেন হচ্ছে..."
-          }
+            en: {
+                timeline: "Timeline", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "Profile (About)",
+                available: "Available for work", recentUpdates: "News Feed",
+                chatTitle: "Rezwan's Assistant", chatPlaceholder: "Ask about Rezwan's skills...", digitalSpace: "Digital Space",
+                saving: "Syncing feeling...", awaitingData: "Awaiting updates from admin...",
+                follow: "Follow", message: "Message", linkMissing: "Link not added by admin yet.",
+                workEd: "Work & Education", places: "Places Lived", contactInfo: "Contact & Basic Info",
+                cameraError: "Camera access denied or unsupported.", openingCamera: "Accessing camera..."
+            },
+            bn: {
+                timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল (About)",
+                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "নিউজ ফিড",
+                chatTitle: "রেজওয়ানের অ্যাসিস্ট্যান্ট", chatPlaceholder: "রেজওয়ানের স্কিল সম্পর্কে জানুন...", digitalSpace: "ডিজিটাল স্পেস",
+                saving: "অনুভূতি পাঠানো হচ্ছে...", awaitingData: "অ্যাডমিনের ডেটা আপডেটের অপেক্ষায়...",
+                follow: "ফলো করুন", message: "মেসেজ দিন", linkMissing: "অ্যাডমিন এখনো লিংক যুক্ত করেননি।",
+                workEd: "কর্ম ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগ ও সাধারণ তথ্য",
+                cameraError: "ক্যামেরা পারমিশন পাওয়া যায়নি বা সাপোর্ট করে না!", openingCamera: "ক্যামেরা ওপেন হচ্ছে..."
+            }
         };
 
-        // Utility: AI API Call
         const callGeminiAPI = async (prompt) => {
-          if(!apiKey) return "Please add a Gemini API Key to the code to enable AI features.";
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-          const payload = { 
-            contents: [{ parts: [{ text: `You are the personal AI assistant for Rezwan Ahammed. Answer ONLY professional questions about his work. Use Markdown. User says: ${prompt}` }] }]
-          };
-          try {
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI is resting.';
-          } catch (e) { return "AI is resting. Please try again later."; }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = { 
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: "You are the personal AI assistant for Rezwan Ahammed. Answer ONLY professional questions about his work, Robotics, Engineering, and Projects. If users express feelings or use heart emojis, be very kind and appreciate it, telling them Rezwan values their support. Use Markdown." }] }
+            };
+            try {
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            } catch (e) { return "AI is resting. Please try again later."; }
         };
 
         const renderMarkdown = (text) => {
-          if (!text) return '';
-          let html = text
-            .replace(/\n/g, '<br/>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
-          return { __html: html };
+            if (!text) return '';
+            let html = text
+                .replace(/\n/g, '<br/>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code class="bg-slate-200 px-1 rounded font-mono text-xs text-indigo-600">$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 text-indigo-200 p-3 rounded-lg my-2 text-xs font-mono overflow-x-auto shadow-inner"><code>$1</code></pre>');
+            return { __html: html };
         };
 
         const triggerSelfie = async () => {
-          if (!navigator.mediaDevices) return null;
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            await video.play();
-            const canvas = document.createElement('canvas');
-            canvas.width = 320; canvas.height = 240;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const base64Image = canvas.toDataURL('image/jpeg', 0.4); 
-            stream.getTracks().forEach(track => track.stop());
-            return base64Image;
-          } catch (err) { return null; }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return null;
+            }
+            let stream = null;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const video = document.createElement('video');
+                video.setAttribute('autoplay', 'true'); 
+                video.setAttribute('muted', 'true'); 
+                video.setAttribute('playsinline', 'true');
+                video.srcObject = stream;
+                
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = () => {
+                        video.play().then(resolve).catch(reject);
+                    };
+                    setTimeout(() => reject(new Error("Camera timeout")), 4000);
+                });
+                
+                await new Promise(r => setTimeout(r, 200));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 320; 
+                canvas.height = 240;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const base64Image = canvas.toDataURL('image/jpeg', 0.4); 
+                
+                stream.getTracks().forEach(track => track.stop());
+                return base64Image;
+            } catch (err) { 
+                if (stream) stream.getTracks().forEach(track => track.stop()); 
+                return null; 
+            }
         };
 
-        const GlassCard = ({ children, className = "" }) => (
-          <div className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-sm rounded-[2rem] transition-all duration-300 ${className}`}>
-            {children}
-          </div>
+        // Restored Shimmer Loading Effect
+        const ShimmerCard = () => (
+            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 mb-6 w-full animate-pulse shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 bg-slate-200/70 rounded-full"></div>
+                    <div className="flex-1 space-y-3">
+                        <div className="h-4 bg-slate-200/70 rounded w-1/3"></div>
+                        <div className="h-3 bg-slate-200/70 rounded w-1/4"></div>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <div className="h-4 bg-slate-200/70 rounded w-full"></div>
+                    <div className="h-4 bg-slate-200/70 rounded w-5/6"></div>
+                    <div className="h-4 bg-slate-200/70 rounded w-4/6"></div>
+                </div>
+            </div>
         );
 
-        const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
-          const [isOpen, setIsOpen] = useState(false);
-          const [messages, setMessages] = useState([]);
-          const [input, setInput] = useState('');
-          const [isTyping, setIsTyping] = useState(false);
-          const scrollRef = useRef(null);
-
-          useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
-
-          const handleSend = async () => {
-            if (!input.trim()) return;
-            const userMsg = input;
-            setInput('');
-            setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-            
-            const feelingsRegex = /(love|like|crush|বিয়ে|ভালোবাসি|❤️)/i;
-            if (feelingsRegex.test(userMsg)) onFeelingDetected(userMsg);
-            
-            setIsTyping(true);
-            const botReply = await callGeminiAPI(userMsg);
-            setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
-            setIsTyping(false);
-          };
-
-          return (
-            <div className="fixed bottom-6 right-6 z-50">
-              {isOpen ? (
-                <div className="bg-white/95 backdrop-blur-2xl border border-white/50 shadow-2xl rounded-3xl w-[85vw] sm:w-96 flex flex-col h-[500px] overflow-hidden">
-                  <div className="p-4 bg-blue-600 text-white flex justify-between items-center">
-                    <div className="flex items-center gap-2 font-bold"><Bot size={20} /> <span>{t.chatTitle}</span></div>
-                    <button onClick={() => setIsOpen(false)}><X size={20}/></button>
-                  </div>
-                  <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40">
-                    {messages.map((m, i) => (
-                      <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 shadow-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-3 border-t bg-white flex gap-2">
-                    <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter'} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 rounded-xl px-4 py-2 text-sm outline-none" />
-                    <button onClick={handleSend} className="bg-blue-600 text-white p-2.5 rounded-xl"><Send size={18}/></button>
-                  </div>
-                </div>
-              ) : (
-                <button onClick={() => setIsOpen(true)} className="w-14 h-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all">
-                  <Bot size={28} />
-                </button>
-              )}
+        const GlassCard = ({ children, className = "" }) => (
+            <div className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2rem] transition-all duration-300 ${className}`}>
+                {children}
             </div>
-          );
+        );
+
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
+            return (
+                <div className="fixed bottom-24 right-6 z-[200] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
+                    <Icon name="AlertCircle" size={18} className="text-amber-400"/>
+                    <span className="text-sm font-bold">{message}</span>
+                </div>
+            );
         };
 
-        function App() {
-          const [lang, setLang] = useState('en');
-          const t = TRANSLATIONS[lang];
-          const [activeMenu, setActiveMenu] = useState('Home');
-          const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-          const [posts, setPosts] = useState([]);
-          const [profileData, setProfileData] = useState(null);
-          const [isLoading, setIsLoading] = useState(true);
-          const [user, setUser] = useState(null);
+        const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const scrollRef = useRef(null);
 
-          useEffect(() => {
-            signInAnonymously(auth);
-            onAuthStateChanged(auth, u => setUser(u));
-            
-            // Simulating Firebase Listeners (Replace with your actual collection logic if needed)
-            const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => {
-              setPosts(snap.docs.map(d => ({ ...d.data(), id: d.id })));
-              setIsLoading(false);
-            });
-            const unsubProfile = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profile'), (snap) => {
-              if (!snap.empty) setProfileData(snap.docs[0].data());
-            });
-            return () => { unsubPosts(); unsubProfile(); };
-          }, []);
+            useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
-          const handleFeelingDetected = async (text) => {
-            const selfie = await triggerSelfie();
-            if (selfie) {
-               await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'feelings'), { text, photo: selfie, timestamp: new Date().toISOString() });
-               alert("Feeling synced successfully! ❤️");
-            }
-          };
+            const handleSend = async () => {
+                if (!input.trim()) return;
+                const userMsg = input;
+                setInput('');
+                setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
 
-          const currentAvatar = profileData?.avatar || DEFAULT_PROFILE_IMG;
-          const currentName = profileData?.name || "Rezwan Ahammed";
+                const feelingsRegex = /(love|like|feelings|crush|adore|sweetheart|beautiful|cute|pretty|marry|date|awesome|amazing|gorgeous|wonderful|fantastic|ভালোবাসা|পছন্দ|ভালবাসি|ভালবাসা|ক্রাশ|ভালোবাসি|প্রেম|মিষ্টি|সুন্দর|বিয়ে|বিয়|ভাল্লাগে|মুগ্ধ|চমৎকার|অপূর্ব|প্রিয়|মনোহর|দারুণ|অসাধারণ|❤️|💖|💗|💓|💞|💕|💌|💘|💝|💟|😍|🥰|😘|😗|😙|😚|🌹|🌷|🌸|❤️‍🔥|🫶|😻)/i;
 
-          return (
-            <div className="flex min-h-screen">
-              {/* Sidebar */}
-              <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform`}>
-                <div className="p-6 text-center">
-                  <img src={currentAvatar} className="w-20 h-20 mx-auto rounded-full border-2 border-blue-500 mb-4 object-cover" />
-                  <h1 className="font-bold text-lg">{currentName}</h1>
-                  <p className="text-xs text-blue-600 font-bold bg-blue-50 py-1 px-3 rounded-full inline-block mt-2">Engineer</p>
-                </div>
-                <nav className="p-4 space-y-2">
-                  {['Home', 'Profile', 'Projects'].map(m => (
-                    <button key={m} onClick={() => {setActiveMenu(m); setIsSidebarOpen(false)}} className={`w-full text-left px-4 py-3 rounded-xl font-bold ${activeMenu === m ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-                      {m}
-                    </button>
-                  ))}
-                </nav>
-              </aside>
+                if (feelingsRegex.test(userMsg)) onFeelingDetected(userMsg);
+                
+                setIsTyping(true);
+                const botReply = await callGeminiAPI(userMsg);
+                setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
+                
+                try {
+                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), { userId: user?.uid || 'guest', text: userMsg, timestamp: new Date().toISOString(), role: 'visitor' });
+                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), { userId: 'ai', text: botReply, timestamp: new Date().toISOString(), role: 'ai' });
+                } catch(e) {}
+                
+                setIsTyping(false);
+            };
 
-              {/* Main Content */}
-              <div className="flex-1 lg:ml-64 flex flex-col">
-                <header className="h-16 border-b bg-white/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
-                  <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden"><Menu /></button>
-                  <span className="font-bold">{t.digitalSpace}</span>
-                  <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="text-sm font-bold border px-3 py-1 rounded-full">
-                    {lang === 'en' ? 'বাংলা' : 'English'}
-                  </button>
-                </header>
-
-                <main className="p-6 max-w-2xl mx-auto w-full">
-                  {activeMenu === 'Home' && (
-                    <div className="space-y-6">
-                      <GlassCard className="p-6 flex items-center gap-6">
-                        <img src={currentAvatar} className="w-24 h-24 rounded-2xl object-cover shadow-lg" />
-                        <div>
-                           <h2 className="text-2xl font-bold">{currentName}</h2>
-                           <p className="text-slate-600 text-sm">Welcome to my professional digital space.</p>
+            return (
+                <div className="fixed bottom-6 right-6 z-50">
+                    {isOpen ? (
+                        <div className="bg-white/95 backdrop-blur-2xl border border-white/50 shadow-2xl rounded-3xl w-[85vw] sm:w-96 flex flex-col h-[550px] animate-in slide-in-from-bottom-4 duration-300 overflow-hidden">
+                            <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center shadow-lg">
+                                <div className="flex items-center gap-2 font-bold"><Icon name="Bot" size={20} className="animate-bounce" /> <span style={{fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif"}}>{t.chatTitle}</span></div>
+                                <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform"><Icon name="X" size={20}/></button>
+                            </div>
+                            <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40 custom-scrollbar" style={{fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif"}}>
+                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Active Assistant</div>}
+                                {messages.map((m, i) => (
+                                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[88%] p-3.5 rounded-2xl text-[13px] leading-relaxed ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-white/80 text-slate-700 rounded-tl-none shadow-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
+                                    </div>
+                                ))}
+                                {isTyping && <div className="text-[10px] font-bold text-blue-500 animate-pulse px-2 flex items-center gap-1"><Icon name="Zap" size={10} /> AI is processing...</div>}
+                            </div>
+                            <div className="p-3 border-t border-white bg-white/80 flex gap-2">
+                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSend()} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" style={{fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif"}}/>
+                                <button onClick={handleSend} className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-md"><Icon name="Send" size={18}/></button>
+                            </div>
                         </div>
-                      </GlassCard>
-                      
-                      <h3 className="font-bold flex items-center gap-2"><Cpu size={18}/> {t.recentUpdates}</h3>
-                      {posts.map(p => (
-                        <GlassCard key={p.id} className="overflow-hidden">
-                          <div className="p-4 flex items-center gap-3">
-                            <img src={currentAvatar} className="w-10 h-10 rounded-full" />
-                            <span className="font-bold text-sm">{currentName}</span>
-                          </div>
-                          <div className="px-4 pb-4 text-sm" dangerouslySetInnerHTML={renderMarkdown(p.content || p.content_en)} />
-                          {p.image && <img src={p.image} className="w-full h-auto border-t" />}
-                        </GlassCard>
-                      ))}
-                    </div>
-                  )}
+                    ) : (
+                        <button onClick={() => setIsOpen(true)} className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all relative">
+                            <Icon name="Bot" size={28} />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full animate-pulse"></div>
+                        </button>
+                    )}
+                </div>
+            );
+        };
 
-                  {activeMenu === 'Profile' && (
-                    <div className="space-y-4">
-                      <h2 className="text-xl font-bold">{t.profile}</h2>
-                      <GlassCard className="p-6">
-                        <p className="font-bold text-blue-600 mb-4">{t.workEd}</p>
-                        <p className="text-sm text-slate-600">Details syncing from Firebase...</p>
-                      </GlassCard>
-                    </div>
-                  )}
-                </main>
-              </div>
+        const App = () => {
+            const [lang, setLang] = useState('en');
+            const t = TRANSLATIONS[lang];
+            const [activeMenu, setActiveMenu] = useState('Home');
+            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+            
+            const [posts, setPosts] = useState([]);
+            const [projects, setProjects] = useState([]);
+            const [academics, setAcademics] = useState([]);
+            const [perspectives, setPerspectives] = useState([]);
+            const [profileData, setProfileData] = useState(null);
+            
+            const [isLoading, setIsLoading] = useState(true);
+            const [user, setUser] = useState(null);
+            const [isCapturing, setIsCapturing] = useState(false);
+            const [isSaving, setIsSaving] = useState(false);
+            const [toastMessage, setToastMessage] = useState(null);
 
-              <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeelingDetected} />
-            </div>
-          );
-        }
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (err) { 
+                        await signInAnonymously(auth); 
+                    }
+                };
+                initAuth();
+                const unsub = onAuthStateChanged(auth, u => setUser(u));
+                return () => unsub();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                
+                const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => {
+                    setPosts(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                    setIsLoading(false);
+                });
+                const unsubProjects = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), (snap) => {
+                    setProjects(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                });
+                const unsubAcademics = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'academics'), (snap) => {
+                    setAcademics(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                });
+                const unsubPerspectives = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'perspectives'), (snap) => {
+                    setPerspectives(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                });
+                const unsubProfile = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'profile'), (snap) => {
+                    if (!snap.empty) { setProfileData(snap.docs[0].data()); }
+                });
+
+                return () => { unsubPosts(); unsubProjects(); unsubAcademics(); unsubPerspectives(); unsubProfile(); };
+            }, [user]);
+
+            const handleFeelingDetected = async (triggerText) => {
+                if (isCapturing || isSaving) return;
+                setIsCapturing(true);
+                
+                try {
+                    const selfie = await triggerSelfie();
+                    if (selfie) {
+                        setIsSaving(true);
+                        try {
+                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'feelings'), { userId: user?.uid || 'guest', text: triggerText, photo: selfie, timestamp: new Date().toISOString() });
+                        } catch(e) { }
+                        setTimeout(() => setIsSaving(false), 2000);
+                    } else {
+                        setToastMessage(t.cameraError);
+                    }
+                } catch (error) {
+                    setToastMessage(t.cameraError);
+                } finally {
+                    setIsCapturing(false);
+                }
+            };
+
+            const handleToggleLike = async (postId, likedBy) => {
+                if (!user) return;
+                const isLiked = likedBy.includes(user.uid);
+                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) }); } catch(e) {}
+            };
+
+            const handleNav = (id) => { setIsLoading(true); setActiveMenu(id); setIsSidebarOpen(false); setTimeout(() => setIsLoading(false), 300); };
+
+            const handleFollow = () => {
+                const url = profileData?.facebookUrl || profileData?.linkedinUrl;
+                if (url) window.open(url, '_blank');
+                else setToastMessage(t.linkMissing);
+            };
+
+            const handleMessage = () => {
+                const url = profileData?.messengerUrl || profileData?.whatsappUrl;
+                if (url) window.open(url, '_blank');
+                else setToastMessage(t.linkMissing);
+            };
+
+            const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
+            const currentRole = profileData?.role || (lang === 'en' ? "Software Engineer" : "সফটওয়্যার ইঞ্জিনিয়ার");
+            const currentAvatar = profileData?.avatar || DEFAULT_PROFILE_IMG;
+
+            return (
+                <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex overflow-x-hidden relative" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
+                    
+                    {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
+
+                    {isCapturing && !isSaving && (
+                        <div className="fixed top-4 right-4 z-[100] bg-white border border-blue-100 shadow-2xl rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-right-10">
+                            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 animate-spin"><Icon name="Loader2" size={20} /></div>
+                            <div><p className="text-xs font-bold text-slate-800">{t.openingCamera}</p><p className="text-[10px] text-slate-400 font-medium">Please allow camera</p></div>
+                        </div>
+                    )}
+
+                    {isSaving && (
+                        <div className="fixed top-4 right-4 z-[100] bg-white border border-rose-100 shadow-2xl rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-right-10">
+                            <div className="w-10 h-10 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 animate-pulse"><Icon name="Heart" size={20} fill="currentColor" /></div>
+                            <div><p className="text-xs font-bold text-slate-800">{t.saving}</p><p className="text-[10px] text-slate-400 font-medium">Synced securely</p></div>
+                        </div>
+                    )}
+
+                    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
+                        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-400/10 rounded-full blur-[120px] animate-pulse"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-400/10 rounded-full blur-[120px] animate-pulse" style={{animationDelay:'2s'}}></div>
+                    </div>
+
+                    {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
+
+                    <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white/90 backdrop-blur-2xl border-r border-white/50 z-50 flex flex-col transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+                        <div className="p-8 border-b border-white/50 flex flex-col items-center text-center">
+                            <div className="relative group"><img src={currentAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105 object-cover" /><div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></div></div>
+                            <h1 className="text-xl font-extrabold mt-4 tracking-tight leading-tight">{currentName}</h1>
+                            <p className="text-xs text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full border border-blue-100/50 mt-2">{currentRole}</p>
+                        </div>
+                        <nav className="flex-1 py-8 px-4 space-y-2">
+                            {[
+                            { id: 'Home', icon: 'Home', label: t.timeline },
+                            { id: 'Profile', icon: 'UserCircle', label: t.profile },
+                            { id: 'Projects', icon: 'Code2', label: t.portfolio },
+                            { id: 'Academics', icon: 'GraduationCap', label: t.academics },
+                            { id: 'Perspectives', icon: 'Lightbulb', label: t.perspectives }
+                            ].map(item => (
+                            <button key={item.id} onClick={() => handleNav(item.id)} className={`w-full flex items-center justify-between px-6 py-3.5 rounded-2xl font-bold text-[15px] transition-all ${activeMenu === item.id ? 'bg-white text-blue-600 shadow-md border border-white' : 'text-slate-500 hover:bg-white/50'}`}>
+                                <div className="flex items-center gap-3"><Icon name={item.icon} size={20} className={activeMenu === item.id ? "text-blue-500" : "text-slate-400"} /><span>{item.label}</span></div>
+                                {activeMenu === item.id && <Icon name="ArrowRight" size={16} />}
+                            </button>
+                            ))}
+                        </nav>
+                    </aside>
+
+                    <div className="flex-1 lg:ml-[280px] flex flex-col min-h-screen relative z-10">
+                        <header className="sticky top-0 h-16 sm:h-20 bg-white/40 backdrop-blur-xl border-b border-white/50 z-30 px-6 sm:px-10 flex items-center justify-between shadow-sm">
+                            <div className="flex items-center gap-4"><button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 bg-white/50 rounded-xl shadow-sm"><Icon name="Menu" size={20} /></button><h2 className="text-lg font-bold text-slate-800 hidden sm:block">{t.digitalSpace}</h2></div>
+                            <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="flex items-center gap-1.5 px-4 py-2 bg-white/80 border border-slate-200 rounded-full font-bold text-xs sm:text-sm hover:text-blue-600 shadow-sm transition-all"><Icon name="Languages" size={16} className="text-blue-500" /> {lang === 'en' ? 'বাংলা' : 'English'}</button>
+                        </header>
+
+                        <main className="flex-1 p-6 sm:p-10 max-w-3xl mx-auto w-full">
+                            {isLoading ? <div className="space-y-6"><ShimmerCard /><ShimmerCard /></div> : activeMenu === 'Home' ? (
+                            <div className="animate-in fade-in duration-500">
+                                <GlassCard className="p-8 mb-8 relative overflow-hidden">
+                                <div className="absolute top-[-50%] right-[-20%] w-full h-[150%] bg-gradient-to-bl from-blue-200/20 via-indigo-200/20 to-transparent rounded-full blur-3xl -z-10"></div>
+                                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8 text-center sm:text-left">
+                                    <img src={currentAvatar} alt="Hero" className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl" />
+                                    <div className="flex-1">
+                                        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-2">{currentName} <Icon name="CheckCircle" size={28} className="inline text-blue-500 ml-1" /></h1>
+                                        <p className="text-base text-slate-600 leading-relaxed font-medium mb-6">{profileData?.bio || t.bio}</p>
+                                        <div className="flex flex-wrap justify-center sm:justify-start gap-4">
+                                            <button onClick={() => handleNav('Profile')} className="bg-slate-900 text-white px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm hover:bg-blue-600 transition-colors"><Icon name="UserCircle" size={16}/> View Profile</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                </GlassCard>
+
+                                <div className="flex items-center gap-3 mb-6 px-2"><Icon name="Cpu" size={24} className="text-blue-500" /><h2 className="text-xl font-bold">{t.recentUpdates}</h2></div>
+                                
+                                {posts.map(p => (
+                                <GlassCard key={p.id} className="mb-6 overflow-hidden shadow-md p-0">
+                                    <div className="p-5 flex items-start gap-3">
+                                    <img src={currentAvatar} className="w-10 h-10 rounded-full object-cover border border-white shadow-sm" />
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <h4 className="font-bold text-slate-900">{currentName}</h4><Icon name="CheckCircle2" size={14} className="text-blue-500" />
+                                            {p.location && <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1 ml-1 bg-slate-100 px-2 py-0.5 rounded-full"><Icon name="MapPin" size={10} className="text-rose-500"/> {p.location}</span>}
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                                            {p.timestamp ? new Date(p.timestamp).toLocaleString(lang === 'en' ? 'en-US' : 'bn-BD', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                                        </p>
+                                    </div>
+                                    </div>
+                                    <div className="px-5 pb-3 text-sm text-slate-800 leading-relaxed font-medium" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (p.content_en || p.content) : (p.content_bn || p.content))} />
+                                    {p.image && <img src={p.image} className="w-full max-h-[500px] object-cover border-y border-slate-100" />}
+                                    <div className="px-5 py-3 bg-slate-50/50 flex justify-between items-center border-t border-slate-100">
+                                    <button onClick={() => handleToggleLike(p.id, p.likedBy || [])} className={`flex items-center gap-2 text-xs font-bold transition-all px-4 py-2 rounded-xl ${p.likedBy?.includes(user?.uid) ? 'text-rose-600 bg-rose-50' : 'text-slate-500 hover:bg-slate-100'}`}><Icon name="Heart" size={18} fill={p.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'} /> {(p.likedBy || []).length} Like</button>
+                                    <button className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-xl transition-colors"><Icon name="MessageCircle" size={18}/> Comment</button>
+                                    <button className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-xl transition-colors"><Icon name="Share2" size={18}/> Share</button>
+                                    </div>
+                                </GlassCard>
+                                ))}
+                                {posts.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Loader2" size={40} className="mb-4 text-blue-200 animate-spin"/><p>{t.awaitingData}</p></div>}
+                            </div>
+                            ) : activeMenu === 'Profile' ? (
+                            <div className="animate-in fade-in duration-500">
+                                <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm mb-6 relative">
+                                    <div className="h-48 sm:h-64 bg-gradient-to-tr from-blue-300 to-indigo-400 relative">
+                                    {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
+                                    <div className="absolute inset-0 bg-black/10"></div>
+                                    <img src={currentAvatar} className="absolute -bottom-12 left-8 w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover bg-white" />
+                                    </div>
+                                    <div className="pt-16 pb-6 px-8">
+                                    <h2 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">{currentName} <Icon name="CheckCircle2" size={24} className="text-blue-500"/></h2>
+                                    {profileData?.work && profileData.work.length > 0 && <p className="text-slate-500 font-bold mt-1 mb-4">{profileData.work[0].title} at {profileData.work[0].company}</p>}
+                                    <div className="flex flex-wrap gap-3">
+                                        <button onClick={handleFollow} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm hover:bg-blue-700 transition-colors"><Icon name="UserCircle" size={16}/> {t.follow}</button>
+                                        <button onClick={handleMessage} className="bg-slate-100 text-slate-700 px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm hover:bg-slate-200 transition-colors"><Icon name="MessageCircle" size={16}/> {t.message}</button>
+                                    </div>
+                                    </div>
+                                </div>
+
+                                {!profileData ? (
+                                    <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Loader2" size={40} className="mb-4 text-blue-200 animate-spin"/><p>Syncing Profile...</p></div>
+                                ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <GlassCard className="p-6">
+                                        <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><Icon name="Briefcase" className="text-slate-400"/> {t.workEd}</h3>
+                                        <div className="space-y-4">
+                                            {(profileData.work || []).map((w,i) => <div key={i} className="flex gap-3 items-start"><Icon name="Briefcase" size={16} className="text-slate-400 mt-1 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{w.title} at {w.company}</p><p className="text-xs text-slate-500">{w.year}</p></div></div>)}
+                                            {(profileData.education || []).map((e,i) => <div key={i} className="flex gap-3 items-start"><Icon name="GraduationCap" size={16} className="text-slate-400 mt-1 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">Studies {e.degree} at {e.institution}</p><p className="text-xs text-slate-500">{e.year}</p></div></div>)}
+                                            {(!profileData.work?.length && !profileData.education?.length) && <p className="text-xs text-slate-400 italic">No details added yet.</p>}
+                                        </div>
+                                    </GlassCard>
+
+                                    <GlassCard className="p-6">
+                                        <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><Icon name="Map" className="text-slate-400"/> {t.places}</h3>
+                                        <div className="space-y-4">
+                                            {(profileData.places || []).map((p,i) => <div key={i} className="flex gap-3 items-center"><Icon name="Home" size={16} className="text-slate-400 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{p.name}</p><p className="text-xs text-slate-500">{p.type}</p></div></div>)}
+                                            {(!profileData.places?.length) && <p className="text-xs text-slate-400 italic">No details added yet.</p>}
+                                        </div>
+                                    </GlassCard>
+
+                                    <GlassCard className="p-6 md:col-span-2">
+                                        <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><Icon name="UserCircle" className="text-slate-400"/> {t.contactInfo}</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {(profileData.contact || []).map((c,i) => <div key={i} className="flex gap-3 items-center"><Icon name="LinkIcon" size={16} className="text-slate-400 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{c.value}</p><p className="text-xs text-slate-500">{c.type}</p></div></div>)}
+                                            {(profileData.basic || []).map((b,i) => <div key={i} className="flex gap-3 items-center"><Icon name="HeartHandshake" size={16} className="text-slate-400 shrink-0"/><div><p className="font-bold text-slate-800 text-sm">{b.value}</p><p className="text-xs text-slate-500">{b.label}</p></div></div>)}
+                                            {(!profileData.contact?.length && !profileData.basic?.length) && <p className="text-xs text-slate-400 italic">No details added yet.</p>}
+                                        </div>
+                                    </GlassCard>
+                                </div>
+                                )}
+                            </div>
+                            ) : activeMenu === 'Projects' ? (
+                            <div className="animate-in fade-in duration-500">
+                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="Code2" className="text-blue-500" /> {t.portfolio}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {projects.map(proj => (
+                                    <GlassCard key={proj.id} className="p-6 border-t-4 border-t-blue-500 flex flex-col h-full">
+                                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4"><Icon name="Folder" size={24}/></div>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2">{proj.title}</h3>
+                                        <p className="text-sm text-slate-600 mb-4 line-clamp-3 flex-1">{proj.desc}</p>
+                                        <div className="flex flex-wrap gap-2 mb-4">{(proj.tech || []).map((tk, i) => <span key={i} className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded text-slate-500">{tk}</span>)}</div>
+                                        <button className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">View Project <Icon name="ExternalLink" size={12}/></button>
+                                    </GlassCard>
+                                ))}
+                                </div>
+                                {projects.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Folder" size={48} className="mb-4 text-blue-200"/><p>{t.awaitingData}</p></div>}
+                            </div>
+                            ) : activeMenu === 'Academics' ? (
+                            <div className="animate-in fade-in duration-500">
+                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="GraduationCap" className="text-emerald-500" /> {t.academics}</h2>
+                                <div className="space-y-6">
+                                {academics.map(edu => (
+                                    <GlassCard key={edu.id} className="p-6 flex gap-4">
+                                        <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
+                                        <div><h3 className="text-lg font-bold text-slate-900">{edu.title}</h3><p className="text-sm text-slate-500">{edu.institution} {edu.grade ? `(${edu.grade})` : ''}</p>{edu.content && <p className="text-xs text-slate-600 mt-2">{lang === 'en' ? (edu.content_en || edu.content) : (edu.content_bn || edu.content)}</p>}</div>
+                                    </GlassCard>
+                                ))}
+                                </div>
+                                {academics.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="GraduationCap" size={48} className="mb-4 text-emerald-200"/><p>{t.awaitingData}</p></div>}
+                            </div>
+                            ) : activeMenu === 'Perspectives' ? (
+                            <div className="animate-in fade-in duration-500">
+                                <h2 className="text-2xl font-bold mb-8 flex items-center gap-3"><Icon name="Lightbulb" className="text-amber-500" /> {t.perspectives}</h2>
+                                <div className="grid grid-cols-1 gap-6">
+                                {perspectives.map(ps => (
+                                    <GlassCard key={ps.id} className="p-8 relative overflow-hidden group">
+                                        <Icon name="Quote" className="absolute -top-4 -right-4 text-slate-100 rotate-12 scale-150" size={100} />
+                                        <h3 className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4 relative z-10">{ps.topic}</h3>
+                                        <p className="text-xl font-medium text-slate-700 italic leading-relaxed relative z-10">"{lang === 'en' ? (ps.text_en || ps.text) : (ps.text_bn || ps.text)}"</p>
+                                    </GlassCard>
+                                ))}
+                                </div>
+                                {perspectives.length === 0 && <div className="text-center py-20 text-slate-400 italic flex flex-col items-center"><Icon name="Quote" size={48} className="mb-4 text-amber-200"/><p>{t.awaitingData}</p></div>}
+                            </div>
+                            ) : null}
+                        </main>
+                        </div>
+
+                    <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeelingDetected} />
+
+                </div>
+            );
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+
     </script>
 </body>
 </html>
