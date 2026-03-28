@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Rezwan OS</title>
     
-    <!-- FontAwesome for Professional Icons (Replacing Emojis) -->
+    <!-- FontAwesome for Professional Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,6 @@
 
         const { useState, useEffect, useRef } = React;
 
-        // Professional Icon Component mapping to FontAwesome (Fixing the emoji issue)
         const Icon = ({ name, className = "", size = 20, fill }) => {
             const faMap = {
                 Home: 'fa-solid fa-house',
@@ -42,7 +41,7 @@
                 Menu: 'fa-solid fa-bars',
                 X: 'fa-solid fa-xmark',
                 Globe: 'fa-solid fa-globe',
-                Heart: 'fa-solid fa-heart', // handled conditionally below
+                Heart: 'fa-solid fa-heart',
                 MessageCircle: 'fa-solid fa-comment',
                 Send: 'fa-solid fa-paper-plane',
                 CheckCircle: 'fa-solid fa-circle-check',
@@ -58,7 +57,7 @@
                 Quote: 'fa-solid fa-quote-right',
                 Star: 'fa-solid fa-star',
                 Award: 'fa-solid fa-medal',
-                Loader2: 'fa-solid fa-circle-notch fa-spin', // Native spinner
+                Loader2: 'fa-solid fa-circle-notch fa-spin',
                 MapPin: 'fa-solid fa-location-dot',
                 Share2: 'fa-solid fa-share-nodes',
                 UserCircle: 'fa-solid fa-circle-user',
@@ -74,8 +73,6 @@
             };
 
             let iconClass = faMap[name] || 'fa-solid fa-circle';
-            
-            // Custom logic for hollow/filled hearts
             if (name === 'Heart' && fill !== 'currentColor') {
                 iconClass = 'fa-regular fa-heart';
             }
@@ -110,30 +107,30 @@
                 saving: "Syncing feeling...", awaitingData: "Awaiting updates from admin...",
                 follow: "Follow", message: "Message", linkMissing: "Link not added by admin yet.",
                 workEd: "Work & Education", places: "Places Lived", contactInfo: "Contact & Basic Info",
-                cameraError: "Camera access denied or unsupported.", openingCamera: "Accessing camera..."
-            },
-            bn: {
-                timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল (About)",
-                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "নিউজ ফিড",
-                chatTitle: "রেজওয়ানের অ্যাসিস্ট্যান্ট", chatPlaceholder: "রেজওয়ানের স্কিল সম্পর্কে জানুন...", digitalSpace: "ডিজিটাল স্পেস",
-                saving: "অনুভূতি পাঠানো হচ্ছে...", awaitingData: "অ্যাডমিনের ডেটা আপডেটের অপেক্ষায়...",
-                follow: "ফলো করুন", message: "মেসেজ দিন", linkMissing: "অ্যাডমিন এখনো লিংক যুক্ত করেননি।",
-                workEd: "কর্ম ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগ ও সাধারণ তথ্য",
                 cameraError: "ক্যামেরা পারমিশন পাওয়া যায়নি বা সাপোর্ট করে না!", openingCamera: "ক্যামেরা ওপেন হচ্ছে..."
             }
         };
 
         const callGeminiAPI = async (prompt) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const activeKey = apiKey || "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
             const payload = { 
                 contents: [{ parts: [{ text: prompt }] }],
                 systemInstruction: { parts: [{ text: "You are the personal AI assistant for Rezwan Ahammed. Answer ONLY professional questions about his work, Robotics, Engineering, and Projects. If users express feelings or use heart emojis, be very kind and appreciate it, telling them Rezwan values their support. Use Markdown." }] }
             };
-            try {
-                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            } catch (e) { return "AI is resting. Please try again later."; }
+            
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i <= delays.length; i++) {
+                try {
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error("API Request Failed");
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                } catch (e) {
+                    if (i === delays.length) return "AI is resting. Please try again later.";
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
         };
 
         const renderMarkdown = (text) => {
@@ -147,57 +144,64 @@
             return { __html: html };
         };
 
+        // CRASH FIX & PERMISSION FIX: Move video off-screen instead of display: none
         const triggerSelfie = async () => {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error("Camera API not supported or blocked by context.");
                 return null;
             }
             let stream = null;
+            let video = null;
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                const video = document.createElement('video');
+                
+                video = document.createElement('video');
+                // IMPORTANT FIX: Avoid display:none to ensure browser initiates play & permission
+                video.style.position = 'fixed';
+                video.style.top = '-10000px';
+                video.style.left = '-10000px';
                 video.setAttribute('autoplay', 'true'); 
                 video.setAttribute('muted', 'true'); 
                 video.setAttribute('playsinline', 'true');
+                
+                document.body.appendChild(video); 
                 video.srcObject = stream;
                 
                 await new Promise((resolve, reject) => {
-                    video.onloadedmetadata = () => {
-                        video.play().then(resolve).catch(reject);
+                    const timeout = setTimeout(() => reject(new Error("Camera playback timeout")), 6000);
+                    video.onplaying = () => {
+                        clearTimeout(timeout);
+                        resolve();
                     };
-                    setTimeout(() => reject(new Error("Camera timeout")), 4000);
+                    video.onerror = (e) => {
+                        clearTimeout(timeout);
+                        reject(e);
+                    };
+                    video.play().catch(e => console.warn("Autoplay promise warning:", e));
                 });
                 
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 400)); // Allow camera to focus/expose
 
                 const canvas = document.createElement('canvas');
                 canvas.width = 320; 
                 canvas.height = 240;
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const base64Image = canvas.toDataURL('image/jpeg', 0.4); 
+                const base64Image = canvas.toDataURL('image/jpeg', 0.5); 
                 
-                stream.getTracks().forEach(track => track.stop());
                 return base64Image;
             } catch (err) { 
-                if (stream) stream.getTracks().forEach(track => track.stop()); 
+                console.error("Camera capture failed:", err);
                 return null; 
+            } finally {
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                if (video && video.parentNode) document.body.removeChild(video); 
             }
         };
 
-        // Restored Shimmer Loading Effect
         const ShimmerCard = () => (
             <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 mb-6 w-full animate-pulse shadow-sm">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-slate-200/70 rounded-full"></div>
-                    <div className="flex-1 space-y-3">
-                        <div className="h-4 bg-slate-200/70 rounded w-1/3"></div>
-                        <div className="h-3 bg-slate-200/70 rounded w-1/4"></div>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div className="h-4 bg-slate-200/70 rounded w-full"></div>
-                    <div className="h-4 bg-slate-200/70 rounded w-5/6"></div>
-                    <div className="h-4 bg-slate-200/70 rounded w-4/6"></div>
-                </div>
+                <div className="flex items-center gap-4 mb-6"><div className="w-12 h-12 bg-slate-200/70 rounded-full"></div><div className="flex-1 space-y-3"><div className="h-4 bg-slate-200/70 rounded w-1/3"></div><div className="h-3 bg-slate-200/70 rounded w-1/4"></div></div></div>
+                <div className="space-y-3"><div className="h-4 bg-slate-200/70 rounded w-full"></div><div className="h-4 bg-slate-200/70 rounded w-5/6"></div><div className="h-4 bg-slate-200/70 rounded w-4/6"></div></div>
             </div>
         );
 
@@ -227,7 +231,7 @@
             useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
             const handleSend = async () => {
-                if (!input.trim()) return;
+                if (!input.trim() || isTyping) return;
                 const userMsg = input;
                 setInput('');
                 setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
@@ -266,8 +270,8 @@
                                 {isTyping && <div className="text-[10px] font-bold text-blue-500 animate-pulse px-2 flex items-center gap-1"><Icon name="Zap" size={10} /> AI is processing...</div>}
                             </div>
                             <div className="p-3 border-t border-white bg-white/80 flex gap-2">
-                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSend()} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" style={{fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif"}}/>
-                                <button onClick={handleSend} className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-md"><Icon name="Send" size={18}/></button>
+                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50" style={{fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif"}}/>
+                                <button onClick={handleSend} disabled={isTyping} className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="Send" size={18}/></button>
                             </div>
                         </div>
                     ) : (
