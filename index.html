@@ -6,8 +6,8 @@
     <title>Digital Rezwan OS</title>
     
     <!-- Chosen Palette: Fluid Minimalist (Slate 50 background, Blue 600 primary, Emerald 500 success, Rose 500 sentiment) -->
-    <!-- Application Structure Plan: This SPA uses React compiled in-browser. It features a professional OS-like interface with dynamic routing via state management. The latest update implements a robust real-time comment system using Firestore's arrayUnion and a native sharing mechanism with clipboard fallbacks. Icons are rendered via FontAwesome 6 to ensure a premium look without SVG. -->
-    <!-- Visualization & Content Choices: Dashboard -> Firestore integration. Commenting -> Sequential list rendering with real-time updates. Sharing -> Browser Navigator API integration. Confirming NO SVG/Mermaid used. -->
+    <!-- Application Structure Plan: This SPA uses React compiled in-browser. It features a professional OS-like interface with dynamic routing via state management. The latest update implements a robust real-time comment system and a unique per-post sharing mechanism using URL query parameters (?post=ID). When a unique link is accessed, the app automatically scrolls to and highlights the target post. -->
+    <!-- Visualization & Content Choices: Dashboard -> Firestore integration. Unique Sharing -> Window Location API with query param detection. Confirming NO SVG/Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <!-- FontAwesome for Professional Icons -->
@@ -33,6 +33,7 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .highlight-post { border: 2px solid #2563EB !important; ring: 4px; ring-color: rgba(37,99,235,0.2); }
     </style>
 </head>
 <body class="bg-[#F8FAFC]">
@@ -115,12 +116,12 @@
                 timeline: "Timeline", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "Profile (About)",
                 available: "Available for work", recentUpdates: "News Feed",
                 chatTitle: "Rezwan's Assistant", chatPlaceholder: "Ask about Rezwan's skills...", digitalSpace: "Digital Space",
-                saving: "Syncing feeling...", awaitingData: "Awaiting updates from admin...",
+                saving: "Syncing feeling...", awaitingData: "Awaiting uploads from admin...",
                 follow: "Follow", message: "Message", linkMissing: "Link not added by admin yet.",
                 workEd: "Work & Education", places: "Places Lived", contactInfo: "Contact & Basic Info",
                 cameraError: "Please allow camera access.", openingCamera: "Accessing camera...",
                 bio: "Passionate software architect building robust digital ecosystems.", resume: "View Profile", noDetails: "No details added yet.",
-                shareSuccess: "Link copied to clipboard!", commentPh: "Write a comment...", postComment: "Post"
+                shareSuccess: "Unique post link copied!", commentPh: "Write a comment...", postComment: "Post"
             },
             bn: {
                 timeline: "টাইমলাইন", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল (About)",
@@ -131,7 +132,7 @@
                 workEd: "কর্ম ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগ ও সাধারণ তথ্য",
                 cameraError: "অনুগ্রহ করে ক্যামেরা পারমিশন দিন!", openingCamera: "ক্যামেরা ওপেন হচ্ছে...",
                 bio: "একজন সফটওয়্যার আর্কিটেক্ট হিসেবে শক্তিশালী ডিজিটাল ইকোসিস্টেম তৈরি করতে ভালোবাসি।", resume: "প্রোফাইল দেখুন", noDetails: "কোনো তথ্য যোগ করা হয়নি।",
-                shareSuccess: "লিঙ্ক ক্লিপবোর্ডে কপি হয়েছে!", commentPh: "একটি কমেন্ট লিখুন...", postComment: "পোস্ট"
+                shareSuccess: "পোস্টের ইউনিক লিঙ্ক কপি হয়েছে!", commentPh: "একটি কমেন্ট লিখুন...", postComment: "পোস্ট"
             }
         };
 
@@ -209,8 +210,8 @@
             </div>
         );
 
-        const GlassCard = ({ children, className = "" }) => (
-            <div className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2rem] transition-all duration-300 ${className}`}>
+        const GlassCard = ({ children, className = "", id }) => (
+            <div id={id} className={`bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2rem] transition-all duration-300 ${className}`}>
                 {children}
             </div>
         );
@@ -299,6 +300,7 @@
             const [toastMessage, setToastMessage] = useState(null);
             const [activeCommentPostId, setActiveCommentPostId] = useState(null);
             const [commentText, setCommentText] = useState('');
+            const [highlightedPostId, setHighlightedPostId] = useState(null);
 
             useEffect(() => {
                 const initAuth = async () => {
@@ -312,8 +314,23 @@
             useEffect(() => {
                 if (!user) return;
                 const unsubPosts = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), (snap) => {
-                    setPosts(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                    const fetchedPosts = snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    setPosts(fetchedPosts);
                     setIsLoading(false);
+
+                    // Logic for deep-linking/scrolling to a specific post via URL ?post=ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const postId = urlParams.get('post');
+                    if (postId && activeMenu === 'Home') {
+                        setTimeout(() => {
+                            const el = document.getElementById(`post-${postId}`);
+                            if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                setHighlightedPostId(postId);
+                                setTimeout(() => setHighlightedPostId(null), 3000); // Clear highlight after 3s
+                            }
+                        }, 800);
+                    }
                 });
                 const unsubProjects = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), (snap) => {
                     setProjects(snap.docs.map(d => ({ ...d.data(), id: d.id })));
@@ -328,7 +345,7 @@
                     if (!snap.empty) setProfileData(snap.docs[0].data());
                 });
                 return () => { unsubPosts(); unsubProjects(); unsubAcademics(); unsubPerspectives(); unsubProfile(); };
-            }, [user]);
+            }, [user, activeMenu]);
 
             const handleFeelingDetected = async (triggerText) => {
                 if (isCapturing || isSaving) return;
@@ -367,18 +384,22 @@
             };
 
             const handleShare = (post) => {
+                // Generate a unique URL for this specific post
+                const uniqueUrl = `${window.location.origin}${window.location.pathname}?post=${post.id}`;
+                
                 const shareData = {
                     title: 'Digital Rezwan OS',
                     text: post.content || 'Check out this post on Rezwan Ahammed\'s portfolio!',
-                    url: window.location.href
+                    url: uniqueUrl
                 };
+
                 if (navigator.share) {
                     navigator.share(shareData).catch(console.error);
                 } else {
-                    // Fallback to clipboard
+                    // Fallback to clipboard with the UNIQUE link
                     const dummy = document.createElement('input');
                     document.body.appendChild(dummy);
-                    dummy.value = window.location.href;
+                    dummy.value = uniqueUrl;
                     dummy.select();
                     document.execCommand('copy');
                     document.body.removeChild(dummy);
@@ -415,8 +436,8 @@
 
                     <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white/90 backdrop-blur-2xl border-r border-white/50 z-50 flex flex-col transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                         <div className="p-8 border-b border-white/50 flex flex-col items-center text-center">
-                            <div className="relative group"><img src={currentAvatar} className="w-20 h-20 rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105 object-cover" /><div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></div></div>
-                            <h1 className="text-xl font-extrabold mt-4 tracking-tight">{currentName}</h1>
+                            <div className="relative group"><img src={currentAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105 object-cover" /><div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></div></div>
+                            <h1 className="text-xl font-extrabold mt-4 tracking-tight leading-tight">{currentName}</h1>
                             <p className="text-xs text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full border border-blue-100/50 mt-2">{currentRole}</p>
                         </div>
                         <nav className="flex-1 py-8 px-4 space-y-2">
@@ -447,7 +468,7 @@
                                 <GlassCard className="p-8 mb-8 relative overflow-hidden">
                                 <div className="absolute top-[-50%] right-[-20%] w-full h-[150%] bg-gradient-to-bl from-blue-200/20 via-indigo-200/20 to-transparent rounded-full blur-3xl -z-10"></div>
                                 <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8 text-center sm:text-left">
-                                    <img src={currentAvatar} className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl" />
+                                    <img src={currentAvatar} alt="Hero" className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl" />
                                     <div className="flex-1">
                                         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-2">{currentName} <Icon name="CheckCircle" size={28} className="inline text-blue-500 ml-1" /></h1>
                                         <p className="text-base text-slate-600 leading-relaxed font-medium mb-6">{profileData?.bio || t.bio}</p>
@@ -457,7 +478,11 @@
                                 </GlassCard>
                                 <div className="flex items-center gap-3 mb-6 px-2"><Icon name="Cpu" size={24} className="text-blue-500" /><h2 className="text-xl font-bold">{t.recentUpdates}</h2></div>
                                 {posts.map(p => (
-                                <GlassCard key={p.id} className="mb-6 overflow-hidden shadow-md p-0">
+                                <GlassCard 
+                                    key={p.id} 
+                                    id={`post-${p.id}`}
+                                    className={`mb-6 overflow-hidden shadow-md p-0 ${highlightedPostId === p.id ? 'highlight-post' : ''}`}
+                                >
                                     <div className="p-5 flex items-start gap-3">
                                     <img src={currentAvatar} className="w-10 h-10 rounded-full object-cover border border-white shadow-sm" />
                                     <div className="flex-1">
@@ -470,7 +495,7 @@
                                     <div className="px-5 py-3 bg-slate-50/50 flex justify-between items-center border-t border-slate-100">
                                     <button onClick={() => handleToggleLike(p.id, p.likedBy || [])} className={`flex items-center gap-2 text-xs font-bold transition-all px-4 py-2 rounded-xl ${p.likedBy?.includes(user?.uid) ? 'text-rose-600 bg-rose-50' : 'text-slate-500 hover:bg-slate-100'}`}><Icon name="Heart" size={18} fill={p.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'} /> {(p.likedBy || []).length} Like</button>
                                     <button onClick={() => setActiveCommentPostId(activeCommentPostId === p.id ? null : p.id)} className={`flex items-center gap-2 text-xs font-bold transition-all px-4 py-2 rounded-xl ${activeCommentPostId === p.id ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:bg-slate-100'}`}><Icon name="MessageCircle" size={18}/> {(p.comments || []).length} Comment</button>
-                                    <button onClick={() => handleShare(p)} className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-xl"><Icon name="Share2" size={18}/> Share</button>
+                                    <button onClick={() => handleShare(p)} className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-xl transition-all active:scale-95"><Icon name="Share2" size={18}/> Share</button>
                                     </div>
                                     
                                     {activeCommentPostId === p.id && (
@@ -478,7 +503,7 @@
                                             <div className="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                                                 {(p.comments || []).map((c, idx) => (
                                                     <div key={idx} className="flex gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px]">👤</div>
+                                                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px]"><Icon name="UserCircle" size={10} className="text-slate-500"/></div>
                                                         <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100 flex-1">
                                                             <p className="text-xs text-slate-700">{c.text}</p>
                                                             <span className="text-[8px] text-slate-400 uppercase font-bold">{new Date(c.timestamp).toLocaleDateString()}</span>
