@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Rezwan OS</title>
+    <title>Rezwan Ahammed | Software Architect</title>
     
-    <!-- Chosen Palette: Fluid Minimalist (Slate 50 background, Blue 600 primary, Emerald 500 success, Rose 500 sentiment) -->
-    <!-- Application Structure Plan: A React-based SPA rendered inside a single HTML file. 
-         It uses a compact sidebar for navigation and a main workspace area. 
-         The design follows modern OS principles: subtle glassmorphism, precise spacing, and refined typography. 
-         Fixed sizing, paddings, and orientations to create a true compact dashboard feel. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. FontAwesome 6 used for icons. -->
+    <!-- Application Structure: A Premium Portfolio Web Application built with React.
+         Design Philosophy: Clean, spacious, typography-driven developer portfolio. 
+         Replaced the cramped dashboard layout with expansive, elegant portfolio views. -->
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,31 +18,36 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
         
-        body { background-color: #F8FAFC; color: #1E293B; overflow-x: hidden; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        body { background-color: #F8FAFC; color: #0F172A; overflow-x: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
-        @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+        @keyframes shimmer { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
         .shimmer { background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%); background-size: 800px 104px; animation: shimmer 2s infinite linear; }
         
-        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .portfolio-card { 
+            background: #FFFFFF; 
+            border: 1px solid #F1F5F9; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); 
+            transition: all 0.3s ease; 
+        }
+        .portfolio-card:hover { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06); transform: translateY(-2px); }
         
-        .timeline-item::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: -24px; width: 2px; background: #E2E8F0; }
-        .timeline-item:last-child::before { display: none; }
+        .timeline-border::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: -32px; width: 2px; background: #E2E8F0; z-index: 0; }
+        .timeline-border:last-child::before { display: none; }
         
-        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .animate-view { animation: fadeInScale 0.4s ease-out forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .highlight-post { border: 2px solid #3B82F6 !important; box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important; }
         @keyframes pulseRipple { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
         .ripple-effect { animation: pulseRipple 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
-        .comment-enter { animation: slideDown 0.3s ease-out forwards; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-enter { animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .highlight-post { border: 2px solid #3B82F6 !important; box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important; }
+        .modal-enter { animation: fadeUp 0.3s ease-out forwards; }
     </style>
 </head>
-<body class="font-['Outfit'] text-slate-800">
+<body class="font-['Outfit']">
     <div id="root"></div>
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -72,28 +74,36 @@
 
         const TRANSLATIONS = {
             en: {
-                timeline: "Feed", portfolio: "Projects", academics: "Academics", perspectives: "Perspectives", profile: "About",
-                available: "Open for Research", recentUpdates: "Latest Activity",
-                chatTitle: "Personal AI", chatPlaceholder: "Type a message...", digitalSpace: "Rezwan OS",
-                saving: "Syncing...", awaitingData: "Connecting to server...",
-                follow: "Follow", message: "Connect", linkMissing: "Not linked by admin.",
-                workEd: "Career & Education", places: "Geography", contactInfo: "Identity & Meta",
-                cameraError: "Camera Access Denied.", openingCamera: "Init Camera...",
-                bio: "Software Architect & Digital Ecosystem Builder.", viewDetails: "Explore Details", noDetails: "Data empty.",
-                shareSuccess: "Link Copied!", commentPh: "Comment here...", postComment: "Post",
-                choosePlatform: "Selection", cancel: "Cancel", present: "Present"
+                home: "Overview", portfolio: "Portfolio", academics: "Academics", perspectives: "Perspectives", profile: "Profile",
+                available: "Available for Hire", recentUpdates: "Latest Updates",
+                chatTitle: "Rezwan's AI", chatPlaceholder: "Ask me anything...",
+                saving: "Syncing...", awaitingData: "Loading data...",
+                follow: "Connect", message: "Contact", linkMissing: "Link not available.",
+                workEd: "Experience & Education", places: "Locations", contactInfo: "Contact Details",
+                cameraError: "Camera access denied.", openingCamera: "Accessing camera...",
+                bio: "I'm a Software Architect passionate about building robust digital products and scalable systems.", 
+                viewDetails: "Read Full Bio", noDetails: "No information available.",
+                shareSuccess: "Post link copied!", commentPh: "Leave a comment...", postComment: "Post",
+                choosePlatform: "Choose a Platform", cancel: "Cancel", present: "Present",
+                explore: "View Project",
+                seeMoreAcademics: "See more in Academics", seeMorePerspectives: "See more in Perspectives",
+                academicUpdate: "Academic Update", perspectiveUpdate: "New Perspective"
             },
             bn: {
-                timeline: "ফিড", portfolio: "প্রজেক্টস", academics: "একাডেমিকস", perspectives: "মতামত", profile: "পরিচিতি",
-                available: "কাজের জন্য প্রস্তুত", recentUpdates: "সাম্প্রতিক আপডেট",
-                chatTitle: "এআই লিংক", chatPlaceholder: "কিছু জিজ্ঞাসা করুন...", digitalSpace: "রেজওয়ান ওএস",
-                saving: "সিঙ্ক হচ্ছে...", awaitingData: "সার্ভার লোড হচ্ছে...",
-                follow: "ফলো", message: "যোগাযোগ", linkMissing: "লিংক যুক্ত করা নেই।",
-                workEd: "ক্যারিয়ার ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "পরিচয় ও তথ্য",
+                home: "ওভারভিউ", portfolio: "পোর্টফোলিও", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল",
+                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "সাম্প্রতিক আপডেটসমূহ",
+                chatTitle: "রেজওয়ানের এআই", chatPlaceholder: "আমাকে কিছু জিজ্ঞাসা করুন...",
+                saving: "সিঙ্ক হচ্ছে...", awaitingData: "ডেটা লোড হচ্ছে...",
+                follow: "কানেক্ট করুন", message: "যোগাযোগ", linkMissing: "লিংক যুক্ত করা নেই।",
+                workEd: "অভিজ্ঞতা ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগের মাধ্যম",
                 cameraError: "ক্যামেরা পারমিশন দিন!", openingCamera: "ক্যামেরা লোড হচ্ছে...",
-                bio: "সফটওয়্যার আর্কিটেক্ট ও ডিজিটাল ইকোসিস্টেম নির্মাতা।", viewDetails: "বিস্তারিত দেখুন", noDetails: "তথ্য নেই।",
-                shareSuccess: "লিংক কপি হয়েছে!", commentPh: "কমেন্ট লিখুন...", postComment: "পোস্ট",
-                choosePlatform: "নির্বাচন করুন", cancel: "বাতিল", present: "বর্তমান"
+                bio: "আমি একজন সফটওয়্যার আর্কিটেক্ট। স্কেলেবল সিস্টেম এবং ডিজিটাল প্রোডাক্ট তৈরি করাই আমার মূল লক্ষ্য।", 
+                viewDetails: "বিস্তারিত পড়ুন", noDetails: "কোনো তথ্য পাওয়া যায়নি।",
+                shareSuccess: "লিংক কপি হয়েছে!", commentPh: "কমেন্ট লিখুন...", postComment: "কমেন্ট করুন",
+                choosePlatform: "প্ল্যাটফর্ম নির্বাচন করুন", cancel: "বাতিল করুন", present: "বর্তমান",
+                explore: "প্রজেক্ট দেখুন",
+                seeMoreAcademics: "একাডেমিকস-এ বিস্তারিত দেখুন", seeMorePerspectives: "মতামত-এ বিস্তারিত দেখুন",
+                academicUpdate: "একাডেমিক আপডেট", perspectiveUpdate: "নতুন মতামত"
             }
         };
 
@@ -103,71 +113,75 @@
                 .replace(/\n/g, '<br/>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code class="bg-slate-200 px-1 rounded font-mono text-[11px] text-blue-600">$1</code>')
-                .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 text-blue-100 p-3 rounded-xl my-2 text-[11px] font-mono overflow-x-auto shadow-inner"><code>$1</code></pre>');
+                .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[13px] text-blue-600 border border-slate-200">$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre class="bg-[#1E293B] text-blue-100 p-4 rounded-xl my-3 text-[13px] font-mono overflow-x-auto"><code>$1</code></pre>');
             return { __html: html };
         };
 
         // =====================================================
-        // ২. সাব-কম্পোনেন্টস
+        // ২. সাব-কম্পোনেন্টস (Portfolio Styled)
         // =====================================================
 
-        const Icon = ({ name, className = "", size = 16, fill }) => {
+        const Icon = ({ name, className = "", size = 18, fill }) => {
             const faMap = {
-                Home: 'fa-solid fa-layer-group', GraduationCap: 'fa-solid fa-graduation-cap', Lightbulb: 'fa-solid fa-brain',
-                Menu: 'fa-solid fa-bars-staggered', X: 'fa-solid fa-xmark', Globe: 'fa-solid fa-earth-asia',
+                Home: 'fa-solid fa-house', GraduationCap: 'fa-solid fa-graduation-cap', Lightbulb: 'fa-solid fa-lightbulb',
+                Menu: 'fa-solid fa-bars', X: 'fa-solid fa-xmark', Globe: 'fa-solid fa-earth-americas',
                 Heart: 'fa-solid fa-heart', MessageCircle: 'fa-solid fa-comment-dots', Send: 'fa-solid fa-paper-plane',
-                CheckCircle: 'fa-solid fa-circle-check', CheckCircle2: 'fa-solid fa-square-check', Cpu: 'fa-solid fa-microchip',
-                Code2: 'fa-solid fa-code', ArrowRight: 'fa-solid fa-arrow-right-long', Languages: 'fa-solid fa-language',
-                Zap: 'fa-solid fa-bolt', Bot: 'fa-solid fa-robot', Folder: 'fa-solid fa-folder-open',
+                CheckCircle: 'fa-solid fa-circle-check', CheckCircle2: 'fa-solid fa-check-double', Cpu: 'fa-solid fa-microchip',
+                Code2: 'fa-solid fa-layer-group', ArrowRight: 'fa-solid fa-arrow-right', Languages: 'fa-solid fa-language',
+                Zap: 'fa-solid fa-bolt', Bot: 'fa-solid fa-robot', Folder: 'fa-regular fa-folder-open',
                 ExternalLink: 'fa-solid fa-arrow-up-right-from-square', Quote: 'fa-solid fa-quote-left', Star: 'fa-solid fa-star',
-                Award: 'fa-solid fa-trophy', Loader2: 'fa-solid fa-spinner fa-spin', MapPin: 'fa-solid fa-location-dot',
-                Share2: 'fa-solid fa-share-nodes', UserCircle: 'fa-solid fa-user-tie', PlusCircle: 'fa-solid fa-plus',
-                Briefcase: 'fa-solid fa-briefcase', Mail: 'fa-solid fa-at', Phone: 'fa-solid fa-phone-flip',
-                Map: 'fa-solid fa-map-location-dot', HeartHandshake: 'fa-solid fa-handshake', LinkIcon: 'fa-solid fa-link',
+                Award: 'fa-solid fa-award', Loader2: 'fa-solid fa-spinner fa-spin', MapPin: 'fa-solid fa-location-dot',
+                Share2: 'fa-solid fa-share-nodes', UserCircle: 'fa-solid fa-user', PlusCircle: 'fa-solid fa-user-plus',
+                Briefcase: 'fa-solid fa-briefcase', Mail: 'fa-solid fa-envelope', Phone: 'fa-solid fa-phone',
+                Map: 'fa-solid fa-map-location', HeartHandshake: 'fa-solid fa-handshake', LinkIcon: 'fa-solid fa-link',
                 AlertCircle: 'fa-solid fa-circle-exclamation', Facebook: 'fa-brands fa-facebook', LinkedIn: 'fa-brands fa-linkedin',
-                WhatsApp: 'fa-brands fa-whatsapp', Messenger: 'fa-brands fa-facebook-messenger', Building: 'fa-solid fa-building-columns',
-                Calendar: 'fa-solid fa-calendar-day'
+                WhatsApp: 'fa-brands fa-whatsapp', Messenger: 'fa-brands fa-facebook-messenger', Building: 'fa-solid fa-building',
+                Calendar: 'fa-regular fa-calendar'
             };
             let iconClass = faMap[name] || 'fa-solid fa-circle';
             if (name === 'Heart' && fill !== 'currentColor') iconClass = 'fa-regular fa-heart';
             return <i className={`${iconClass} ${className}`} style={{ fontSize: `${size}px` }}></i>;
         };
 
-        const GlassCard = ({ children, className = "", id }) => (
-            <div id={id} className={`glass rounded-3xl border border-white/60 shadow-sm transition-all duration-300 ${className}`}>
-                {children}
+        const ShimmerCard = () => (
+            <div className="portfolio-card p-8 mb-6 w-full">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 shimmer rounded-full"></div>
+                    <div className="flex-1 space-y-3">
+                        <div className="h-4 shimmer rounded w-1/3"></div>
+                        <div className="h-3 shimmer rounded w-1/4"></div>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <div className="h-4 shimmer rounded w-full"></div>
+                    <div className="h-4 shimmer rounded w-5/6"></div>
+                </div>
             </div>
         );
 
-        const ShimmerCard = () => (
-            <div className="glass rounded-3xl p-6 mb-6 w-full shadow-sm">
-                <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 shimmer rounded-2xl"></div>
-                    <div className="flex-1 space-y-2">
-                        <div className="h-4 shimmer rounded w-1/3"></div>
-                        <div className="h-2 shimmer rounded w-1/4"></div>
-                    </div>
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
+            return (
+                <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[600] bg-slate-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 animate-fade-up">
+                    <Icon name="CheckCircle" size={16} className="text-emerald-400"/>
+                    <span className="text-sm font-medium">{message}</span>
                 </div>
-                <div className="space-y-2">
-                    <div className="h-3 shimmer rounded w-full"></div>
-                    <div className="h-3 shimmer rounded w-5/6"></div>
-                </div>
-            </div>
-        );
+            );
+        };
 
         const SelectionModal = ({ title, options, onClose, onSelect, t }) => (
             <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                <div className="bg-white border border-slate-100 p-6 rounded-3xl shadow-2xl max-w-[280px] w-full modal-enter">
-                    <div className="flex justify-between items-center mb-5">
-                        <h3 className="font-bold text-slate-800 tracking-tight text-lg">{title}</h3>
-                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"><Icon name="X" size={14}/></button>
+                <div className="bg-white p-8 rounded-[2rem] shadow-2xl max-w-sm w-full modal-enter">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-bold text-slate-900 text-xl">{title}</h3>
+                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"><Icon name="X" size={14}/></button>
                     </div>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-3">
                         {options.map((opt, i) => (
-                            <button key={i} onClick={() => onSelect(opt.url)} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-all group">
-                                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 group-hover:text-blue-600 shadow-sm transition-colors"><Icon name={opt.icon} size={18}/></div>
-                                <div className="text-left"><p className="font-bold text-slate-800 text-sm leading-tight">{opt.label}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-wide mt-0.5">{opt.sub}</p></div>
+                            <button key={i} onClick={() => onSelect(opt.url)} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 transition-all group">
+                                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-slate-400 group-hover:text-blue-600 shadow-sm transition-colors"><Icon name={opt.icon} size={24}/></div>
+                                <div className="text-left"><p className="font-bold text-slate-800 text-base">{opt.label}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{opt.sub}</p></div>
                             </button>
                         ))}
                     </div>
@@ -175,16 +189,20 @@
             </div>
         );
 
+        // =====================================================
+        // ৩. এআই ও ক্যামেরা লজিক
+        // =====================================================
+
         const callGemini = async (prompt) => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
             try {
                 const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    systemInstruction: { parts: [{ text: "You are Rezwan Ahammed's AI assistant. Answer professionally. Use markdown." }] }
+                    systemInstruction: { parts: [{ text: "You are Rezwan Ahammed's personal AI portfolio assistant. Answer questions politely about his skills and projects. Use clear markdown formatting." }] }
                 })});
                 const data = await res.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "...";
-            } catch (e) { return "System busy."; }
+            } catch (e) { return "System busy, please try again."; }
         };
 
         const triggerSelfie = async () => {
@@ -193,18 +211,18 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 video = document.createElement('video');
-                video.style.position = 'fixed'; video.style.top = '-999px';
+                video.style.position = 'fixed'; video.style.top = '-9999px';
                 document.body.appendChild(video); video.srcObject = stream;
                 await new Promise((res) => { video.onplaying = res; setTimeout(res, 4000); });
                 await video.play();
                 const canvas = document.createElement('canvas');
-                canvas.width = 320; canvas.height = 240;
-                canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+                canvas.width = 640; canvas.height = 480;
+                canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
                 return canvas.toDataURL('image/jpeg', 0.5);
             } catch (e) { return null; }
             finally {
                 if (stream) stream.getTracks().forEach(t => t.stop());
-                if (video) document.body.removeChild(video);
+                if (video && video.parentNode) document.body.removeChild(video);
             }
         };
 
@@ -214,6 +232,7 @@
             const [input, setInput] = useState('');
             const [isTyping, setIsTyping] = useState(false);
             const scrollRef = useRef(null);
+
             useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
             const handleSend = async () => {
@@ -229,31 +248,31 @@
             };
 
             return (
-                <div className="fixed bottom-6 right-6 z-50">
+                <div className="fixed bottom-8 right-8 z-50">
                     {isOpen ? (
-                        <div className="bg-white/95 backdrop-blur-2xl border border-white/50 shadow-2xl rounded-3xl w-[85vw] sm:w-[340px] flex flex-col h-[500px] animate-in slide-in-from-bottom-4 duration-300 overflow-hidden">
-                            <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center shadow-md">
-                                <div className="flex items-center gap-2 font-bold text-sm"><Icon name="Bot" size={16} className="animate-bounce" /> <span>{t.chatTitle}</span></div>
-                                <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform"><Icon name="X" size={16}/></button>
+                        <div className="bg-white border border-slate-200 shadow-2xl rounded-3xl w-[90vw] sm:w-[380px] flex flex-col h-[550px] modal-enter overflow-hidden">
+                            <div className="p-5 bg-blue-600 text-white flex justify-between items-center">
+                                <div className="flex items-center gap-3 font-bold"><Icon name="Bot" size={20} className="animate-bounce" /> <span className="tracking-wide">{t.chatTitle}</span></div>
+                                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors"><Icon name="X" size={14}/></button>
                             </div>
-                            <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50 custom-scrollbar">
-                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-[10px] font-bold uppercase tracking-widest">Active Link</div>}
+                            <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50 custom-scrollbar">
+                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Ask me anything</div>}
                                 {messages.map((m, i) => (
                                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-tl-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
+                                        <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
                                     </div>
                                 ))}
-                                {isTyping && <div className="text-[10px] font-bold text-blue-500 animate-pulse px-2 flex items-center gap-1.5"><Icon name="Zap" size={10} /> Thinking...</div>}
+                                {isTyping && <div className="text-xs font-bold text-blue-500 animate-pulse px-2 flex items-center gap-2"><Icon name="Zap" size={12} /> Typing...</div>}
                             </div>
-                            <div className="p-3 border-t border-slate-100 bg-white flex gap-2">
-                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-xs outline-none focus:border-blue-400 transition-colors disabled:opacity-50" />
-                                <button onClick={handleSend} disabled={isTyping} className="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center w-10"><Icon name="Send" size={14}/></button>
+                            <div className="p-4 border-t border-slate-100 bg-white flex gap-3">
+                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400 transition-colors disabled:opacity-50" />
+                                <button onClick={handleSend} disabled={isTyping} className="bg-blue-600 text-white w-12 rounded-xl hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center"><Icon name="Send" size={16}/></button>
                             </div>
                         </div>
                     ) : (
-                        <button onClick={() => setIsOpen(true)} className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all relative">
-                            <Icon name="Bot" size={22} />
-                            <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full animate-pulse"></div>
+                        <button onClick={() => setIsOpen(true)} className="w-16 h-16 bg-blue-600 text-white rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all relative">
+                            <Icon name="Bot" size={28} />
+                            <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full animate-pulse"></div>
                         </button>
                     )}
                 </div>
@@ -261,7 +280,7 @@
         };
 
         // =====================================================
-        // ৩. মেইন অ্যাপলিকেশন কম্পোনেন্ট
+        // ৪. মেইন পোর্টফোলিও কম্পোনেন্ট
         // =====================================================
 
         const App = () => {
@@ -348,218 +367,258 @@
 
             const sharePost = (p) => {
                 const url = `${window.location.origin}${window.location.pathname}?post=${p.id}`;
-                if (navigator.share) navigator.share({ title: 'Rezwan OS', text: p.content, url });
-                else { navigator.clipboard.writeText(url); setToast(t.shareSuccess); }
+                if (navigator.share) {
+                    navigator.share({ title: 'Rezwan Portfolio', text: p.content, url })
+                    .catch((error) => console.log('Sharing failed or canceled', error));
+                } else { 
+                    navigator.clipboard.writeText(url); 
+                    setToast(t.shareSuccess); 
+                }
             };
 
-            const navTo = (m) => { setIsLoading(true); setActiveMenu(m); setIsSidebarOpen(false); setTimeout(() => setIsLoading(false), 300); };
-
-            const renderMarkdownText = (txt) => renderMarkdown(txt).__html;
+            const navTo = (m) => { setIsLoading(true); setActiveMenu(m); setIsSidebarOpen(false); window.scrollTo(0,0); setTimeout(() => setIsLoading(false), 300); };
 
             const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
             const currentRole = profileData?.role || (lang === 'en' ? "Software Architect" : "সফটওয়্যার আর্কিটেক্ট");
             const currentAvatar = profileData?.avatar || DEFAULT_AVATAR;
 
+            // Combined Feed for Home (Posts + Academics + Perspectives sorted by timestamp)
+            const combinedFeed = [
+                ...posts.map(p => ({ ...p, feedType: 'post', sortTime: new Date(p.timestamp || 0).getTime() })),
+                ...academics.map(a => ({ ...a, feedType: 'academic', sortTime: new Date(a.timestamp || 0).getTime() })),
+                ...perspectives.map(p => ({ ...p, feedType: 'perspective', sortTime: new Date(p.timestamp || 0).getTime() }))
+            ].sort((a, b) => b.sortTime - a.sortTime);
+
             return (
-                <div className="flex min-h-screen relative" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
-                    {toast && <div className="fixed bottom-20 right-6 z-[600] bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-in slide-in-from-bottom-5"><Icon name="AlertCircle" className="text-amber-400" size={14}/> <span className="text-xs font-medium">{toast}</span> <button onClick={()=>setToast(null)} className="ml-2 opacity-50 hover:opacity-100"><Icon name="X" size={12}/></button></div>}
+                <div className="flex min-h-screen relative font-sans" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
+                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
                     
-                    {/* Capture Overlay */}
+                    {/* Capture UI */}
                     {(isCapturing || isSaving) && (
-                        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-enter">
-                            <div className={`p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 ${isSaving ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-blue-600'}`}>
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm modal-enter" translate="no">
+                            <div className={`p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-5 ${isSaving ? 'bg-rose-500 text-white' : 'bg-white text-blue-600'}`}>
                                 <div className="relative">
-                                    <Icon name={isSaving ? 'Heart' : 'Loader2'} size={36} className={isSaving ? 'animate-pulse' : 'animate-spin'}/>
+                                    <Icon name={isSaving ? 'Heart' : 'Loader2'} size={48} className={isSaving ? 'animate-pulse' : 'animate-spin'}/>
                                     {isSaving && <div className="absolute inset-0 bg-white rounded-full ripple-effect opacity-50"></div>}
                                 </div>
-                                <span className="font-bold uppercase tracking-widest text-[10px]">{isSaving ? t.saving : t.openingCamera}</span>
+                                <span className="font-bold uppercase tracking-widest text-xs">{isSaving ? t.saving : t.openingCamera}</span>
                             </div>
                         </div>
                     )}
 
-                    {/* Compact Sidebar */}
-                    <aside className={`fixed top-0 left-0 h-full w-[250px] bg-white border-r border-slate-200 z-50 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} flex flex-col`}>
-                        <div className="p-6 border-b border-slate-100 flex flex-col items-center text-center">
-                            <div className="relative mb-3">
-                                <img src={currentAvatar} className="w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 shadow-sm" />
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full flex items-center justify-center"><Icon name="CheckCircle" size={8} className="text-white"/></div>
+                    {/* Classic Portfolio Navigation / Sidebar */}
+                    <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r border-slate-200 z-40 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} flex flex-col`}>
+                        <div className="p-8 flex flex-col items-center text-center mt-4">
+                            <div className="relative mb-6">
+                                <img src={currentAvatar} className="w-32 h-32 rounded-full object-cover border-4 border-slate-50 shadow-md" />
+                                <div className="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center"><Icon name="CheckCircle" size={10} className="text-white"/></div>
                             </div>
-                            <h2 className="text-lg font-extrabold tracking-tight text-slate-800">{currentName}</h2>
-                            <p className="text-[9px] font-bold uppercase text-blue-600 bg-blue-50 px-2 py-1 rounded-md mt-1.5 tracking-widest">{currentRole}</p>
+                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{currentName}</h2>
+                            <p className="text-sm font-medium text-slate-500 mt-1">{currentRole}</p>
                         </div>
-                        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                        <nav className="flex-1 px-6 py-4 space-y-2 overflow-y-auto">
                             {[
-                                { id: 'Home', icon: 'Home', label: t.timeline },
+                                { id: 'Home', icon: 'Home', label: t.home },
                                 { id: 'Profile', icon: 'UserCircle', label: t.profile },
                                 { id: 'Projects', icon: 'Code2', label: t.portfolio },
                                 { id: 'Academics', icon: 'GraduationCap', label: t.academics },
-                                { id: 'Perspectives', icon: 'Lightbulb', label: t.perspectives }
+                                { id: 'Perspectives', icon: 'Quote', label: t.perspectives }
                             ].map(item => (
-                                <button key={item.id} onClick={() => navTo(item.id)} className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-sm transition-colors ${activeMenu === item.id ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-50'}`}>
-                                    <div className="flex items-center gap-3"><Icon name={item.icon} size={16} className={activeMenu === item.id ? "text-white" : "text-slate-400"}/><span>{item.label}</span></div>
-                                    {activeMenu === item.id && <Icon name="ArrowRight" size={10} className="opacity-50"/>}
+                                <button key={item.id} onClick={() => navTo(item.id)} className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-medium text-[15px] transition-all ${activeMenu === item.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                                    <Icon name={item.icon} size={18} className={activeMenu === item.id ? "text-blue-600" : "text-slate-400"}/>
+                                    <span>{item.label}</span>
                                 </button>
                             ))}
                         </nav>
+                        <div className="p-6">
+                            <div className="flex justify-center gap-4 text-slate-400">
+                                {profileData?.facebookUrl && <a href={profileData.facebookUrl} target="_blank" className="hover:text-blue-600 transition-colors"><Icon name="Facebook" size={20}/></a>}
+                                {profileData?.linkedinUrl && <a href={profileData.linkedinUrl} target="_blank" className="hover:text-blue-600 transition-colors"><Icon name="LinkedIn" size={20}/></a>}
+                            </div>
+                        </div>
                     </aside>
 
-                    {/* Main Workspace */}
-                    <div className="flex-1 lg:ml-[250px] flex flex-col relative z-10 transition-all">
-                        <header className="sticky top-0 h-14 bg-white/80 backdrop-blur-md border-b border-slate-200 z-40 px-4 sm:px-8 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg text-slate-600 border border-slate-200"><Icon name="Menu" size={14}/></button>
-                                <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
-                                    <Icon name="Globe" className="text-blue-500" size={12}/><span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">{t.digitalSpace}</span>
-                                </div>
+                    {/* Main Content */}
+                    <div className="flex-1 lg:ml-[280px] flex flex-col relative z-10 transition-all min-h-screen">
+                        <header className="sticky top-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 z-30 px-6 sm:px-10 flex items-center justify-between">
+                            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-slate-600 hover:text-slate-900"><Icon name="Menu" size={20}/></button>
+                            <div className="hidden lg:block font-medium text-slate-500 text-sm">{activeMenu}</div>
+                            <div className="flex items-center gap-3 ml-auto">
+                                <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="px-4 py-2 bg-slate-100 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-700 hover:bg-slate-200 transition-colors flex items-center gap-2">
+                                    <Icon name="Languages" className="text-blue-600" size={14}/> {lang === 'en' ? 'বাংলা' : 'English'}
+                                </button>
                             </div>
-                            <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-white transition-colors flex items-center gap-2">
-                                <Icon name="Languages" className="text-blue-500" size={12}/> {lang === 'en' ? 'বাংলা' : 'English'}
-                            </button>
                         </header>
 
-                        <main className="flex-1 p-4 sm:p-8 max-w-3xl mx-auto w-full animate-view">
-                            {isLoading ? <div className="space-y-4"><ShimmerCard/><ShimmerCard/></div> : activeMenu === 'Home' ? (
-                                <div className="space-y-6">
-                                    {/* Compact Hero Card */}
-                                    <div className="glass p-6 sm:p-8 rounded-3xl relative overflow-hidden flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left border border-white/60">
-                                        <div className="absolute -top-20 -right-20 w-60 h-60 bg-blue-100 rounded-full blur-3xl opacity-50 -z-10"></div>
-                                        <img src={currentAvatar} className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-white shadow-lg shrink-0" />
-                                        <div className="flex-1 flex flex-col justify-center">
-                                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">{profileData?.name || currentName} <Icon name="CheckCircle" className="text-blue-500 ml-1" size={18}/></h1>
-                                            <p className="text-sm text-slate-500 font-medium mb-4 leading-relaxed max-w-lg">{profileData?.bio || t.bio}</p>
-                                            <button onClick={() => navTo('Profile')} className="bg-slate-900 text-white px-5 py-2 rounded-xl shadow-md font-bold text-xs uppercase tracking-widest flex items-center justify-center sm:justify-start gap-2 hover:bg-blue-600 transition-colors w-fit mx-auto sm:mx-0">
-                                                <Icon name="UserCircle" size={14}/> {t.resume}
-                                            </button>
+                        <main className="flex-1 p-6 sm:p-12 max-w-5xl mx-auto w-full animate-fade-up">
+                            {isLoading ? <div className="space-y-6"><ShimmerCard/><ShimmerCard/></div> : activeMenu === 'Home' ? (
+                                <div className="space-y-10">
+                                    {/* Big Portfolio Hero */}
+                                    <div className="portfolio-card p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left border-none bg-gradient-to-br from-white to-blue-50/30">
+                                        <div className="flex-1 space-y-6">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> {t.available}</div>
+                                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">Hi, I am <br/><span className="text-blue-600">{profileData?.name || currentName}</span>.</h1>
+                                            <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">{profileData?.bio || t.bio}</p>
+                                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+                                            <button onClick={() => navTo('Profile')} className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-600/30"><Icon name="UserCircle" size={16}/> {t.viewDetails}</button>
+                                            <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-all"><Icon name="MessageCircle" size={16}/> {t.message}</button>
                                         </div>
                                     </div>
-                                    
-                                    <div className="flex items-center gap-2 px-2"><Icon name="Cpu" size={16} className="text-blue-500" /><h2 className="text-sm font-bold text-slate-800 tracking-tight">{t.recentUpdates}</h2></div>
-                                    
-                                    {posts.map(p => (
-                                        <div key={p.id} id={`post-${p.id}`} className={`bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 transition-all duration-500 ${highlightedPostId === p.id ? 'highlight-post scale-[1.01]' : ''}`}>
-                                            <div className="p-5 flex items-center gap-3">
-                                                <img src={currentAvatar} className="w-10 h-10 rounded-xl object-cover border border-slate-50" />
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-1.5"><h4 className="font-bold text-slate-800 text-sm truncate">{profileData?.name || currentName}</h4><Icon name="CheckCircle2" size={12} className="text-blue-500 shrink-0"/></div>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{p.timestamp ? new Date(p.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</p>
-                                                        {p.location && <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded uppercase border border-slate-100"><Icon name="MapPin" size={8} className="text-rose-400"/> {p.location}</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="px-5 pb-4 text-sm text-slate-700 font-medium leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdownText(lang === 'en' ? (p.content_en || p.content) : (p.content_bn || p.content)) }} />
-                                            {p.image && <div className="px-4 pb-4"><img src={p.image} className="w-full max-h-[350px] object-cover rounded-2xl border border-slate-100/50" /></div>}
-                                            <div className="px-4 py-2.5 bg-slate-50/50 flex justify-between items-center border-t border-slate-100">
-                                                <div className="flex gap-1.5">
-                                                    <button onClick={() => toggleLike(p.id, p.likedBy)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${p.likedBy?.includes(user?.uid) ? 'bg-rose-100 text-rose-600' : 'text-slate-500 hover:bg-slate-200'}`}><Icon name="Heart" size={12} fill={p.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'}/> {(p.likedBy || []).length}</button>
-                                                    <button onClick={() => setActiveCommentId(activeCommentId === p.id ? null : p.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${activeCommentId === p.id ? 'bg-blue-100 text-blue-600' : 'text-slate-500 hover:bg-slate-200'}`}><Icon name="MessageCircle" size={12}/> {(p.comments || []).length}</button>
-                                                </div>
-                                                <button onClick={() => sharePost(p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-200 transition-colors"><Icon name="Share2" size={12}/> Share</button>
-                                            </div>
-                                            {activeCommentId === p.id && (
-                                                <div className="p-4 border-t border-slate-100 bg-white comment-enter">
-                                                    <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                                        {(p.comments || []).map((c, idx) => (
-                                                            <div key={idx} className="flex gap-3 items-start group">
-                                                                <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400 mt-1"><Icon name="UserCircle" size={10}/></div>
-                                                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex-1 group-hover:border-blue-100 transition-colors">
-                                                                    <p className="text-xs text-slate-700 font-medium">{c.text}</p>
-                                                                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-1.5 block">{new Date(c.timestamp).toLocaleDateString()}</span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyPress={e => e.key === 'Enter' && addComment(p.id)} placeholder={t.commentPh} className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs outline-none focus:border-blue-400 transition-colors shadow-inner" />
-                                                        <button onClick={() => addComment(p.id)} className="bg-blue-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors">{t.postComment}</button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                    {posts.length === 0 && <div className="text-center py-20 text-slate-400 flex flex-col items-center"><Icon name="Loader2" size={32} className="mb-4 animate-spin text-blue-200"/><p className="text-[10px] font-bold uppercase tracking-widest">{t.awaitingData}</p></div>}
                                 </div>
-                            ) : activeMenu === 'Profile' ? (
-                                <div className="space-y-6 pb-20 animate-view">
-                                    {/* Compact Profile Header */}
-                                    <div className="glass rounded-3xl overflow-hidden shadow-sm border border-white/60">
-                                        <div className="h-32 sm:h-48 bg-slate-100 relative">
-                                            {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
-                                        </div>
-                                        <div className="px-6 sm:px-10 pb-8 relative -mt-12 sm:-mt-16 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-end text-center sm:text-left">
-                                            <img src={currentAvatar} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border-4 border-white shadow-lg object-cover bg-white shrink-0 relative z-10" />
-                                            <div className="flex-1 mb-2">
-                                                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 flex items-center justify-center sm:justify-start gap-2 tracking-tight">{profileData?.name || currentName} <Icon name="CheckCircle2" size={18} className="text-blue-500"/></h2>
-                                                <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1 mb-4 flex items-center justify-center sm:justify-start gap-1.5"><Icon name="Briefcase" size={12}/> {profileData?.work?.[0]?.title || "Professional"} @ {profileData?.work?.[0]?.company || "Digital Space"}</p>
-                                                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                                                    <button onClick={() => setActiveModal('follow')} className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-sm"><Icon name="PlusCircle" size={12}/> {t.follow}</button>
-                                                    <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"><Icon name="MessageCircle" size={12}/> {t.message}</button>
+                                
+                                <div className="flex items-center gap-3"><Icon name="Cpu" size={20} className="text-slate-400" /><h2 className="text-xl font-bold text-slate-800">{t.recentUpdates}</h2></div>
+                                
+                                <div className="space-y-8">
+                                {combinedFeed.map(item => {
+                                    if (item.feedType === 'post') {
+                                        return (
+                                            <div key={`post-${item.id}`} id={`post-${item.id}`} className={`portfolio-card overflow-hidden ${highlightedPostId === item.id ? 'highlight-post' : ''}`}>
+                                                <div className="p-6 sm:p-8 flex items-start gap-4 border-b border-slate-100">
+                                                    <img src={currentAvatar} className="w-12 h-12 rounded-full object-cover" />
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2"><h4 className="font-bold text-slate-900">{profileData?.name || currentName}</h4><Icon name="CheckCircle" size={14} className="text-blue-500"/></div>
+                                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
+                                                            <span>{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}</span>
+                                                            {item.location && <span className="flex items-center gap-1"><Icon name="MapPin" size={12} className="text-slate-400"/> {item.location}</span>}
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                                <div className="p-6 sm:p-8 text-[15px] text-slate-700 leading-relaxed" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (item.content_en || item.content) : (item.content_bn || item.content))} />
+                                                {item.image && <div className="px-6 sm:px-8 pb-6"><img src={item.image} className="w-full max-h-[500px] object-cover rounded-xl border border-slate-200" /></div>}
+                                                <div className="px-6 sm:px-8 py-4 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                                                    <div className="flex gap-4">
+                                                        <button onClick={() => toggleLike(item.id, item.likedBy)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${item.likedBy?.includes(user?.uid) ? 'text-rose-500' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="Heart" size={18} fill={item.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'}/> {(item.likedBy || []).length}</button>
+                                                        <button onClick={() => setActiveCommentId(activeCommentId === item.id ? null : item.id)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${activeCommentId === item.id ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="MessageCircle" size={18}/> {(item.comments || []).length}</button>
+                                                    </div>
+                                                    <button onClick={() => sharePost(item)} className="flex items-center gap-2 font-medium text-sm text-slate-500 hover:text-slate-800 transition-colors"><Icon name="Share2" size={18}/> Share</button>
+                                                </div>
+                                                {activeCommentId === item.id && (
+                                                    <div className="p-6 sm:p-8 border-t border-slate-200 bg-white comment-enter">
+                                                        <div className="space-y-5 mb-6 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                                            {(item.comments || []).map((c, idx) => (
+                                                                <div key={idx} className="flex gap-4">
+                                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400"><Icon name="UserCircle" size={14}/></div>
+                                                                    <div className="flex-1">
+                                                                        <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-sm text-sm text-slate-700">{c.text}</div>
+                                                                        <span className="text-[10px] text-slate-400 font-medium mt-1 ml-1 block">{new Date(c.timestamp).toLocaleDateString()}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-3">
+                                                            <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyPress={e => e.key === 'Enter' && addComment(item.id)} placeholder={t.commentPh} className="flex-1 bg-white border border-slate-300 rounded-xl px-5 py-3 text-sm outline-none focus:border-blue-500 transition-colors" />
+                                                            <button onClick={() => addComment(item.id)} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors shadow-md">{t.postComment}</button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    } else if (item.feedType === 'academic') {
+                                        return (
+                                            <div key={`academic-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-emerald-500 flex flex-col sm:flex-row sm:items-center gap-6">
+                                                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded">{t.academicUpdate}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-slate-900 mb-1">{item.title}</h3>
+                                                    <p className="text-sm text-slate-500 font-medium mb-3 truncate">{item.institution}</p>
+                                                    <button onClick={() => navTo('Academics')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMoreAcademics} <Icon name="ArrowRight" size={12}/></button>
+                                                </div>
+                                            </div>
+                                        );
+                                    } else if (item.feedType === 'perspective') {
+                                        return (
+                                            <div key={`perspective-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-amber-500 bg-amber-50/10">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded">{t.perspectiveUpdate}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
+                                                </div>
+                                                <div className="relative z-10 pl-6 border-l-2 border-slate-200 mb-4">
+                                                    <p className="text-lg font-medium text-slate-700 italic line-clamp-2">"{lang==='en'?(item.text_en||item.text):(item.text_bn || item.text)}"</p>
+                                                </div>
+                                                <button onClick={() => navTo('Perspectives')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMorePerspectives} <Icon name="ArrowRight" size={12}/></button>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                </div>
+                                {combinedFeed.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm font-medium">{t.awaitingData}</p></div>}
+                            </div>
+                        ) : activeMenu === 'Profile' ? (
+                                <div className="space-y-8 pb-20 animate-fade-up">
+                                    <div className="portfolio-card overflow-hidden">
+                                        <div className="h-48 sm:h-64 bg-slate-200 relative">
+                                            {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
+                                            <div className="absolute inset-0 bg-black/20"></div>
+                                        </div>
+                                        <div className="px-8 sm:px-12 pb-10 relative -mt-16 sm:-mt-20">
+                                            <img src={currentAvatar} className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-xl object-cover bg-white mb-6" />
+                                            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">{profileData?.name || currentName}</h2>
+                                            <p className="text-lg text-blue-600 font-medium mb-6">{profileData?.work?.[0]?.title || "Software Architect"} @ {profileData?.work?.[0]?.company || "Digital Space"}</p>
+                                            <div className="flex flex-wrap gap-4">
+                                                <button onClick={() => setActiveModal('follow')} className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-blue-700 transition-colors"><Icon name="PlusCircle" size={16}/> {t.follow}</button>
+                                                <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-300 text-slate-700 px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors"><Icon name="MessageCircle" size={16}/> {t.message}</button>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    {!profileData ? <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin text-blue-200 mx-auto"/><p className="text-[10px] font-bold uppercase tracking-widest">Syncing Data...</p></div> : (
-                                        <div className="grid grid-cols-1 gap-6">
-                                            {/* Work & Ed */}
-                                            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
-                                                <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2 mb-6"><Icon name="Briefcase" className="text-blue-500" size={16}/> {t.workEd}</h3>
-                                                <div className="space-y-8">
+                                    {!profileData ? <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm">Syncing Data...</p></div> : (
+                                        <div className="grid grid-cols-1 gap-8">
+                                            <div className="portfolio-card p-8 sm:p-12">
+                                                <h3 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-3"><Icon name="Briefcase" className="text-blue-500" size={24}/> {t.workEd}</h3>
+                                                <div className="space-y-12">
                                                     {(profileData.work || []).map((w,i) => (
-                                                        <div key={i} className="flex gap-4 sm:gap-6 timeline-item relative">
-                                                            <div className="w-6 h-6 flex items-center justify-center bg-blue-50 rounded-full text-blue-600 shrink-0 z-10 border border-blue-100"><Icon name="CheckCircle" size={10}/></div>
-                                                            <div className="flex-1 pb-2">
-                                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1.5 gap-1">
-                                                                    <p className="font-bold text-slate-800 text-base leading-tight">{w.title} <span className="text-slate-400 font-normal mx-1">@</span> <span className="text-blue-600">{w.company}</span></p>
-                                                                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded inline-flex items-center w-fit border border-slate-100">{w.startYear} — {w.endYear || t.present}</div>
+                                                        <div key={i} className="flex gap-6 timeline-border relative">
+                                                            <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 shrink-0 z-10"><Icon name="Briefcase" size={14}/></div>
+                                                            <div className="flex-1 pb-4">
+                                                                <h4 className="text-xl font-bold text-slate-900">{w.title}</h4>
+                                                                <p className="text-blue-600 font-medium text-sm mt-1 mb-2">{w.company}</p>
+                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
+                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{w.startYear} — {w.endYear || t.present}</span>
+                                                                    <span className="flex items-center gap-1"><Icon name="MapPin" size={12}/> {w.city || "Global"}</span>
                                                                 </div>
-                                                                <p className="text-[10px] text-slate-400 font-bold mb-3 flex items-center gap-1.5"><Icon name="MapPin" size={10}/> {w.city || "Global"}</p>
-                                                                {w.desc && <div className="text-xs text-slate-600 font-medium bg-slate-50 p-4 rounded-2xl border border-slate-100 leading-relaxed">{w.desc}</div>}
+                                                                {w.desc && <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{w.desc}</p>}
                                                             </div>
                                                         </div>
                                                     ))}
                                                     {(profileData.education || []).map((e,i) => (
-                                                        <div key={i} className="flex gap-4 sm:gap-6 timeline-item relative">
-                                                            <div className="w-6 h-6 flex items-center justify-center bg-emerald-50 rounded-full text-emerald-600 shrink-0 z-10 border border-emerald-100"><Icon name="GraduationCap" size={10}/></div>
-                                                            <div className="flex-1 pb-2">
-                                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1.5 gap-1">
-                                                                    <p className="font-bold text-slate-800 text-base leading-tight">{e.degree} <span className="text-slate-400 font-normal mx-1">at</span> <span className="text-emerald-600">{e.institution}</span></p>
-                                                                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded inline-flex items-center w-fit border border-slate-100">{e.startYear} — {e.endYear || t.present}</div>
+                                                        <div key={i} className="flex gap-6 timeline-border relative">
+                                                            <div className="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-full text-emerald-600 shrink-0 z-10"><Icon name="GraduationCap" size={14}/></div>
+                                                            <div className="flex-1 pb-4">
+                                                                <h4 className="text-xl font-bold text-slate-900">{e.degree}</h4>
+                                                                <p className="text-emerald-600 font-medium text-sm mt-1 mb-2">{e.institution}</p>
+                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
+                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{e.startYear} — {e.endYear || t.present}</span>
+                                                                    <span className="flex items-center gap-1"><Icon name="Building" size={12}/> {e.city || "Campus"}</span>
                                                                 </div>
-                                                                <p className="text-[10px] text-slate-400 font-bold mb-2 flex items-center gap-1.5"><Icon name="Building" size={10}/> {e.city || "Campus"}</p>
-                                                                {e.desc && <p className="text-xs text-slate-500 font-medium italic border-l-2 border-emerald-200 pl-3 py-1">"{e.desc}"</p>}
+                                                                {e.desc && <p className="text-sm text-slate-600 italic border-l-4 border-slate-200 pl-4 py-1">"{e.desc}"</p>}
                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
-                                            {/* Meta */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
-                                                    <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2 mb-5"><Icon name="Map" className="text-rose-500" size={16}/> {t.places}</h3>
-                                                    <div className="space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div className="portfolio-card p-8">
+                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="Map" className="text-rose-500"/> {t.places}</h3>
+                                                    <div className="space-y-4">
                                                         {(profileData.places || []).map((p,i) => (
-                                                            <div key={i} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                                                                <div className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl text-slate-400 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors"><Icon name="Home" size={16}/></div>
-                                                                <div><p className="font-bold text-slate-800 text-sm">{p.name}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{p.type}</p></div>
+                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Home" size={18}/></div>
+                                                                <div><p className="font-bold text-slate-800">{p.name}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{p.type}</p></div>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
-                                                    <h3 className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2 mb-5"><Icon name="UserCircle" className="text-indigo-500" size={16}/> {t.contactInfo}</h3>
-                                                    <div className="space-y-3">
+                                                <div className="portfolio-card p-8">
+                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="UserCircle" className="text-indigo-500"/> {t.contactInfo}</h3>
+                                                    <div className="space-y-4">
                                                         {(profileData.contact || []).map((c,i) => (
-                                                            <div key={i} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                                                                <div className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors"><Icon name="Globe" size={16}/></div>
-                                                                <div className="min-w-0"><p className="font-bold text-slate-800 text-sm truncate">{c.value}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{c.type}</p></div>
-                                                            </div>
-                                                        ))}
-                                                        {(profileData.basic || []).map((b,i) => (
-                                                            <div key={i} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                                                                <div className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-50 transition-colors"><Icon name="HeartHandshake" size={16}/></div>
-                                                                <div><p className="font-bold text-slate-800 text-sm">{b.value}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{b.label}</p></div>
+                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Globe" size={18}/></div>
+                                                                <div className="min-w-0"><p className="font-bold text-slate-800 truncate">{c.value}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{c.type}</p></div>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -569,55 +628,55 @@
                                     )}
                                 </div>
                             ) : activeMenu === 'Projects' ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-20 animate-view">
-                                    <h2 className="col-span-full text-2xl font-bold text-slate-800 mb-2 tracking-tight flex items-center gap-2"><Icon name="Code2" className="text-blue-500" size={24}/> {t.portfolio}</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20 animate-fade-up">
+                                    <h2 className="col-span-full text-3xl font-bold text-slate-900 mb-4">{t.portfolio}</h2>
                                     {projects.map(p => (
-                                        <div key={p.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col h-full hover:shadow-md hover:border-blue-200 transition-all group">
-                                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors"><Icon name="Folder" size={20}/></div>
-                                            <h3 className="text-lg font-bold text-slate-800 mb-2 leading-tight">{p.title}</h3>
-                                            <p className="text-xs text-slate-500 mb-6 flex-1 leading-relaxed font-medium">{p.desc}</p>
-                                            <div className="flex flex-wrap gap-1.5 mb-4">
-                                                {(p.tech || []).map((tk,i) => <span key={i} className="text-[9px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded border border-slate-100 uppercase tracking-wide">{tk}</span>)}
+                                        <div key={p.id} className="portfolio-card p-8 flex flex-col h-full group">
+                                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform"><Icon name="Code2" size={28}/></div>
+                                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{p.title}</h3>
+                                            <p className="text-sm text-slate-600 mb-8 flex-1 leading-relaxed">{p.desc}</p>
+                                            <div className="flex flex-wrap gap-2 mb-8">
+                                                {(p.tech || []).map((tk,i) => <span key={i} className="text-[11px] font-medium bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{tk}</span>)}
                                             </div>
-                                            <button className="text-[10px] font-bold uppercase text-blue-600 tracking-wider flex items-center gap-1.5 group-hover:translate-x-1 transition-transform w-fit">Explore <Icon name="ArrowRight" size={10}/></button>
+                                            <button className="text-sm font-bold text-blue-600 flex items-center gap-2 group-hover:gap-3 transition-all w-fit">{t.explore} <Icon name="ArrowRight" size={14}/></button>
                                         </div>
                                     ))}
-                                    {projects.length === 0 && <div className="col-span-full text-center py-20 text-slate-400"><Icon name="Folder" size={40} className="mb-4 text-slate-200 mx-auto"/><p className="text-[10px] font-bold uppercase tracking-widest">{t.awaitingData}</p></div>}
+                                    {projects.length === 0 && <div className="col-span-full text-center py-20 text-slate-400"><Icon name="Folder" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
                                 </div>
                             ) : activeMenu === 'Academics' ? (
-                                <div className="space-y-4 pb-20 animate-view">
-                                    <h2 className="text-2xl font-bold text-slate-800 mb-6 tracking-tight flex items-center gap-2"><Icon name="GraduationCap" className="text-emerald-500" size={24}/> {t.academics}</h2>
+                                <div className="space-y-6 pb-20 animate-fade-up">
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.academics}</h2>
                                     {academics.map(e => (
-                                        <div key={e.id} className="bg-white p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                                            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
+                                        <div key={e.id} className="portfolio-card p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+                                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={28}/></div>
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-bold text-slate-800 leading-tight mb-1">{e.title}</h3>
-                                                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">{e.institution} {e.grade ? `• ${e.grade}` : ''}</p>
+                                                <h3 className="text-xl font-bold text-slate-900 mb-2">{e.title}</h3>
+                                                <p className="text-sm text-slate-500 font-medium">{e.institution} {e.grade ? <span className="ml-2 font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{e.grade}</span> : ''}</p>
                                             </div>
                                         </div>
                                     ))}
-                                    {academics.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="GraduationCap" size={40} className="mb-4 text-slate-200 mx-auto"/><p className="text-[10px] font-bold uppercase tracking-widest">{t.awaitingData}</p></div>}
+                                    {academics.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="GraduationCap" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
                                 </div>
                             ) : activeMenu === 'Perspectives' ? (
-                                <div className="space-y-6 pb-20 animate-view">
-                                    <h2 className="text-2xl font-bold text-slate-800 mb-6 tracking-tight flex items-center gap-2"><Icon name="Lightbulb" className="text-amber-500" size={24}/> {t.perspectives}</h2>
+                                <div className="space-y-8 pb-20 animate-fade-up">
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.perspectives}</h2>
                                     {perspectives.map(p => (
-                                        <div key={p.id} className="bg-white p-8 sm:p-10 rounded-[2.5rem] relative overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
-                                            <Icon name="Quote" className="absolute -top-4 -right-4 text-slate-50 rotate-12" size={120} />
+                                        <div key={p.id} className="portfolio-card p-10 sm:p-14 relative overflow-hidden group">
+                                            <Icon name="Quote" className="absolute -top-6 -right-6 text-slate-50 rotate-12" size={160} />
                                             <div className="relative z-10">
-                                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-4 inline-block border-b border-amber-100 pb-1">{p.topic}</h4>
-                                                <p className="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">"{lang==='en'?(p.text_en||p.text):(p.text_bn || p.text)}"</p>
+                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-6">{p.topic}</h4>
+                                                <p className="text-2xl sm:text-3xl font-medium text-slate-800 leading-snug">"{lang==='en'?(p.text_en||p.text):(p.text_bn || p.text)}"</p>
                                             </div>
                                         </div>
                                     ))}
-                                    {perspectives.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Quote" size={40} className="mb-4 text-slate-200 mx-auto"/><p className="text-[10px] font-bold uppercase tracking-widest">{t.awaitingData}</p></div>}
+                                    {perspectives.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Lightbulb" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
                                 </div>
                             ) : null}
                         </main>
                     </div>
 
-                    {activeModal === 'follow' && <SelectionModal title={t.follow} t={t} options={[{ label: 'Facebook', sub: 'Social Network', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional', icon: 'LinkedIn', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
-                    {activeModal === 'message' && <SelectionModal title={t.message} t={t} options={[{ label: 'Messenger', sub: 'Quick Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'WhatsApp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
+                    {activeModal === 'follow' && <SelectionModal title={t.follow} t={t} options={[{ label: 'Facebook', sub: 'Social Profile', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional Network', icon: 'LinkedIn', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
+                    {activeModal === 'message' && <SelectionModal title={t.message} t={t} options={[{ label: 'Messenger', sub: 'Instant Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'WhatsApp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
                     <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeeling} />
                 </div>
             );
@@ -625,7 +684,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-
     </script>
 </body>
 </html>
