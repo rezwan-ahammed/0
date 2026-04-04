@@ -3,687 +3,1511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezwan Ahammed | Software Architect</title>
-    
-    <!-- Application Structure: A Premium Portfolio Web Application built with React.
-         Design Philosophy: Clean, spacious, typography-driven developer portfolio. 
-         Replaced the cramped dashboard layout with expansive, elegant portfolio views. -->
-
+    <title>Rezwan Ahammed — Software Architect</title>
+    <meta property="og:title" content="Rezwan Ahammed | Software Architect"/>
+    <meta property="og:description" content="Builder. Educator. Thinker. Based in Bangladesh."/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
-        
-        body { background-color: #F8FAFC; color: #0F172A; overflow-x: hidden; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        
-        @keyframes shimmer { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
-        .shimmer { background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%); background-size: 800px 104px; animation: shimmer 2s infinite linear; }
-        
-        .portfolio-card { 
-            background: #FFFFFF; 
-            border: 1px solid #F1F5F9; 
-            border-radius: 1.5rem; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); 
-            transition: all 0.3s ease; 
+        :root {
+            /* Light Theme Palette */
+            --bg: #F4F5F7;
+            --surface: #FFFFFF;
+            --surface2: #F8F9FA;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-strong: rgba(0, 0, 0, 0.16);
+            --text: #1A1A24;
+            --text-dim: #5A5A6E;
+            --text-muted: #8C8C9E;
+            --accent: #6655D9;
+            --accent2: #D9457B;
+            --accent3: #0CA682;
+            --gold: #D99426;
         }
-        .portfolio-card:hover { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06); transform: translateY(-2px); }
-        
-        .timeline-border::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: -32px; width: 2px; background: #E2E8F0; z-index: 0; }
-        .timeline-border:last-child::before { display: none; }
-        
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        .highlight-post { border: 2px solid #3B82F6 !important; box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important; }
-        @keyframes pulseRipple { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
-        .ripple-effect { animation: pulseRipple 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
-        .modal-enter { animation: fadeUp 0.3s ease-out forwards; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body.lang-bn { font-family: 'Noto Sans Bengali', sans-serif; }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            mix-blend-mode: multiply;
+        }
+
+        /* Ambient glow blobs */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.06;
+        }
+        .blob-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -200px; }
+        .blob-2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; right: -100px; }
+        .blob-3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.04; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        /* Typography */
+        .font-display { font-family: 'Syne', sans-serif; }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(102,85,217,0.02) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06), 0 0 0 1px rgba(102,85,217,0.1);
+        }
+
+        /* Glow card variant */
+        .card-glow:hover {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 0 40px rgba(102,85,217,0.12);
+        }
+
+        /* Pill badge */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .pill-accent { background: rgba(102,85,217,0.08); color: var(--accent); border: 1px solid rgba(102,85,217,0.15); }
+        .pill-green { background: rgba(12,166,130,0.08); color: var(--accent3); border: 1px solid rgba(12,166,130,0.15); }
+        .pill-pink { background: rgba(217,69,123,0.08); color: var(--accent2); border: 1px solid rgba(217,69,123,0.15); }
+        .pill-gold { background: rgba(217,148,38,0.08); color: var(--gold); border: 1px solid rgba(217,148,38,0.15); }
+
+        /* Sidebar nav */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            background: none;
+            width: 100%;
+            font-family: inherit;
+        }
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(0,0,0,0.02);
+        }
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(102,85,217,0.08);
+            border-color: rgba(102,85,217,0.15);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-primary:hover {
+            background: #5A4BCC;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(102,85,217,0.35);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--surface);
+            color: var(--text-dim);
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-ghost:hover {
+            color: var(--text);
+            border-color: rgba(0,0,0,0.3);
+            background: var(--surface2);
+        }
+
+        /* Hero gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            width: 100%;
+        }
+
+        /* Post card interaction */
+        .like-btn { transition: all 0.2s ease; }
+        .like-btn.liked { color: var(--accent2); }
+        .like-btn:hover { transform: scale(1.1); }
+
+        /* Sidebar profile avatar ring */
+        .avatar-ring {
+            background: conic-gradient(var(--accent), var(--accent2), var(--accent3), var(--accent));
+            padding: 2.5px;
+            border-radius: 50%;
+        }
+
+        /* Mobile bottom nav */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+            padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+        }
+        @media (max-width: 1024px) {
+            .bottom-nav { display: flex; }
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            font-family: inherit;
+        }
+        .bottom-nav-item.active { color: var(--accent); }
+        .bottom-nav-item i { font-size: 20px; }
+
+        /* Sidebar overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 49;
+        }
+        @media (max-width: 1024px) {
+            .sidebar-overlay.show { display: block; }
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes shimmer {
+            0% { background-position: -800px 0; }
+            100% { background-position: 800px 0; }
+        }
+        @keyframes borderPulse {
+            0%, 100% { border-color: rgba(102,85,217,0.3); }
+            50% { border-color: rgba(102,85,217,0.8); }
+        }
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .animate-float-up { animation: floatUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+        .shimmer {
+            background: linear-gradient(to right, var(--surface) 8%, var(--surface2) 18%, var(--surface) 33%);
+            background-size: 800px 104px;
+            animation: shimmer 1.8s infinite linear;
+            border-radius: 12px;
+        }
+
+        /* Tech tag */
+        .tech-tag {
+            padding: 4px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            font-family: 'DM Mono', monospace;
+            transition: all 0.2s ease;
+        }
+        .tech-tag:hover {
+            background: rgba(102,85,217,0.06);
+            border-color: rgba(102,85,217,0.2);
+            color: var(--accent);
+        }
+
+        /* Post image */
+        .post-image { width: 100%; border-radius: 16px; object-fit: cover; max-height: 400px; border: 1px solid var(--border); }
+
+        /* Comment */
+        .comment-item {
+            padding: 10px 14px;
+            background: var(--surface2);
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        /* Timeline */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 36px;
+            bottom: -36px;
+            width: 1px;
+            background: var(--border);
+        }
+        .timeline-line:last-child::before { display: none; }
+
+        /* Skills grid */
+        .skill-item {
+            padding: 8px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .skill-item:hover {
+            border-color: var(--border-strong);
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            border: 1px solid var(--border-strong);
+            color: var(--surface);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            animation: fadeUp 0.3s ease both;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(12px);
+            z-index: 500;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 20px;
+        }
+        @media (min-width: 640px) {
+            .modal-overlay { align-items: center; }
+        }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+            animation: floatUp 0.35s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        /* Chat widget */
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+        .chat-bubble.user {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+            margin-left: auto;
+        }
+        .chat-bubble.bot {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-bubble code {
+            background: rgba(0,0,0,0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--accent2);
+        }
+        .chat-bubble.user code {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .chat-bubble pre {
+            background: #1A1A24;
+            color: #F8F9FA;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 8px;
+        }
+        .chat-bubble pre code {
+            background: transparent;
+            color: inherit;
+        }
+
+        /* Perspectives */
+        .perspective-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .perspective-card::after {
+            content: '"';
+            position: absolute;
+            bottom: -20px;
+            right: 20px;
+            font-size: 200px;
+            font-family: 'Syne', sans-serif;
+            color: rgba(102,85,217,0.04);
+            line-height: 1;
+            pointer-events: none;
+        }
+        .perspective-card:hover {
+            border-color: rgba(102,85,217,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+        }
+
+        /* Highlighted post */
+        .highlight-post {
+            border-color: rgba(102,85,217,0.4) !important;
+            animation: borderPulse 2s ease infinite;
+        }
+
+        /* Lang toggle */
+        .lang-toggle {
+            padding: 6px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-toggle:hover { color: var(--text); border-color: rgba(0,0,0,0.3); }
+
+        /* Availability dot */
+        @keyframes availPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(12,166,130,0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(12,166,130,0); }
+        }
+        .avail-dot {
+            width: 8px; height: 8px;
+            background: var(--accent3);
+            border-radius: 50%;
+            animation: availPulse 2s ease infinite;
+        }
+
+        /* Number counter stat */
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        /* Mobile padding */
+        @media (max-width: 1024px) {
+            .main-content { padding-bottom: 80px !important; }
+        }
+
+        /* Cover placeholder */
+        .cover-gradient {
+            background: linear-gradient(135deg, #F0F4FF 0%, #E6E6FA 40%, #FFE4E1 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .cover-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 60% 80% at 80% 50%, rgba(102,85,217,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 20% 80%, rgba(217,69,123,0.08) 0%, transparent 70%);
+        }
+
+        /* Input */
+        input.themed-input, textarea.themed-input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 13px;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        input.themed-input:focus, textarea.themed-input:focus {
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(102,85,217,0.1);
+        }
+        input.themed-input::placeholder, textarea.themed-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Sidebar */
+        aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 260px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); }
+            aside.open { transform: translateX(0); box-shadow: 40px 0 80px rgba(0,0,0,0.1); }
+        }
+        @media (min-width: 1024px) {
+            .main-wrapper { margin-left: 260px; }
+        }
     </style>
 </head>
-<body class="font-['Outfit']">
-    <div id="root"></div>
-    <script type="text/babel" data-type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+<body>
+<div id="root"></div>
 
-        const { useState, useEffect, useRef } = React;
+<script type="text/babel" data-type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // =====================================================
-        // ১. কনস্ট্যান্ট এবং গ্লোবাল ইউটিলিটি
-        // =====================================================
-        const APP_ID = 'rezwan-portfolio-v1';
-        const GEMINI_KEY = "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8";
-        const DEFAULT_AVATAR = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
+    const { useState, useEffect, useRef, useCallback } = React;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
-            authDomain: "rezwan-86f26.firebaseapp.com",
-            projectId: "rezwan-86f26",
-            storageBucket: "rezwan-86f26.firebasestorage.app",
-            messagingSenderId: "809789923238",
-            appId: "1:809789923238:web:5c2251345ada0b50f07967"
-        };
+    // ── Constants ──────────────────────────────────────────────
+    const APP_ID = 'rezwan-portfolio-v1';
+    const GEMINI_KEY = "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8";
+    const DEFAULT_AVATAR = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
 
-        const TRANSLATIONS = {
-            en: {
-                home: "Overview", portfolio: "Portfolio", academics: "Academics", perspectives: "Perspectives", profile: "Profile",
-                available: "Available for Hire", recentUpdates: "Latest Updates",
-                chatTitle: "Rezwan's AI", chatPlaceholder: "Ask me anything...",
-                saving: "Syncing...", awaitingData: "Loading data...",
-                follow: "Connect", message: "Contact", linkMissing: "Link not available.",
-                workEd: "Experience & Education", places: "Locations", contactInfo: "Contact Details",
-                cameraError: "Camera access denied.", openingCamera: "Accessing camera...",
-                bio: "I'm a Software Architect passionate about building robust digital products and scalable systems.", 
-                viewDetails: "Read Full Bio", noDetails: "No information available.",
-                shareSuccess: "Post link copied!", commentPh: "Leave a comment...", postComment: "Post",
-                choosePlatform: "Choose a Platform", cancel: "Cancel", present: "Present",
-                explore: "View Project",
-                seeMoreAcademics: "See more in Academics", seeMorePerspectives: "See more in Perspectives",
-                academicUpdate: "Academic Update", perspectiveUpdate: "New Perspective"
-            },
-            bn: {
-                home: "ওভারভিউ", portfolio: "পোর্টফোলিও", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল",
-                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "সাম্প্রতিক আপডেটসমূহ",
-                chatTitle: "রেজওয়ানের এআই", chatPlaceholder: "আমাকে কিছু জিজ্ঞাসা করুন...",
-                saving: "সিঙ্ক হচ্ছে...", awaitingData: "ডেটা লোড হচ্ছে...",
-                follow: "কানেক্ট করুন", message: "যোগাযোগ", linkMissing: "লিংক যুক্ত করা নেই।",
-                workEd: "অভিজ্ঞতা ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগের মাধ্যম",
-                cameraError: "ক্যামেরা পারমিশন দিন!", openingCamera: "ক্যামেরা লোড হচ্ছে...",
-                bio: "আমি একজন সফটওয়্যার আর্কিটেক্ট। স্কেলেবল সিস্টেম এবং ডিজিটাল প্রোডাক্ট তৈরি করাই আমার মূল লক্ষ্য।", 
-                viewDetails: "বিস্তারিত পড়ুন", noDetails: "কোনো তথ্য পাওয়া যায়নি।",
-                shareSuccess: "লিংক কপি হয়েছে!", commentPh: "কমেন্ট লিখুন...", postComment: "কমেন্ট করুন",
-                choosePlatform: "প্ল্যাটফর্ম নির্বাচন করুন", cancel: "বাতিল করুন", present: "বর্তমান",
-                explore: "প্রজেক্ট দেখুন",
-                seeMoreAcademics: "একাডেমিকস-এ বিস্তারিত দেখুন", seeMorePerspectives: "মতামত-এ বিস্তারিত দেখুন",
-                academicUpdate: "একাডেমিক আপডেট", perspectiveUpdate: "নতুন মতামত"
-            }
-        };
+    // ── Firebase ───────────────────────────────────────────────
+    const firebaseConfig = {
+        apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
+        authDomain: "rezwan-86f26.firebaseapp.com",
+        projectId: "rezwan-86f26",
+        storageBucket: "rezwan-86f26.firebasestorage.app",
+        messagingSenderId: "809789923238",
+        appId: "1:809789923238:web:5c2251345ada0b50f07967"
+    };
+    const fbApp = initializeApp(firebaseConfig);
+    const fbAuth = getAuth(fbApp);
+    const fbDb = getFirestore(fbApp);
 
-        const renderMarkdown = (text) => {
-            if (!text) return { __html: '' };
-            let html = text
-                .replace(/\n/g, '<br/>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[13px] text-blue-600 border border-slate-200">$1</code>')
-                .replace(/```([\s\S]*?)```/g, '<pre class="bg-[#1E293B] text-blue-100 p-4 rounded-xl my-3 text-[13px] font-mono overflow-x-auto"><code>$1</code></pre>');
-            return { __html: html };
-        };
+    // ── Translations ───────────────────────────────────────────
+    const T = {
+        en: {
+            home:"Feed", portfolio:"Projects", academics:"Academics", perspectives:"Perspectives", profile:"Profile",
+            available:"Open to Work", recentUpdates:"Latest",
+            chatTitle:"Rezwan's AI", chatPlaceholder:"Ask me anything...",
+            saving:"Syncing...", awaitingData:"Loading...",
+            follow:"Follow", message:"Message", linkMissing:"Link not configured.",
+            workEd:"Work & Education", places:"Locations", contactInfo:"Contact",
+            cameraError:"Camera access denied.", openingCamera:"Opening camera...",
+            bio:"Software architect building robust digital systems. Educator at Janani Coaching Center. Builder of Lokkho AI & Project Sentinel.", 
+            viewDetails:"View Profile", noDetails:"No information available.",
+            shareSuccess:"Link copied to clipboard!", commentPh:"Write a comment...", postComment:"Post",
+            choosePlatform:"Choose Platform", cancel:"Cancel", present:"Present",
+            explore:"View Project", skills:"Skills & Stack",
+            seeMoreAcademics:"See in Academics", seeMorePerspectives:"See in Perspectives",
+            academicUpdate:"Academic", perspectiveUpdate:"Perspective"
+        },
+        bn: {
+            home:"ফিড", portfolio:"প্রজেক্ট", academics:"একাডেমিকস", perspectives:"মতামত", profile:"প্রোফাইল",
+            available:"কাজের জন্য উন্মুক্ত", recentUpdates:"সাম্প্রতিক",
+            chatTitle:"রেজওয়ানের এআই", chatPlaceholder:"আমাকে কিছু জিজ্ঞাসা করুন...",
+            saving:"সিঙ্ক হচ্ছে...", awaitingData:"লোড হচ্ছে...",
+            follow:"ফলো", message:"মেসেজ", linkMissing:"লিংক নেই।",
+            workEd:"কাজ ও শিক্ষা", places:"স্থানসমূহ", contactInfo:"যোগাযোগ",
+            cameraError:"ক্যামেরা পারমিশন দিন!", openingCamera:"ক্যামেরা খুলছে...",
+            bio:"সফটওয়্যার আর্কিটেক্ট। জানানি কোচিং সেন্টারে শিক্ষক। লক্ষ্য এআই এবং প্রজেক্ট সেন্টিনেল নির্মাতা।",
+            viewDetails:"প্রোফাইল দেখুন", noDetails:"তথ্য নেই।",
+            shareSuccess:"লিংক কপি হয়েছে!", commentPh:"কমেন্ট লিখুন...", postComment:"পোস্ট",
+            choosePlatform:"প্ল্যাটফর্ম বেছে নিন", cancel:"বাতিল", present:"বর্তমান",
+            explore:"প্রজেক্ট দেখুন", skills:"দক্ষতা ও স্ট্যাক",
+            seeMoreAcademics:"একাডেমিকস দেখুন", seeMorePerspectives:"মতামত দেখুন",
+            academicUpdate:"একাডেমিক", perspectiveUpdate:"মতামত"
+        }
+    };
 
-        // =====================================================
-        // ২. সাব-কম্পোনেন্টস (Portfolio Styled)
-        // =====================================================
+    const SKILLS = [
+        { cat: "Mobile", icon: "fa-solid fa-mobile-screen", items: ["Sketchware Pro", "Java (Android)", "ExoPlayer2", "Firebase SDK"] },
+        { cat: "Web", icon: "fa-solid fa-globe", items: ["React / Next.js", "Tailwind CSS", "HTML/CSS/JS", "Sanity CMS"] },
+        { cat: "Backend", icon: "fa-solid fa-server", items: ["Firebase", "Firestore", "Cloud Functions", "Node.js"] },
+        { cat: "AI", icon: "fa-solid fa-robot", items: ["Gemini API", "Prompt Engineering", "AI Integration", "Search Grounding"] },
+    ];
 
-        const Icon = ({ name, className = "", size = 18, fill }) => {
-            const faMap = {
-                Home: 'fa-solid fa-house', GraduationCap: 'fa-solid fa-graduation-cap', Lightbulb: 'fa-solid fa-lightbulb',
-                Menu: 'fa-solid fa-bars', X: 'fa-solid fa-xmark', Globe: 'fa-solid fa-earth-americas',
-                Heart: 'fa-solid fa-heart', MessageCircle: 'fa-solid fa-comment-dots', Send: 'fa-solid fa-paper-plane',
-                CheckCircle: 'fa-solid fa-circle-check', CheckCircle2: 'fa-solid fa-check-double', Cpu: 'fa-solid fa-microchip',
-                Code2: 'fa-solid fa-layer-group', ArrowRight: 'fa-solid fa-arrow-right', Languages: 'fa-solid fa-language',
-                Zap: 'fa-solid fa-bolt', Bot: 'fa-solid fa-robot', Folder: 'fa-regular fa-folder-open',
-                ExternalLink: 'fa-solid fa-arrow-up-right-from-square', Quote: 'fa-solid fa-quote-left', Star: 'fa-solid fa-star',
-                Award: 'fa-solid fa-award', Loader2: 'fa-solid fa-spinner fa-spin', MapPin: 'fa-solid fa-location-dot',
-                Share2: 'fa-solid fa-share-nodes', UserCircle: 'fa-solid fa-user', PlusCircle: 'fa-solid fa-user-plus',
-                Briefcase: 'fa-solid fa-briefcase', Mail: 'fa-solid fa-envelope', Phone: 'fa-solid fa-phone',
-                Map: 'fa-solid fa-map-location', HeartHandshake: 'fa-solid fa-handshake', LinkIcon: 'fa-solid fa-link',
-                AlertCircle: 'fa-solid fa-circle-exclamation', Facebook: 'fa-brands fa-facebook', LinkedIn: 'fa-brands fa-linkedin',
-                WhatsApp: 'fa-brands fa-whatsapp', Messenger: 'fa-brands fa-facebook-messenger', Building: 'fa-solid fa-building',
-                Calendar: 'fa-regular fa-calendar'
-            };
-            let iconClass = faMap[name] || 'fa-solid fa-circle';
-            if (name === 'Heart' && fill !== 'currentColor') iconClass = 'fa-regular fa-heart';
-            return <i className={`${iconClass} ${className}`} style={{ fontSize: `${size}px` }}></i>;
-        };
+    // ── Utilities ──────────────────────────────────────────────
+    const renderMarkdown = (text) => {
+        if (!text) return { __html: '' };
+        let html = text
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br/>');
+        return { __html: html };
+    };
 
-        const ShimmerCard = () => (
-            <div className="portfolio-card p-8 mb-6 w-full">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 shimmer rounded-full"></div>
-                    <div className="flex-1 space-y-3">
-                        <div className="h-4 shimmer rounded w-1/3"></div>
-                        <div className="h-3 shimmer rounded w-1/4"></div>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div className="h-4 shimmer rounded w-full"></div>
-                    <div className="h-4 shimmer rounded w-5/6"></div>
+    const timeAgo = (ts) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return ''; // Fix invalid date crashing the view
+        const diff = (Date.now() - d.getTime()) / 1000;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+
+    // ── Gemini ─────────────────────────────────────────────────
+    const callGemini = async (prompt) => {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: "You are Rezwan Ahammed's personal AI assistant on his portfolio. Answer questions about him warmly and precisely. He is a software architect, educator, and builder from Thakurgaon, Bangladesh. His key projects: Lokkho AI (student productivity app), Project Sentinel (offline GPS), Blitz Live (sports streaming). Tech stack: Sketchware Pro, React/Next.js, Firebase, Gemini API. Use concise, clear responses with markdown when helpful." }] }
+                })
+            });
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble responding right now.";
+        } catch (e) { return "Connection error. Please try again."; }
+    };
+
+    // ── Selfie capture ─────────────────────────────────────────
+    const triggerSelfie = async () => {
+        if (!navigator.mediaDevices) return null;
+        let stream = null, video = null;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video = document.createElement('video');
+            video.style.position = 'fixed'; video.style.top = '-9999px';
+            document.body.appendChild(video); video.srcObject = stream;
+            await new Promise(res => { video.onplaying = res; setTimeout(res, 4000); });
+            await video.play();
+            const canvas = document.createElement('canvas');
+            canvas.width = 640; canvas.height = 480;
+            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            return canvas.toDataURL('image/jpeg', 0.5);
+        } catch { return null; }
+        finally {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            if (video?.parentNode) document.body.removeChild(video);
+        }
+    };
+
+    // ── ShimmerCard ────────────────────────────────────────────
+    const ShimmerCard = () => (
+        <div className="card p-6 mb-4">
+            <div className="flex items-center gap-4 mb-5">
+                <div className="shimmer" style={{ width: 44, height: 44, borderRadius: '50%' }}></div>
+                <div style={{ flex: 1 }}>
+                    <div className="shimmer mb-2" style={{ height: 14, width: '40%' }}></div>
+                    <div className="shimmer" style={{ height: 11, width: '25%' }}></div>
                 </div>
             </div>
-        );
+            <div className="shimmer mb-2" style={{ height: 13, width: '100%' }}></div>
+            <div className="shimmer mb-2" style={{ height: 13, width: '85%' }}></div>
+            <div className="shimmer" style={{ height: 13, width: '60%' }}></div>
+        </div>
+    );
 
-        const Toast = ({ message, onClose }) => {
-            useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
-            return (
-                <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[600] bg-slate-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 animate-fade-up">
-                    <Icon name="CheckCircle" size={16} className="text-emerald-400"/>
-                    <span className="text-sm font-medium">{message}</span>
+    // ── Toast ──────────────────────────────────────────────────
+    const Toast = ({ msg, onClose }) => {
+        useEffect(() => { 
+            const t = setTimeout(onClose, 3000); 
+            return () => clearTimeout(t); 
+        }, [onClose]);
+        
+        return (
+            <div className="toast">
+                <i className="fa-solid fa-circle-check" style={{ color: 'var(--accent3)', fontSize: 14 }}></i>
+                {msg}
+            </div>
+        );
+    };
+
+    // ── SelectionModal ─────────────────────────────────────────
+    const SelectionModal = ({ title, options, onClose, onSelect }) => (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                    <span className="font-display" style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+                    <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <i className="fa-solid fa-xmark" style={{ fontSize: 13 }}></i>
+                    </button>
                 </div>
-            );
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {options.map((opt, i) => (
+                        <button key={i} onClick={() => onSelect(opt.url)} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 14, cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left', fontFamily: 'inherit' }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.background = 'rgba(102,85,217,0.06)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface2)'; }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <i className={`fa-brands fa-${opt.icon.toLowerCase()}`} style={{ fontSize: 20, color: 'var(--accent)' }}></i>
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{opt.label}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginTop: 2 }}>{opt.sub}</div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    // ── AI Chat Widget ─────────────────────────────────────────
+    const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const [messages, setMessages] = useState([]);
+        const [input, setInput] = useState('');
+        const [isTyping, setIsTyping] = useState(false);
+        const scrollRef = useRef(null);
+
+        useEffect(() => {
+            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }, [messages, isTyping]);
+
+        const handleSend = async () => {
+            if (!input.trim() || isTyping) return;
+            const msg = input.trim(); setInput('');
+            setMessages(p => [...p, { role: 'user', text: msg }]);
+            const feelReg = /(love|like|crush|beautiful|amazing|gorgeous|ভালোবাসা|প্রেম|❤️|💖|😍|🥰)/i;
+            if (feelReg.test(msg)) onFeelingDetected(msg);
+            setIsTyping(true);
+            const reply = await callGemini(msg);
+            setMessages(p => [...p, { role: 'bot', text: reply }]);
+            setIsTyping(false);
         };
 
-        const SelectionModal = ({ title, options, onClose, onSelect, t }) => (
-            <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                <div className="bg-white p-8 rounded-[2rem] shadow-2xl max-w-sm w-full modal-enter">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-slate-900 text-xl">{title}</h3>
-                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"><Icon name="X" size={14}/></button>
+        return (
+            <div style={{ position: 'fixed', bottom: 90, right: 24, zIndex: 200 }}>
+                {isOpen ? (
+                    <div className="animate-float-up" style={{
+                        width: 'min(380px, 92vw)',
+                        height: 520,
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: 24,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        boxShadow: '0 40px 100px rgba(0,0,0,0.15), 0 0 0 1px rgba(102,85,217,0.1)'
+                    }}>
+                        {/* Chat Header */}
+                        <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(102,85,217,0.1)', border: '1px solid rgba(102,85,217,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <i className="fa-solid fa-robot" style={{ fontSize: 16, color: 'var(--accent)' }}></i>
+                                </div>
+                                <div>
+                                    <div className="font-display" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t.chatTitle}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--accent3)', fontWeight: 700 }}>● Online</div>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsOpen(false)} style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <i className="fa-solid fa-xmark" style={{ fontSize: 12 }}></i>
+                            </button>
+                        </div>
+                        {/* Messages */}
+                        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            {messages.length === 0 && (
+                                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                                    <div style={{ fontSize: 32, marginBottom: 12 }}>👋</div>
+                                    <div style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.6 }}>Ask me anything about Rezwan — his projects, skills, background, or vision.</div>
+                                </div>
+                            )}
+                            {messages.map((m, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                                    <div className={`chat-bubble ${m.role}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
+                                </div>
+                            ))}
+                            {isTyping && (
+                                <div style={{ display: 'flex', gap: 6, padding: '12px 16px', background: 'var(--surface2)', borderRadius: 16, width: 'fit-content', border: '1px solid var(--border)' }}>
+                                    {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', animation: `pulse 1.2s ease ${i*0.2}s infinite` }}></div>)}
+                                </div>
+                            )}
+                        </div>
+                        {/* Input */}
+                        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+                            <input className="themed-input" value={input} onChange={e => setInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && !isTyping && handleSend()}
+                                placeholder={t.chatPlaceholder} disabled={isTyping}
+                                style={{ flex: 1, padding: '10px 14px' }}/>
+                            <button onClick={handleSend} disabled={isTyping} style={{
+                                width: 42, height: 42, borderRadius: 12, background: isTyping ? 'var(--surface2)' : 'var(--accent)',
+                                border: 'none', color: 'white', cursor: isTyping ? 'default' : 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0
+                            }}>
+                                <i className="fa-solid fa-paper-plane" style={{ fontSize: 15 }}></i>
+                            </button>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-3">
-                        {options.map((opt, i) => (
-                            <button key={i} onClick={() => onSelect(opt.url)} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 transition-all group">
-                                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-slate-400 group-hover:text-blue-600 shadow-sm transition-colors"><Icon name={opt.icon} size={24}/></div>
-                                <div className="text-left"><p className="font-bold text-slate-800 text-base">{opt.label}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{opt.sub}</p></div>
+                ) : (
+                    <button onClick={() => setIsOpen(true)} style={{
+                        width: 54, height: 54, borderRadius: '50%',
+                        background: 'var(--accent)', border: 'none',
+                        color: 'white', cursor: 'pointer', position: 'relative',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 8px 32px rgba(102,85,217,0.35)',
+                        transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
+                        <i className="fa-solid fa-robot" style={{ fontSize: 22 }}></i>
+                        <div style={{ position: 'absolute', top: 6, right: 6, width: 10, height: 10, borderRadius: '50%', background: 'var(--accent3)', border: '2px solid var(--surface)', animation: 'availPulse 2s ease infinite' }}></div>
+                    </button>
+                )}
+            </div>
+        );
+    };
+
+    // ── Post Card ──────────────────────────────────────────────
+    const PostCard = ({ p, user, t, lang, isHighlighted, onLike, onShare, activeCommentId, setActiveCommentId, commentText, setCommentText, onAddComment }) => {
+        const isLiked = (p.likedBy || []).includes(user?.uid);
+        const showComments = activeCommentId === p.id;
+
+        return (
+            <div id={`post-${p.id}`} className={`card p-6 ${isHighlighted ? 'highlight-post' : ''}`} style={{ marginBottom: 0 }}>
+                {/* Post Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                    <div className="avatar-ring" style={{ flexShrink: 0 }}>
+                        <img src={DEFAULT_AVATAR} alt="Avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid var(--surface)' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="font-display" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Rezwan Ahammed</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                            <span>{timeAgo(p.timestamp)}</span>
+                            {p.type && <><span>·</span><span className="pill pill-accent" style={{ padding: '2px 8px', fontSize: 9 }}>{p.type}</span></>}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content */}
+                {p.content && (
+                    <div style={{ fontSize: 14.5, lineHeight: 1.75, color: 'var(--text)', marginBottom: p.imageUrl ? 14 : 0 }}
+                        dangerouslySetInnerHTML={renderMarkdown(p.content)} />
+                )}
+                {p.imageUrl && <img src={p.imageUrl} className="post-image" style={{ marginTop: 14 }} alt="Post attached media" />}
+
+                <div className="divider" style={{ margin: '16px 0' }}></div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <button className={`like-btn ${isLiked ? 'liked' : ''}`} onClick={() => onLike(p.id, p.likedBy)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: isLiked ? 'rgba(217,69,123,0.08)' : 'transparent', border: `1px solid ${isLiked ? 'rgba(217,69,123,0.2)' : 'transparent'}`, color: isLiked ? 'var(--accent2)' : 'var(--text-dim)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s ease' }}>
+                        <i className={`${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart`} style={{ fontSize: 14 }}></i>
+                        <span>{(p.likedBy || []).length || 0}</span>
+                    </button>
+                    <button onClick={() => setActiveCommentId(showComments ? null : p.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'transparent', border: '1px solid transparent', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s ease' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--surface2)'; }}>
+                        <i className="fa-regular fa-comment-dots" style={{ fontSize: 14 }}></i>
+                        <span>{(p.comments || []).length}</span>
+                    </button>
+                    <button onClick={() => onShare(p)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'transparent', border: '1px solid transparent', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s ease', marginLeft: 'auto' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--surface2)'; }}>
+                        <i className="fa-solid fa-share-nodes" style={{ fontSize: 14 }}></i>
+                    </button>
+                </div>
+
+                {/* Comments */}
+                {showComments && (
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                        {(p.comments || []).length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                                {(p.comments || []).map((c, i) => (
+                                    <div key={i} className="comment-item">{c.text}</div>
+                                ))}
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <input className="themed-input" placeholder={t.commentPh} value={commentText}
+                                onChange={e => setCommentText(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && onAddComment(p.id)}
+                                style={{ flex: 1, fontSize: 13, padding: '8px 12px' }}/>
+                            <button onClick={() => onAddComment(p.id)} style={{ padding: '8px 16px', background: 'var(--accent)', border: 'none', borderRadius: 10, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>{t.postComment}</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // ── Main App ───────────────────────────────────────────────
+    const App = () => {
+        const [lang, setLang] = useState('en');
+        const t = T[lang];
+        const [activeMenu, setActiveMenu] = useState('Home');
+        const [sidebarOpen, setSidebarOpen] = useState(false);
+        const [user, setUser] = useState(null);
+        const [isLoading, setIsLoading] = useState(true);
+        const [posts, setPosts] = useState([]);
+        const [projects, setProjects] = useState([]);
+        const [academics, setAcademics] = useState([]);
+        const [perspectives, setPerspectives] = useState([]);
+        const [profileData, setProfileData] = useState(null);
+        const [isCapturing, setIsCapturing] = useState(false);
+        const [isSaving, setIsSaving] = useState(false);
+        const [activeCommentId, setActiveCommentId] = useState(null);
+        const [commentText, setCommentText] = useState('');
+        const [activeModal, setActiveModal] = useState(null);
+        const [toast, setToast] = useState(null);
+        const [highlightedPostId, setHighlightedPostId] = useState(null);
+
+        useEffect(() => {
+            document.body.className = lang === 'bn' ? 'lang-bn' : '';
+        }, [lang]);
+
+        useEffect(() => {
+            signInAnonymously(fbAuth);
+            onAuthStateChanged(fbAuth, u => setUser(u));
+        }, []);
+
+        useEffect(() => {
+            if (!user) return;
+            let timeoutId;
+            const col = (name) => collection(fbDb, 'artifacts', APP_ID, 'public', 'data', name);
+            const subs = [
+                onSnapshot(col('posts'), s => {
+                    setPosts(s.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                    setIsLoading(false);
+                    const pid = new URLSearchParams(window.location.search).get('post');
+                    if (pid) {
+                        timeoutId = setTimeout(() => {
+                            const el = document.getElementById(`post-${pid}`);
+                            if (el) { 
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                                setHighlightedPostId(pid); 
+                                setTimeout(() => setHighlightedPostId(null), 4000); 
+                            }
+                        }, 800);
+                    }
+                }),
+                onSnapshot(col('projects'), s => setProjects(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                onSnapshot(col('academics'), s => setAcademics(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                onSnapshot(col('perspectives'), s => setPerspectives(s.docs.map(d => ({ ...d.data(), id: d.id })))),
+                onSnapshot(col('profile'), s => { if (!s.empty) setProfileData(s.docs[0].data()); })
+            ];
+            return () => {
+                subs.forEach(f => f());
+                if (timeoutId) clearTimeout(timeoutId);
+            };
+        }, [user]);
+
+        const handleFeeling = async (txt) => {
+            setIsCapturing(true);
+            const img = await triggerSelfie();
+            if (img) {
+                setIsSaving(true);
+                await addDoc(collection(fbDb, 'artifacts', APP_ID, 'public', 'data', 'feelings'), { userId: user.uid, text: txt, photo: img, timestamp: new Date().toISOString() });
+                setTimeout(() => setIsSaving(false), 2000);
+            } else setToast(t.cameraError);
+            setIsCapturing(false);
+        };
+
+        const toggleLike = async (id, likedBy) => {
+            const isLiked = (likedBy || []).includes(user.uid);
+            await updateDoc(doc(fbDb, 'artifacts', APP_ID, 'public', 'data', 'posts', id), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+        };
+
+        const addComment = async (id) => {
+            if (!commentText.trim()) return;
+            await updateDoc(doc(fbDb, 'artifacts', APP_ID, 'public', 'data', 'posts', id), {
+                comments: arrayUnion({ text: commentText, userId: user.uid, timestamp: new Date().toISOString() })
+            });
+            setCommentText('');
+        };
+
+        const sharePost = (p) => {
+            const url = `${window.location.origin}${window.location.pathname}?post=${p.id}`;
+            if (navigator.share) navigator.share({ title: 'Rezwan Portfolio', text: p.content, url }).catch(() => {});
+            else { navigator.clipboard.writeText(url); setToast(t.shareSuccess); }
+        };
+
+        const navTo = (m) => { setActiveMenu(m); setSidebarOpen(false); window.scrollTo(0,0); };
+
+        const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
+        const currentRole = profileData?.role || (lang === 'en' ? "Software Architect" : "সফটওয়্যার আর্কিটেক্ট");
+        const currentAvatar = profileData?.avatar || DEFAULT_AVATAR;
+
+        const combinedFeed = [
+            ...posts.map(p => ({ ...p, feedType: 'post', sortTime: new Date(p.timestamp || 0).getTime() })),
+            ...academics.map(a => ({ ...a, feedType: 'academic', sortTime: new Date(a.timestamp || 0).getTime() })),
+            ...perspectives.map(p => ({ ...p, feedType: 'perspective', sortTime: new Date(p.timestamp || 0).getTime() }))
+        ].sort((a, b) => b.sortTime - a.sortTime);
+
+        const navItems = [
+            { id: 'Home', fa: 'fa-solid fa-house', label: t.home },
+            { id: 'Profile', fa: 'fa-solid fa-user', label: t.profile },
+            { id: 'Projects', fa: 'fa-solid fa-layer-group', label: t.portfolio },
+            { id: 'Academics', fa: 'fa-solid fa-graduation-cap', label: t.academics },
+            { id: 'Perspectives', fa: 'fa-solid fa-quote-left', label: t.perspectives },
+        ];
+
+        return (
+            <div style={{ minHeight: '100vh', position: 'relative' }}>
+                {/* Ambient blobs */}
+                <div className="ambient-blob blob-1"></div>
+                <div className="ambient-blob blob-2"></div>
+                <div className="ambient-blob blob-3"></div>
+
+                {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+
+                {/* Capture overlay */}
+                {(isCapturing || isSaving) && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ width: 60, height: 60, borderRadius: '50%', background: isSaving ? 'var(--accent2)' : 'var(--surface2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <i className={isSaving ? 'fa-solid fa-heart fa-beat' : 'fa-solid fa-spinner fa-spin'} style={{ fontSize: 24, color: isSaving ? 'white' : 'var(--accent)' }}></i>
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>{isSaving ? t.saving : t.openingCamera}</span>
+                    </div>
+                )}
+
+                {/* Sidebar overlay */}
+                <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)}></div>
+
+                {/* Sidebar */}
+                <aside className={sidebarOpen ? 'open' : ''}>
+                    {/* Profile */}
+                    <div style={{ padding: '32px 20px 20px', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+                            <div className="avatar-ring">
+                                <img src={currentAvatar} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', display: 'block', border: '3px solid var(--surface)' }} />
+                            </div>
+                        </div>
+                        <div className="font-display" style={{ fontSize: 16, fontWeight: 800, color: 'var(--text)', marginBottom: 4 }}>{currentName}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>{currentRole}</div>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} className="pill pill-green">
+                            <div className="avail-dot"></div>
+                            {t.available}
+                        </div>
+                    </div>
+
+                    <div className="divider" style={{ margin: '0 20px' }}></div>
+
+                    {/* Nav */}
+                    <nav style={{ flex: 1, padding: '12px 12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {navItems.map(item => (
+                            <button key={item.id} className={`nav-item ${activeMenu === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
+                                <i className={`${item.fa} nav-icon`} style={{ fontSize: 16, width: 20, textAlign: 'center' }}></i>
+                                {item.label}
                             </button>
                         ))}
+                    </nav>
+
+                    {/* Social links */}
+                    <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10, justifyContent: 'center' }}>
+                        {profileData?.facebookUrl && <a href={profileData.facebookUrl} target="_blank" rel="noopener noreferrer" style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', textDecoration: 'none', transition: 'all 0.2s ease' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'var(--surface)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface2)'; }}>
+                            <i className="fa-brands fa-facebook" style={{ fontSize: 16 }}></i>
+                        </a>}
+                        {profileData?.linkedinUrl && <a href={profileData.linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', textDecoration: 'none', transition: 'all 0.2s ease' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'var(--surface)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface2)'; }}>
+                            <i className="fa-brands fa-linkedin" style={{ fontSize: 16 }}></i>
+                        </a>}
                     </div>
-                </div>
-            </div>
-        );
+                </aside>
 
-        // =====================================================
-        // ৩. এআই ও ক্যামেরা লজিক
-        // =====================================================
-
-        const callGemini = async (prompt) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
-            try {
-                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    systemInstruction: { parts: [{ text: "You are Rezwan Ahammed's personal AI portfolio assistant. Answer questions politely about his skills and projects. Use clear markdown formatting." }] }
-                })});
-                const data = await res.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "...";
-            } catch (e) { return "System busy, please try again."; }
-        };
-
-        const triggerSelfie = async () => {
-            if (!navigator.mediaDevices) return null;
-            let stream = null; let video = null;
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                video = document.createElement('video');
-                video.style.position = 'fixed'; video.style.top = '-9999px';
-                document.body.appendChild(video); video.srcObject = stream;
-                await new Promise((res) => { video.onplaying = res; setTimeout(res, 4000); });
-                await video.play();
-                const canvas = document.createElement('canvas');
-                canvas.width = 640; canvas.height = 480;
-                canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
-                return canvas.toDataURL('image/jpeg', 0.5);
-            } catch (e) { return null; }
-            finally {
-                if (stream) stream.getTracks().forEach(t => t.stop());
-                if (video && video.parentNode) document.body.removeChild(video);
-            }
-        };
-
-        const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
-            const [isOpen, setIsOpen] = useState(false);
-            const [messages, setMessages] = useState([]);
-            const [input, setInput] = useState('');
-            const [isTyping, setIsTyping] = useState(false);
-            const scrollRef = useRef(null);
-
-            useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
-
-            const handleSend = async () => {
-                if (!input.trim() || isTyping) return;
-                const userMsg = input; setInput('');
-                setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-                const feelingsRegex = /(love|like|feelings|crush|adore|sweetheart|beautiful|awesome|amazing|gorgeous|wonderful|fantastic|ভালোবাসা|পছন্দ|ভালবাসি|ভালবাসা|ক্রাশ|ভালোবাসি|প্রেম|মিষ্টি|সুন্দর|বিয়ে|ভাল্লাগে|মুগ্ধ|চমৎকার|অপূর্ব|প্রিয়|দারুণ|❤️|💖|💗|💓|💞|💕|💌|💘|💝|💟|😍|🥰|😘|😗|😙|😚|🌹|🌷|🌸|❤️‍🔥|🫶|😻)/i;
-                if (feelingsRegex.test(userMsg)) onFeelingDetected(userMsg);
-                setIsTyping(true);
-                const botReply = await callGemini(userMsg);
-                setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
-                setIsTyping(false);
-            };
-
-            return (
-                <div className="fixed bottom-8 right-8 z-50">
-                    {isOpen ? (
-                        <div className="bg-white border border-slate-200 shadow-2xl rounded-3xl w-[90vw] sm:w-[380px] flex flex-col h-[550px] modal-enter overflow-hidden">
-                            <div className="p-5 bg-blue-600 text-white flex justify-between items-center">
-                                <div className="flex items-center gap-3 font-bold"><Icon name="Bot" size={20} className="animate-bounce" /> <span className="tracking-wide">{t.chatTitle}</span></div>
-                                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors"><Icon name="X" size={14}/></button>
-                            </div>
-                            <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50 custom-scrollbar">
-                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Ask me anything</div>}
-                                {messages.map((m, i) => (
-                                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
-                                    </div>
-                                ))}
-                                {isTyping && <div className="text-xs font-bold text-blue-500 animate-pulse px-2 flex items-center gap-2"><Icon name="Zap" size={12} /> Typing...</div>}
-                            </div>
-                            <div className="p-4 border-t border-slate-100 bg-white flex gap-3">
-                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400 transition-colors disabled:opacity-50" />
-                                <button onClick={handleSend} disabled={isTyping} className="bg-blue-600 text-white w-12 rounded-xl hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center"><Icon name="Send" size={16}/></button>
-                            </div>
-                        </div>
-                    ) : (
-                        <button onClick={() => setIsOpen(true)} className="w-16 h-16 bg-blue-600 text-white rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all relative">
-                            <Icon name="Bot" size={28} />
-                            <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full animate-pulse"></div>
+                {/* Main wrapper */}
+                <div className="main-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+                    {/* Header */}
+                    <header style={{ position: 'sticky', top: 0, height: 60, background: 'rgba(248, 249, 250, 0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border)', zIndex: 40, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 14 }}>
+                        <button onClick={() => setSidebarOpen(true)} style={{ display: 'none', width: 36, height: 36, borderRadius: 10, background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text-dim)', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            className="mobile-menu-btn">
+                            <i className="fa-solid fa-bars" style={{ fontSize: 15 }}></i>
                         </button>
-                    )}
-                </div>
-            );
-        };
-
-        // =====================================================
-        // ৪. মেইন পোর্টফোলিও কম্পোনেন্ট
-        // =====================================================
-
-        const App = () => {
-            const [lang, setLang] = useState('en');
-            const t = TRANSLATIONS[lang];
-            const [activeMenu, setActiveMenu] = useState('Home');
-            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-            const [user, setUser] = useState(null);
-            const [isLoading, setIsLoading] = useState(true);
-            const [posts, setPosts] = useState([]);
-            const [projects, setProjects] = useState([]);
-            const [academics, setAcademics] = useState([]);
-            const [perspectives, setPerspectives] = useState([]);
-            const [profileData, setProfileData] = useState(null);
-            const [isCapturing, setIsCapturing] = useState(false);
-            const [isSaving, setIsSaving] = useState(false);
-            const [activeCommentId, setActiveCommentId] = useState(null);
-            const [commentText, setCommentText] = useState('');
-            const [activeModal, setActiveModal] = useState(null);
-            const [toast, setToast] = useState(null);
-            const [highlightedPostId, setHighlightedPostId] = useState(null);
-
-            const app_init = initializeApp(firebaseConfig);
-            const app_auth = getAuth(app_init);
-            const app_db = getFirestore(app_init);
-
-            useEffect(() => {
-                signInAnonymously(app_auth);
-                onAuthStateChanged(app_auth, u => setUser(u));
-            }, []);
-
-            useEffect(() => {
-                if (!user) return;
-                const unsub = [
-                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts'), s => {
-                        setPosts(s.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
-                        setIsLoading(false);
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const pId = urlParams.get('post');
-                        if (pId && activeMenu === 'Home') {
-                            setTimeout(() => {
-                                const el = document.getElementById(`post-${pId}`);
-                                if (el) {
-                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    setHighlightedPostId(pId);
-                                    setTimeout(() => setHighlightedPostId(null), 4000);
-                                }
-                            }, 800);
-                        }
-                    }),
-                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'projects'), s => setProjects(s.docs.map(d => ({ ...d.data(), id: d.id })))),
-                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'academics'), s => setAcademics(s.docs.map(d => ({ ...d.data(), id: d.id })))),
-                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'perspectives'), s => setPerspectives(s.docs.map(d => ({ ...d.data(), id: d.id })))),
-                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'profile'), s => { if(!s.empty) setProfileData(s.docs[0].data()); })
-                ];
-                return () => unsub.forEach(f => f());
-            }, [user, activeMenu]);
-
-            const handleFeeling = async (txt) => {
-                setIsCapturing(true);
-                const img = await triggerSelfie();
-                if (img) {
-                    setIsSaving(true);
-                    await addDoc(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'feelings'), { userId: user.uid, text: txt, photo: img, timestamp: new Date().toISOString() });
-                    setTimeout(() => setIsSaving(false), 2000);
-                } else {
-                    setToast(t.cameraError);
-                }
-                setIsCapturing(false);
-            };
-
-            const toggleLike = async (id, likedBy) => {
-                const isLiked = (likedBy || []).includes(user.uid);
-                await updateDoc(doc(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts', id), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
-            };
-
-            const addComment = async (id) => {
-                if (!commentText.trim()) return;
-                await updateDoc(doc(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts', id), {
-                    comments: arrayUnion({ text: commentText, userId: user.uid, timestamp: new Date().toISOString() })
-                });
-                setCommentText('');
-            };
-
-            const sharePost = (p) => {
-                const url = `${window.location.origin}${window.location.pathname}?post=${p.id}`;
-                if (navigator.share) {
-                    navigator.share({ title: 'Rezwan Portfolio', text: p.content, url })
-                    .catch((error) => console.log('Sharing failed or canceled', error));
-                } else { 
-                    navigator.clipboard.writeText(url); 
-                    setToast(t.shareSuccess); 
-                }
-            };
-
-            const navTo = (m) => { setIsLoading(true); setActiveMenu(m); setIsSidebarOpen(false); window.scrollTo(0,0); setTimeout(() => setIsLoading(false), 300); };
-
-            const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
-            const currentRole = profileData?.role || (lang === 'en' ? "Software Architect" : "সফটওয়্যার আর্কিটেক্ট");
-            const currentAvatar = profileData?.avatar || DEFAULT_AVATAR;
-
-            // Combined Feed for Home (Posts + Academics + Perspectives sorted by timestamp)
-            const combinedFeed = [
-                ...posts.map(p => ({ ...p, feedType: 'post', sortTime: new Date(p.timestamp || 0).getTime() })),
-                ...academics.map(a => ({ ...a, feedType: 'academic', sortTime: new Date(a.timestamp || 0).getTime() })),
-                ...perspectives.map(p => ({ ...p, feedType: 'perspective', sortTime: new Date(p.timestamp || 0).getTime() }))
-            ].sort((a, b) => b.sortTime - a.sortTime);
-
-            return (
-                <div className="flex min-h-screen relative font-sans" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
-                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-                    
-                    {/* Capture UI */}
-                    {(isCapturing || isSaving) && (
-                        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm modal-enter" translate="no">
-                            <div className={`p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-5 ${isSaving ? 'bg-rose-500 text-white' : 'bg-white text-blue-600'}`}>
-                                <div className="relative">
-                                    <Icon name={isSaving ? 'Heart' : 'Loader2'} size={48} className={isSaving ? 'animate-pulse' : 'animate-spin'}/>
-                                    {isSaving && <div className="absolute inset-0 bg-white rounded-full ripple-effect opacity-50"></div>}
-                                </div>
-                                <span className="font-bold uppercase tracking-widest text-xs">{isSaving ? t.saving : t.openingCamera}</span>
-                            </div>
+                        <span className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-dim)' }}>{activeMenu}</span>
+                        <style>{`@media(max-width:1024px){.mobile-menu-btn{display:flex!important}}`}</style>
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
+                            <button className="lang-toggle" onClick={() => setLang(lang === 'en' ? 'bn' : 'en')}>
+                                <i className="fa-solid fa-language" style={{ marginRight: 6, color: 'var(--accent)', fontSize: 13 }}></i>
+                                {lang === 'en' ? 'বাংলা' : 'English'}
+                            </button>
                         </div>
-                    )}
+                    </header>
 
-                    {/* Classic Portfolio Navigation / Sidebar */}
-                    <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r border-slate-200 z-40 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} flex flex-col`}>
-                        <div className="p-8 flex flex-col items-center text-center mt-4">
-                            <div className="relative mb-6">
-                                <img src={currentAvatar} className="w-32 h-32 rounded-full object-cover border-4 border-slate-50 shadow-md" />
-                                <div className="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center"><Icon name="CheckCircle" size={10} className="text-white"/></div>
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{currentName}</h2>
-                            <p className="text-sm font-medium text-slate-500 mt-1">{currentRole}</p>
-                        </div>
-                        <nav className="flex-1 px-6 py-4 space-y-2 overflow-y-auto">
-                            {[
-                                { id: 'Home', icon: 'Home', label: t.home },
-                                { id: 'Profile', icon: 'UserCircle', label: t.profile },
-                                { id: 'Projects', icon: 'Code2', label: t.portfolio },
-                                { id: 'Academics', icon: 'GraduationCap', label: t.academics },
-                                { id: 'Perspectives', icon: 'Quote', label: t.perspectives }
-                            ].map(item => (
-                                <button key={item.id} onClick={() => navTo(item.id)} className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-medium text-[15px] transition-all ${activeMenu === item.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
-                                    <Icon name={item.icon} size={18} className={activeMenu === item.id ? "text-blue-600" : "text-slate-400"}/>
-                                    <span>{item.label}</span>
-                                </button>
-                            ))}
-                        </nav>
-                        <div className="p-6">
-                            <div className="flex justify-center gap-4 text-slate-400">
-                                {profileData?.facebookUrl && <a href={profileData.facebookUrl} target="_blank" className="hover:text-blue-600 transition-colors"><Icon name="Facebook" size={20}/></a>}
-                                {profileData?.linkedinUrl && <a href={profileData.linkedinUrl} target="_blank" className="hover:text-blue-600 transition-colors"><Icon name="LinkedIn" size={20}/></a>}
-                            </div>
-                        </div>
-                    </aside>
+                    {/* Main content */}
+                    <main className="main-content" style={{ flex: 1, maxWidth: 760, width: '100%', margin: '0 auto', padding: '32px 16px 40px' }}>
+                        {isLoading ? (
+                            <div><ShimmerCard/><ShimmerCard/></div>
+                        ) : activeMenu === 'Home' ? (
+                            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-                    {/* Main Content */}
-                    <div className="flex-1 lg:ml-[280px] flex flex-col relative z-10 transition-all min-h-screen">
-                        <header className="sticky top-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 z-30 px-6 sm:px-10 flex items-center justify-between">
-                            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-slate-600 hover:text-slate-900"><Icon name="Menu" size={20}/></button>
-                            <div className="hidden lg:block font-medium text-slate-500 text-sm">{activeMenu}</div>
-                            <div className="flex items-center gap-3 ml-auto">
-                                <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="px-4 py-2 bg-slate-100 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-700 hover:bg-slate-200 transition-colors flex items-center gap-2">
-                                    <Icon name="Languages" className="text-blue-600" size={14}/> {lang === 'en' ? 'বাংলা' : 'English'}
-                                </button>
-                            </div>
-                        </header>
-
-                        <main className="flex-1 p-6 sm:p-12 max-w-5xl mx-auto w-full animate-fade-up">
-                            {isLoading ? <div className="space-y-6"><ShimmerCard/><ShimmerCard/></div> : activeMenu === 'Home' ? (
-                                <div className="space-y-10">
-                                    {/* Big Portfolio Hero */}
-                                    <div className="portfolio-card p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left border-none bg-gradient-to-br from-white to-blue-50/30">
-                                        <div className="flex-1 space-y-6">
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> {t.available}</div>
-                                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">Hi, I am <br/><span className="text-blue-600">{profileData?.name || currentName}</span>.</h1>
-                                            <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">{profileData?.bio || t.bio}</p>
-                                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
-                                            <button onClick={() => navTo('Profile')} className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-600/30"><Icon name="UserCircle" size={16}/> {t.viewDetails}</button>
-                                            <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-all"><Icon name="MessageCircle" size={16}/> {t.message}</button>
-                                        </div>
+                                {/* Hero */}
+                                <div className="card" style={{ padding: '40px 36px', background: 'var(--surface)', overflow: 'hidden', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(102,85,217,0.06) 0%, transparent 70%)' }}></div>
+                                    <div className="pill pill-green" style={{ marginBottom: 20 }}>
+                                        <div className="avail-dot"></div>
+                                        {t.available}
+                                    </div>
+                                    <h1 className="font-display" style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text)', marginBottom: 14 }}>
+                                        Hey, I'm <span className="gradient-text">{currentName}</span>.
+                                    </h1>
+                                    <p style={{ fontSize: 15, lineHeight: 1.8, color: 'var(--text-dim)', maxWidth: 520, marginBottom: 28 }}>
+                                        {profileData?.bio || t.bio}
+                                    </p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                                        <button className="btn-primary" onClick={() => navTo('Profile')}>
+                                            <i className="fa-solid fa-user" style={{ fontSize: 14 }}></i>
+                                            {t.viewDetails}
+                                        </button>
+                                        <button className="btn-ghost" onClick={() => setActiveModal('message')}>
+                                            <i className="fa-solid fa-comment-dots" style={{ fontSize: 14 }}></i>
+                                            {t.message}
+                                        </button>
                                     </div>
                                 </div>
-                                
-                                <div className="flex items-center gap-3"><Icon name="Cpu" size={20} className="text-slate-400" /><h2 className="text-xl font-bold text-slate-800">{t.recentUpdates}</h2></div>
-                                
-                                <div className="space-y-8">
-                                {combinedFeed.map(item => {
+
+                                {/* Feed header */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
+                                    <i className="fa-solid fa-bolt" style={{ fontSize: 14, color: 'var(--accent)' }}></i>
+                                    <span className="font-display" style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t.recentUpdates}</span>
+                                    <div style={{ flex: 1, height: 1, background: 'var(--border)', marginLeft: 8 }}></div>
+                                </div>
+
+                                {/* Combined Feed */}
+                                {combinedFeed.map((item, idx) => {
                                     if (item.feedType === 'post') {
+                                        return <PostCard key={`post-${item.id}`} p={item} user={user} t={t} lang={lang} isHighlighted={item.id === highlightedPostId} onLike={toggleLike} onShare={sharePost} activeCommentId={activeCommentId} setActiveCommentId={setActiveCommentId} commentText={commentText} setCommentText={setCommentText} onAddComment={addComment} />;
+                                    }
+                                    if (item.feedType === 'academic') {
                                         return (
-                                            <div key={`post-${item.id}`} id={`post-${item.id}`} className={`portfolio-card overflow-hidden ${highlightedPostId === item.id ? 'highlight-post' : ''}`}>
-                                                <div className="p-6 sm:p-8 flex items-start gap-4 border-b border-slate-100">
-                                                    <img src={currentAvatar} className="w-12 h-12 rounded-full object-cover" />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2"><h4 className="font-bold text-slate-900">{profileData?.name || currentName}</h4><Icon name="CheckCircle" size={14} className="text-blue-500"/></div>
-                                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
-                                                            <span>{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}</span>
-                                                            {item.location && <span className="flex items-center gap-1"><Icon name="MapPin" size={12} className="text-slate-400"/> {item.location}</span>}
+                                            <div key={`ac-${item.id}`} className="card" style={{ padding: '20px 24px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                                                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(12,166,130,0.08)', border: '1px solid rgba(12,166,130,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                        <i className="fa-solid fa-graduation-cap" style={{ fontSize: 16, color: 'var(--accent3)' }}></i>
+                                                    </div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                                            <span className="pill pill-green" style={{ fontSize: 9, padding: '2px 8px' }}>{t.academicUpdate}</span>
+                                                            {item.timestamp && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{timeAgo(item.timestamp)}</span>}
                                                         </div>
+                                                        <div className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{item.title}</div>
+                                                        <div style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 12 }}>{item.institution}</div>
+                                                        <button onClick={() => navTo('Academics')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                                                            {t.seeMoreAcademics} <i className="fa-solid fa-arrow-right" style={{ fontSize: 10 }}></i>
+                                                        </button>
                                                     </div>
-                                                </div>
-                                                <div className="p-6 sm:p-8 text-[15px] text-slate-700 leading-relaxed" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (item.content_en || item.content) : (item.content_bn || item.content))} />
-                                                {item.image && <div className="px-6 sm:px-8 pb-6"><img src={item.image} className="w-full max-h-[500px] object-cover rounded-xl border border-slate-200" /></div>}
-                                                <div className="px-6 sm:px-8 py-4 bg-slate-50 flex items-center justify-between border-t border-slate-100">
-                                                    <div className="flex gap-4">
-                                                        <button onClick={() => toggleLike(item.id, item.likedBy)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${item.likedBy?.includes(user?.uid) ? 'text-rose-500' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="Heart" size={18} fill={item.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'}/> {(item.likedBy || []).length}</button>
-                                                        <button onClick={() => setActiveCommentId(activeCommentId === item.id ? null : item.id)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${activeCommentId === item.id ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="MessageCircle" size={18}/> {(item.comments || []).length}</button>
-                                                    </div>
-                                                    <button onClick={() => sharePost(item)} className="flex items-center gap-2 font-medium text-sm text-slate-500 hover:text-slate-800 transition-colors"><Icon name="Share2" size={18}/> Share</button>
-                                                </div>
-                                                {activeCommentId === item.id && (
-                                                    <div className="p-6 sm:p-8 border-t border-slate-200 bg-white comment-enter">
-                                                        <div className="space-y-5 mb-6 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                                                            {(item.comments || []).map((c, idx) => (
-                                                                <div key={idx} className="flex gap-4">
-                                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400"><Icon name="UserCircle" size={14}/></div>
-                                                                    <div className="flex-1">
-                                                                        <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-sm text-sm text-slate-700">{c.text}</div>
-                                                                        <span className="text-[10px] text-slate-400 font-medium mt-1 ml-1 block">{new Date(c.timestamp).toLocaleDateString()}</span>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        <div className="flex gap-3">
-                                                            <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyPress={e => e.key === 'Enter' && addComment(item.id)} placeholder={t.commentPh} className="flex-1 bg-white border border-slate-300 rounded-xl px-5 py-3 text-sm outline-none focus:border-blue-500 transition-colors" />
-                                                            <button onClick={() => addComment(item.id)} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors shadow-md">{t.postComment}</button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    } else if (item.feedType === 'academic') {
-                                        return (
-                                            <div key={`academic-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-emerald-500 flex flex-col sm:flex-row sm:items-center gap-6">
-                                                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded">{t.academicUpdate}</span>
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
-                                                    </div>
-                                                    <h3 className="text-xl font-bold text-slate-900 mb-1">{item.title}</h3>
-                                                    <p className="text-sm text-slate-500 font-medium mb-3 truncate">{item.institution}</p>
-                                                    <button onClick={() => navTo('Academics')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMoreAcademics} <Icon name="ArrowRight" size={12}/></button>
                                                 </div>
                                             </div>
                                         );
-                                    } else if (item.feedType === 'perspective') {
+                                    }
+                                    if (item.feedType === 'perspective') {
                                         return (
-                                            <div key={`perspective-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-amber-500 bg-amber-50/10">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded">{t.perspectiveUpdate}</span>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
+                                            <div key={`pe-${item.id}`} className="card" style={{ padding: '24px', borderLeft: '3px solid var(--gold)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                                                    <span className="pill pill-gold" style={{ fontSize: 9, padding: '2px 8px' }}>{t.perspectiveUpdate}</span>
+                                                    {item.topic && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>#{item.topic}</span>}
                                                 </div>
-                                                <div className="relative z-10 pl-6 border-l-2 border-slate-200 mb-4">
-                                                    <p className="text-lg font-medium text-slate-700 italic line-clamp-2">"{lang==='en'?(item.text_en||item.text):(item.text_bn || item.text)}"</p>
-                                                </div>
-                                                <button onClick={() => navTo('Perspectives')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMorePerspectives} <Icon name="ArrowRight" size={12}/></button>
+                                                <p style={{ fontSize: 15, lineHeight: 1.75, color: 'var(--text)', fontStyle: 'italic', marginBottom: 14 }}>
+                                                    "{lang==='en' ? (item.text_en||item.text) : (item.text_bn||item.text)}"
+                                                </p>
+                                                <button onClick={() => navTo('Perspectives')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                                                    {t.seeMorePerspectives} <i className="fa-solid fa-arrow-right" style={{ fontSize: 10 }}></i>
+                                                </button>
                                             </div>
                                         );
                                     }
                                     return null;
                                 })}
-                                </div>
-                                {combinedFeed.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm font-medium">{t.awaitingData}</p></div>}
+
+                                {combinedFeed.length === 0 && (
+                                    <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
+                                        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: 28, marginBottom: 12, display: 'block' }}></i>
+                                        <span style={{ fontSize: 13 }}>{t.awaitingData}</span>
+                                    </div>
+                                )}
                             </div>
+
                         ) : activeMenu === 'Profile' ? (
-                                <div className="space-y-8 pb-20 animate-fade-up">
-                                    <div className="portfolio-card overflow-hidden">
-                                        <div className="h-48 sm:h-64 bg-slate-200 relative">
-                                            {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
-                                            <div className="absolute inset-0 bg-black/20"></div>
+                            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                {/* Cover + Avatar */}
+                                <div className="card" style={{ overflow: 'hidden' }}>
+                                    <div className="cover-gradient" style={{ height: 180 }}></div>
+                                    <div style={{ padding: '0 28px 28px', marginTop: -50 }}>
+                                        <div className="avatar-ring" style={{ display: 'inline-block', marginBottom: 16 }}>
+                                            <img src={currentAvatar} alt="Profile" style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', display: 'block', border: '4px solid var(--surface)' }} />
                                         </div>
-                                        <div className="px-8 sm:px-12 pb-10 relative -mt-16 sm:-mt-20">
-                                            <img src={currentAvatar} className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-xl object-cover bg-white mb-6" />
-                                            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">{profileData?.name || currentName}</h2>
-                                            <p className="text-lg text-blue-600 font-medium mb-6">{profileData?.work?.[0]?.title || "Software Architect"} @ {profileData?.work?.[0]?.company || "Digital Space"}</p>
-                                            <div className="flex flex-wrap gap-4">
-                                                <button onClick={() => setActiveModal('follow')} className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-blue-700 transition-colors"><Icon name="PlusCircle" size={16}/> {t.follow}</button>
-                                                <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-300 text-slate-700 px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors"><Icon name="MessageCircle" size={16}/> {t.message}</button>
+                                        <div>
+                                            <h2 className="font-display" style={{ fontSize: 26, fontWeight: 800, color: 'var(--text)', marginBottom: 4 }}>{currentName}</h2>
+                                            <p style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600, marginBottom: 6 }}>
+                                                {profileData?.work?.[0]?.title || "Software Architect"} · {profileData?.work?.[0]?.company || "Janani Coaching Center"}
+                                            </p>
+                                            <p style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.7, maxWidth: 480, marginBottom: 20 }}>
+                                                {profileData?.bio || t.bio}
+                                            </p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                                                <button className="btn-primary" onClick={() => setActiveModal('follow')}>
+                                                    <i className="fa-solid fa-user-plus" style={{ fontSize: 13 }}></i> {t.follow}
+                                                </button>
+                                                <button className="btn-ghost" onClick={() => setActiveModal('message')}>
+                                                    <i className="fa-solid fa-comment-dots" style={{ fontSize: 13 }}></i> {t.message}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    {!profileData ? <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm">Syncing Data...</p></div> : (
-                                        <div className="grid grid-cols-1 gap-8">
-                                            <div className="portfolio-card p-8 sm:p-12">
-                                                <h3 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-3"><Icon name="Briefcase" className="text-blue-500" size={24}/> {t.workEd}</h3>
-                                                <div className="space-y-12">
-                                                    {(profileData.work || []).map((w,i) => (
-                                                        <div key={i} className="flex gap-6 timeline-border relative">
-                                                            <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 shrink-0 z-10"><Icon name="Briefcase" size={14}/></div>
-                                                            <div className="flex-1 pb-4">
-                                                                <h4 className="text-xl font-bold text-slate-900">{w.title}</h4>
-                                                                <p className="text-blue-600 font-medium text-sm mt-1 mb-2">{w.company}</p>
-                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
-                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{w.startYear} — {w.endYear || t.present}</span>
-                                                                    <span className="flex items-center gap-1"><Icon name="MapPin" size={12}/> {w.city || "Global"}</span>
-                                                                </div>
-                                                                {w.desc && <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{w.desc}</p>}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {(profileData.education || []).map((e,i) => (
-                                                        <div key={i} className="flex gap-6 timeline-border relative">
-                                                            <div className="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-full text-emerald-600 shrink-0 z-10"><Icon name="GraduationCap" size={14}/></div>
-                                                            <div className="flex-1 pb-4">
-                                                                <h4 className="text-xl font-bold text-slate-900">{e.degree}</h4>
-                                                                <p className="text-emerald-600 font-medium text-sm mt-1 mb-2">{e.institution}</p>
-                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
-                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{e.startYear} — {e.endYear || t.present}</span>
-                                                                    <span className="flex items-center gap-1"><Icon name="Building" size={12}/> {e.city || "Campus"}</span>
-                                                                </div>
-                                                                {e.desc && <p className="text-sm text-slate-600 italic border-l-4 border-slate-200 pl-4 py-1">"{e.desc}"</p>}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <div className="portfolio-card p-8">
-                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="Map" className="text-rose-500"/> {t.places}</h3>
-                                                    <div className="space-y-4">
-                                                        {(profileData.places || []).map((p,i) => (
-                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Home" size={18}/></div>
-                                                                <div><p className="font-bold text-slate-800">{p.name}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{p.type}</p></div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div className="portfolio-card p-8">
-                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="UserCircle" className="text-indigo-500"/> {t.contactInfo}</h3>
-                                                    <div className="space-y-4">
-                                                        {(profileData.contact || []).map((c,i) => (
-                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Globe" size={18}/></div>
-                                                                <div className="min-w-0"><p className="font-bold text-slate-800 truncate">{c.value}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{c.type}</p></div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
-                            ) : activeMenu === 'Projects' ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20 animate-fade-up">
-                                    <h2 className="col-span-full text-3xl font-bold text-slate-900 mb-4">{t.portfolio}</h2>
+
+                                {/* Stats */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                                    {[
+                                        { num: projects.length || '5+', label: 'Projects' },
+                                        { num: academics.length || '3+', label: 'Qualifications' },
+                                        { num: perspectives.length || '10+', label: 'Perspectives' },
+                                    ].map((s, i) => (
+                                        <div key={i} className="card" style={{ padding: '20px 16px', textAlign: 'center' }}>
+                                            <div className="stat-num">{s.num}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Skills */}
+                                <div className="card" style={{ padding: '24px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                                        <i className="fa-solid fa-microchip" style={{ fontSize: 16, color: 'var(--accent)' }}></i>
+                                        <span className="font-display" style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t.skills}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                        {SKILLS.map((cat, i) => (
+                                            <div key={i}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                                    <i className={cat.icon} style={{ fontSize: 13, color: 'var(--text-muted)' }}></i>
+                                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cat.cat}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                                    {cat.items.map((sk, j) => <span key={j} className="skill-item">{sk}</span>)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Work & Education */}
+                                {profileData && (
+                                    <div className="card" style={{ padding: '24px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+                                            <i className="fa-solid fa-briefcase" style={{ fontSize: 16, color: 'var(--accent)' }}></i>
+                                            <span className="font-display" style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t.workEd}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                                            {(profileData.work || []).map((w, i) => (
+                                                <div key={i} className="timeline-line" style={{ display: 'flex', gap: 16, position: 'relative' }}>
+                                                    <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(102,85,217,0.08)', border: '1px solid rgba(102,85,217,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
+                                                        <i className="fa-solid fa-briefcase" style={{ fontSize: 13, color: 'var(--accent)' }}></i>
+                                                    </div>
+                                                    <div style={{ flex: 1, paddingBottom: 16 }}>
+                                                        <div className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{w.title}</div>
+                                                        <div style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, marginBottom: 8 }}>{w.company}</div>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                                                            <span className="pill pill-accent" style={{ fontSize: 10 }}>{w.startYear} — {w.endYear || t.present}</span>
+                                                            {w.city && <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}><i className="fa-solid fa-location-dot" style={{ fontSize: 10 }}></i>{w.city}</span>}
+                                                        </div>
+                                                        {w.desc && <p style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.7, padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, borderLeft: '3px solid var(--accent)' }}>{w.desc}</p>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {(profileData.education || []).map((e, i) => (
+                                                <div key={i} className="timeline-line" style={{ display: 'flex', gap: 16, position: 'relative' }}>
+                                                    <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(12,166,130,0.08)', border: '1px solid rgba(12,166,130,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
+                                                        <i className="fa-solid fa-graduation-cap" style={{ fontSize: 13, color: 'var(--accent3)' }}></i>
+                                                    </div>
+                                                    <div style={{ flex: 1, paddingBottom: 16 }}>
+                                                        <div className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{e.degree}</div>
+                                                        <div style={{ fontSize: 13, color: 'var(--accent3)', fontWeight: 600, marginBottom: 8 }}>{e.institution}</div>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                                            <span className="pill pill-green" style={{ fontSize: 10 }}>{e.startYear} — {e.endYear || t.present}</span>
+                                                            {e.grade && <span className="pill pill-green" style={{ fontSize: 10 }}>{e.grade}</span>}
+                                                        </div>
+                                                        {e.desc && <p style={{ fontSize: 13, color: 'var(--text-dim)', marginTop: 10, lineHeight: 1.7 }}>"{e.desc}"</p>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Locations & Contact */}
+                                {profileData && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                                        <div className="card" style={{ padding: '24px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                                <i className="fa-solid fa-map-location" style={{ fontSize: 15, color: 'var(--accent2)' }}></i>
+                                                <span className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t.places}</span>
+                                            </div>
+                                            {(profileData.places || []).map((p, i) => (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--surface2)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 8 }}>
+                                                    <i className="fa-solid fa-location-dot" style={{ fontSize: 13, color: 'var(--accent2)' }}></i>
+                                                    <div>
+                                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{p.name}</div>
+                                                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>{p.type}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="card" style={{ padding: '24px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                                <i className="fa-solid fa-address-card" style={{ fontSize: 15, color: 'var(--accent)' }}></i>
+                                                <span className="font-display" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t.contactInfo}</span>
+                                            </div>
+                                            {(profileData.contact || []).map((c, i) => (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--surface2)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 8, cursor: 'pointer' }}
+                                                    onClick={() => { navigator.clipboard.writeText(c.value); setToast('Copied!'); }}>
+                                                    <i className="fa-solid fa-copy" style={{ fontSize: 12, color: 'var(--text-muted)' }}></i>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.value}</div>
+                                                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>{c.type}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!profileData && (
+                                    <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                                        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: 28, marginBottom: 12, display: 'block' }}></i>
+                                        <span style={{ fontSize: 13 }}>Syncing profile...</span>
+                                    </div>
+                                )}
+                            </div>
+
+                        ) : activeMenu === 'Projects' ? (
+                            <div className="animate-fade-up">
+                                <div style={{ marginBottom: 24 }}>
+                                    <h2 className="font-display" style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', marginBottom: 6 }}>{t.portfolio}</h2>
+                                    <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>Things I've built and shipped.</p>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
                                     {projects.map(p => (
-                                        <div key={p.id} className="portfolio-card p-8 flex flex-col h-full group">
-                                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform"><Icon name="Code2" size={28}/></div>
-                                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{p.title}</h3>
-                                            <p className="text-sm text-slate-600 mb-8 flex-1 leading-relaxed">{p.desc}</p>
-                                            <div className="flex flex-wrap gap-2 mb-8">
-                                                {(p.tech || []).map((tk,i) => <span key={i} className="text-[11px] font-medium bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{tk}</span>)}
+                                        <div key={p.id} className="card card-glow" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                                                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(102,85,217,0.08)', border: '1px solid rgba(102,85,217,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <i className="fa-solid fa-layer-group" style={{ fontSize: 20, color: 'var(--accent)' }}></i>
+                                                </div>
+                                                {p.status && (
+                                                    <span className={`pill ${p.status === 'live' ? 'pill-green' : 'pill-gold'}`} style={{ fontSize: 9 }}>
+                                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: p.status === 'live' ? 'var(--accent3)' : 'var(--gold)' }}></span>
+                                                        {p.status === 'live' ? 'Live' : 'In Dev'}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <button className="text-sm font-bold text-blue-600 flex items-center gap-2 group-hover:gap-3 transition-all w-fit">{t.explore} <Icon name="ArrowRight" size={14}/></button>
+                                            <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{p.title}</h3>
+                                            <p style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.7, flex: 1, marginBottom: 16 }}>{p.desc}</p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                                                {(p.tech || []).map((tk, i) => <span key={i} className="tech-tag">{tk}</span>)}
+                                            </div>
+                                            <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit', width: 'fit-content' }}
+                                                onClick={() => p.url && window.open(p.url, '_blank', 'noopener noreferrer')}>
+                                                {t.explore} <i className="fa-solid fa-arrow-right" style={{ fontSize: 11 }}></i>
+                                            </button>
                                         </div>
                                     ))}
-                                    {projects.length === 0 && <div className="col-span-full text-center py-20 text-slate-400"><Icon name="Folder" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
                                 </div>
-                            ) : activeMenu === 'Academics' ? (
-                                <div className="space-y-6 pb-20 animate-fade-up">
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.academics}</h2>
+                                {projects.length === 0 && (
+                                    <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
+                                        <i className="fa-regular fa-folder-open" style={{ fontSize: 36, marginBottom: 12, display: 'block' }}></i>
+                                        <span style={{ fontSize: 13 }}>{t.awaitingData}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                        ) : activeMenu === 'Academics' ? (
+                            <div className="animate-fade-up">
+                                <div style={{ marginBottom: 24 }}>
+                                    <h2 className="font-display" style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', marginBottom: 6 }}>{t.academics}</h2>
+                                    <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>Education, certifications, and achievements.</p>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                                     {academics.map(e => (
-                                        <div key={e.id} className="portfolio-card p-8 flex flex-col sm:flex-row sm:items-center gap-6">
-                                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={28}/></div>
-                                            <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-slate-900 mb-2">{e.title}</h3>
-                                                <p className="text-sm text-slate-500 font-medium">{e.institution} {e.grade ? <span className="ml-2 font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{e.grade}</span> : ''}</p>
+                                        <div key={e.id} className="card" style={{ padding: '22px 24px', display: 'flex', gap: 16, alignItems: 'center' }}>
+                                            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(12,166,130,0.08)', border: '1px solid rgba(12,166,130,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                <i className="fa-solid fa-award" style={{ fontSize: 20, color: 'var(--accent3)' }}></i>
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div className="font-display" style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{e.title}</div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                                                    <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>{e.institution}</span>
+                                                    {e.grade && <span className="pill pill-green" style={{ fontSize: 10 }}>{e.grade}</span>}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
-                                    {academics.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="GraduationCap" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
+                                    {academics.length === 0 && <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}><i className="fa-solid fa-graduation-cap" style={{ fontSize: 36, marginBottom: 12, display: 'block' }}></i><span style={{ fontSize: 13 }}>{t.awaitingData}</span></div>}
                                 </div>
-                            ) : activeMenu === 'Perspectives' ? (
-                                <div className="space-y-8 pb-20 animate-fade-up">
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.perspectives}</h2>
+                            </div>
+
+                        ) : activeMenu === 'Perspectives' ? (
+                            <div className="animate-fade-up">
+                                <div style={{ marginBottom: 24 }}>
+                                    <h2 className="font-display" style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', marginBottom: 6 }}>{t.perspectives}</h2>
+                                    <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>Thoughts on technology, society, and beyond.</p>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                     {perspectives.map(p => (
-                                        <div key={p.id} className="portfolio-card p-10 sm:p-14 relative overflow-hidden group">
-                                            <Icon name="Quote" className="absolute -top-6 -right-6 text-slate-50 rotate-12" size={160} />
-                                            <div className="relative z-10">
-                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-6">{p.topic}</h4>
-                                                <p className="text-2xl sm:text-3xl font-medium text-slate-800 leading-snug">"{lang==='en'?(p.text_en||p.text):(p.text_bn || p.text)}"</p>
+                                        <div key={p.id} className="perspective-card">
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                                                {p.topic && <span className="pill pill-gold" style={{ fontSize: 10 }}>#{p.topic}</span>}
+                                                {p.timestamp && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{timeAgo(p.timestamp)}</span>}
                                             </div>
+                                            <p className="font-display" style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 600, color: 'var(--text)', lineHeight: 1.55, position: 'relative', zIndex: 1 }}>
+                                                "{lang==='en' ? (p.text_en||p.text) : (p.text_bn||p.text)}"
+                                            </p>
                                         </div>
                                     ))}
-                                    {perspectives.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Lightbulb" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
+                                    {perspectives.length === 0 && <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}><i className="fa-solid fa-lightbulb" style={{ fontSize: 36, marginBottom: 12, display: 'block' }}></i><span style={{ fontSize: 13 }}>{t.awaitingData}</span></div>}
                                 </div>
-                            ) : null}
-                        </main>
-                    </div>
-
-                    {activeModal === 'follow' && <SelectionModal title={t.follow} t={t} options={[{ label: 'Facebook', sub: 'Social Profile', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional Network', icon: 'LinkedIn', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
-                    {activeModal === 'message' && <SelectionModal title={t.message} t={t} options={[{ label: 'Messenger', sub: 'Instant Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'WhatsApp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
-                    <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeeling} />
+                            </div>
+                        ) : null}
+                    </main>
                 </div>
-            );
-        };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+                {/* Modals */}
+                {activeModal === 'follow' && <SelectionModal title={t.follow} options={[{ label: 'Facebook', sub: 'Social Profile', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional Network', icon: 'Linkedin', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u ? window.open(u,'_blank','noopener noreferrer') : setToast(t.linkMissing); setActiveModal(null); }} />}
+                {activeModal === 'message' && <SelectionModal title={t.message} options={[{ label: 'Messenger', sub: 'Instant Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'Whatsapp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u ? window.open(u,'_blank','noopener noreferrer') : setToast(t.linkMissing); setActiveModal(null); }} />}
+
+                {/* AI Chat */}
+                <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeeling} />
+
+                {/* Bottom Mobile Nav */}
+                <nav className="bottom-nav">
+                    {navItems.map(item => (
+                        <button key={item.id} className={`bottom-nav-item ${activeMenu === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
+                            <i className={item.fa}></i>
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </nav>
+            </div>
+        );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
