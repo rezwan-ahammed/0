@@ -2,319 +2,299 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Student Portal | Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Student Portal | Janani Coaching Centre</title>
     
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #fdfbf7;
-            --surface: #ffffff;
-            --primary: #d97757;
-            --primary-hover: #c26547;
-            --text-main: #2c2a29;
-            --text-muted: #827e7a;
-            --border: #f0ebe1;
-            --error-bg: #fff0f0;
-            --error-text: #d32f2f;
-            --shadow: 0 12px 32px rgba(44, 42, 41, 0.05);
-            --radius: 16px;
+            --jcc-emerald: #00695c;
+            --jcc-green: #2e7d32;
+            --jcc-glass: rgba(255, 255, 255, 0.7);
+            --jcc-border: rgba(255, 255, 255, 0.3);
+            --jcc-text: #1a2a26;
+            --jcc-bg-grad: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            padding: 1rem; 
-            -webkit-font-smoothing: antialiased;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--jcc-bg-grad);
+            min-height: 100vh;
+            color: var(--jcc-text);
+            display: flex;
+            justify-content: center;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 2rem auto;
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+        .jcc-app-shell {
+            width: 100%;
+            max-width: 580px;
+            margin: 20px;
+            background: var(--jcc-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--jcc-border);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 77, 64, 0.08);
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            border: 1px solid var(--border);
         }
 
-        .tabs { display: flex; border-bottom: 1px solid var(--border); }
-        .tab { 
-            flex: 1; padding: 1.2rem; text-align: center; font-weight: 600; 
-            color: var(--text-muted); cursor: pointer; transition: all 0.2s;
-            background: transparent; border: none; font-size: 1rem;
+        header {
+            padding: 30px 20px 20px;
+            text-align: center;
         }
-        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
 
-        .content { padding: 2rem; }
-        h2 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
-        p.subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; }
+        .jcc-logo {
+            height: 75px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.04));
+        }
 
-        .file-input-wrapper {
-            position: relative; overflow: hidden; display: block;
-            border: 2px dashed var(--border); border-radius: var(--radius);
-            padding: 3rem 1rem; text-align: center; cursor: pointer;
-            transition: border-color 0.3s, background 0.3s;
-            background: var(--bg-color);
+        .jcc-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: rgba(255,255,255,0.2);
+            border-bottom: 1px solid var(--jcc-border);
         }
-        .file-input-wrapper:hover { border-color: var(--primary); background: #fbf5f3; }
-        .file-input-wrapper input[type=file] {
-            font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
-        }
-        
-        .btn { 
-            background: var(--primary); color: white; border: none; padding: 14px 24px; 
-            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem;
-            width: 100%; transition: background 0.2s; margin-top: 1.5rem;
-        }
-        .btn:hover { background: var(--primary-hover); }
-        .btn:disabled { background: #e0dcd5; cursor: not-allowed; color: #a39f98; }
 
-        .progress-bar-bg { width: 100%; background: var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; height: 8px; }
-        .progress-bar-fill { background: var(--primary); height: 100%; transition: width 0.3s ease; }
+        .nav-link {
+            padding: 15px;
+            border: none;
+            background: none;
+            font-weight: 700;
+            color: #5f7d78;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
 
-        .status-message {
-            margin-top: 1rem; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; text-align: center;
+        .nav-link.active {
+            color: var(--jcc-emerald);
+            background: rgba(255,255,255,0.4);
+            box-shadow: inset 0 -3px 0 var(--jcc-green);
         }
-        .status-error { background-color: var(--error-bg); color: var(--error-text); border: 1px solid #ffcdd2; }
-        .status-info { color: var(--text-main); }
 
-        .gallery-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;
+        .jcc-main { padding: 25px; }
+
+        .drop-zone {
+            border: 2px dashed rgba(0, 105, 92, 0.2);
+            border-radius: 18px;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
         }
-        .gallery-item {
-            position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; 
-            background: var(--bg-color); border: 1px solid var(--border);
+
+        .drop-zone:hover {
+            border-color: var(--jcc-emerald);
+            background: rgba(255,255,255,0.5);
         }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        .download-btn {
-            position: absolute; bottom: 8px; right: 8px; background: rgba(255, 255, 255, 0.9);
-            border: none; border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 18px; transition: transform 0.2s;
+
+        .jcc-btn {
+            background: linear-gradient(135deg, var(--jcc-emerald), var(--jcc-green));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 105, 92, 0.2);
+            margin-top: 20px;
         }
-        .download-btn:active { transform: scale(0.9); }
-        .loading { text-align: center; color: var(--text-muted); padding: 2rem; }
+
+        .jcc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .progress-track {
+            height: 6px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--jcc-green);
+            transition: width 0.3s ease;
+        }
+
+        .gallery-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .img-card {
+            aspect-ratio: 1;
+            border-radius: 14px;
+            overflow: hidden;
+            background: white;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--jcc-border);
+        }
+
+        .img-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+        .img-card:hover img { transform: scale(1.08); }
+
+        .dl-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: var(--jcc-emerald);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .status-pill {
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 10px;
+            color: var(--jcc-emerald);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
-
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const BACKEND_URL = "https://janani-backend-api.onrender.com"; 
+        const API_BASE = "https://janani-backend-api.onrender.com";
 
-        function App() {
-            const [activeTab, setActiveTab] = useState('upload');
-
-            return (
-                <div className="container">
-                    <div className="tabs">
-                        <button className={`tab ${activeTab === 'upload' ? 'active' : ''}`} onClick={() => setActiveTab('upload')}>Upload</button>
-                        <button className={`tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Gallery</button>
-                    </div>
-                    <div className="content">
-                        {activeTab === 'upload' ? <Uploader /> : <Gallery />}
-                    </div>
-                </div>
-            );
-        }
-
-        function Uploader() {
-            const [file, setFile] = useState(null);
-            const [progress, setProgress] = useState(0);
-            const [status, setStatus] = useState({ type: "", text: "" });
-
-            const handleFileChange = (e) => {
-                const selectedFile = e.target.files[0];
-                if (selectedFile) {
-                    // Pre-upload validation: Check file size (e.g., Max 10MB)
-                    const maxSizeInBytes = 10 * 1024 * 1024;
-                    if (selectedFile.size > maxSizeInBytes) {
-                        setFile(null);
-                        setStatus({ type: "error", text: "❌ File is too large. Please select an image under 10MB." });
-                        return;
+        const compress = async (file) => {
+            return new Promise((res) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const scale = 1000 / Math.max(img.width, img.height);
+                        canvas.width = img.width * Math.min(scale, 1);
+                        canvas.height = img.height * Math.min(scale, 1);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((b) => res(new File([b], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.85);
                     }
-                    setFile(selectedFile);
-                    setStatus({ type: "", text: "" });
                 }
-            };
+            });
+        };
 
-            const handleUpload = async () => {
-                if (!file) return;
+        const App = () => {
+            const [view, setView] = useState('up');
+            const [file, setFile] = useState(null);
+            const [perc, setPerc] = useState(0);
+            const [msg, setMsg] = useState("");
+            const [items, setItems] = useState([]);
 
+            const onUpload = async () => {
                 try {
-                    // Step 1: Connect to Render Backend
-                    setStatus({ type: "info", text: "Waking up secure server (this may take 30s)..." });
-                    const response = await fetch(`${BACKEND_URL}/api/get-b2-upload-url`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Server returned status ${response.status}. Is the backend running?`);
-                    }
-                    
-                    const data = await response.json();
-                    if (data.error) throw new Error(data.error);
+                    setMsg("Preparing secure channel...");
+                    const r = await fetch(`${API_BASE}/api/get-b2-upload-url`);
+                    const { uploadUrl, authorizationToken } = await r.json();
 
-                    const { uploadUrl, authorizationToken } = data;
-
-                    // Step 2: Direct Upload to Backblaze
-                    setStatus({ type: "info", text: "Uploading photo to cloud..." });
+                    setMsg("Sending image...");
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", uploadUrl, true);
-                    
                     xhr.setRequestHeader("Authorization", authorizationToken);
-                    xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(file.name)); 
-                    xhr.setRequestHeader("Content-Type", file.type || "b2/x-auto");
-                    xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify"); 
+                    xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(`jcc_${Date.now()}_${file.name}`));
+                    xhr.setRequestHeader("Content-Type", file.type);
+                    xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify");
 
-                    xhr.upload.onprogress = (event) => {
-                        if (event.lengthComputable) {
-                            setProgress(Math.round((event.loaded / event.total) * 100));
-                        }
-                    };
-
+                    xhr.upload.onprogress = (e) => setPerc(Math.round((e.loaded/e.total)*100));
                     xhr.onload = () => {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            setStatus({ type: "info", text: "✅ Upload successful!" });
-                            setFile(null); 
-                            setTimeout(() => { setProgress(0); setStatus({ type: "", text: "" }); }, 4000);
-                        } else {
-                            console.error("Backblaze Upload Error:", xhr.responseText);
-                            setStatus({ type: "error", text: `❌ Upload rejected (Status ${xhr.status}). Check browser console for details.` });
-                            setProgress(0);
+                        if(xhr.status === 200) {
+                            setMsg("Registry updated successfully.");
+                            setFile(null);
+                            setTimeout(() => {setPerc(0); setMsg("");}, 3000);
                         }
                     };
-
-                    xhr.onerror = () => {
-                        console.error("XHR Network Error. This is often caused by CORS blocking the request.");
-                        setStatus({ type: "error", text: "❌ Network error. Check your connection or CORS configuration." });
-                        setProgress(0);
-                    };
-
                     xhr.send(file);
-                } catch (error) {
-                    console.error("Upload Pipeline Error:", error);
-                    setStatus({ type: "error", text: `❌ Error: ${error.message}` });
-                    setProgress(0);
-                }
+                } catch(e) { setMsg("Upload failed. Verify server status."); }
             };
 
-            return (
-                <div>
-                    <h2>Submit Photo</h2>
-                    <p className="subtitle">High-quality images for the student registry.</p>
-                    
-                    <div className="file-input-wrapper">
-                        <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📁</span>
-                        {file ? <strong>{file.name}</strong> : <span style={{ color: '#827e7a' }}>Tap to select an image</span>}
-                        <input type="file" accept="image/*" onChange={handleFileChange} />
-                    </div>
-                    
-                    {progress > 0 && (
-                        <div className="progress-bar-bg">
-                            <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-                        </div>
-                    )}
-                    
-                    {status.text && (
-                        <div className={`status-message ${status.type === 'error' ? 'status-error' : 'status-info'}`}>
-                            {status.text}
-                        </div>
-                    )}
-
-                    <button className="btn" onClick={handleUpload} disabled={!file || (progress > 0 && progress < 100)}>
-                        {progress > 0 && progress < 100 ? `Uploading... ${progress}%` : "Upload Now"}
-                    </button>
-                </div>
-            );
-        }
-
-        function Gallery() {
-            const [images, setImages] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(null);
-
-            useEffect(() => {
-                const fetchGallery = async () => {
-                    try {
-                        const response = await fetch(`${BACKEND_URL}/api/gallery`);
-                        if (!response.ok) {
-                            throw new Error(`Failed to contact server (Status: ${response.status})`);
-                        }
-                        const data = await response.json();
-                        if (data.error) throw new Error(data.error);
-                        
-                        setImages(data);
-                    } catch (err) {
-                        console.error("Gallery Fetch Error:", err);
-                        setError(err.message);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                fetchGallery();
-            }, []);
-
-            const downloadImage = async (url, filename) => {
+            const loadItems = async () => {
+                setMsg("Syncing database...");
                 try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error("File not accessible");
-                    const blob = await response.blob();
-                    const blobUrl = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(blobUrl);
-                } catch (error) {
-                    console.error("Download failed:", error);
-                    alert("Download failed. Opening in a new tab instead.");
-                    window.open(url, '_blank');
-                }
+                    const r = await fetch(`${API_BASE}/api/gallery`);
+                    const d = await r.json();
+                    setItems(d);
+                    setMsg("");
+                } catch(e) { setMsg("Sync failed."); }
             };
 
-            if (loading) return <div className="loading">Waking up server & loading gallery...</div>;
-            
-            if (error) return (
-                <div className="status-message status-error">
-                    <strong>Error Loading Archive:</strong> {error}
-                </div>
-            );
-
-            if (images.length === 0) return <div className="loading">No photos uploaded yet.</div>;
+            useEffect(() => { if(view === 'gal') loadItems(); }, [view]);
 
             return (
-                <div>
-                    <h2>Archive</h2>
-                    <p className="subtitle">Securely loaded from the cloud registry.</p>
-                    
-                    <div className="gallery-grid">
-                        {images.map(img => (
-                            <div key={img.id} className="gallery-item">
-                                <img src={img.url} alt={img.name} loading="lazy" />
-                                <button 
-                                    className="download-btn" 
-                                    onClick={() => downloadImage(img.url, img.name)}
-                                    title="Download Image"
-                                >
-                                    📥
+                <div className="jcc-app-shell">
+                    <header>
+                        <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="jcc-logo" />
+                    </header>
+
+                    <nav className="jcc-nav">
+                        <button className={`nav-link ${view==='up'?'active':''}`} onClick={()=>setView('up')}>SUBMISSION</button>
+                        <button className={`nav-link ${view==='gal'?'active':''}`} onClick={()=>setView('gal')}>REGISTRY</button>
+                    </nav>
+
+                    <main className="jcc-main">
+                        {view === 'up' ? (
+                            <section>
+                                <div className="drop-zone">
+                                    <input type="file" accept="image/*" style={{opacity:0, position:'absolute', inset:0}} 
+                                        onChange={async (e) => {
+                                            const f = e.target.files[0];
+                                            if(f) {
+                                                setMsg("Optimizing...");
+                                                const cf = await compress(f);
+                                                setFile(cf);
+                                                setMsg("Photo ready.");
+                                            }
+                                        }} />
+                                    <div style={{fontSize:'24px', marginBottom:'10px'}}>📸</div>
+                                    <div style={{fontWeight:600}}>{file ? file.name : "Select Student Photo"}</div>
+                                    <div style={{fontSize:'12px', color:'#7a928e', marginTop:'5px'}}>Standard identity formats supported</div>
+                                </div>
+                                {perc > 0 && <div className="progress-track"><div className="progress-fill" style={{width:`${perc}%`}}></div></div>}
+                                {msg && <div className="status-pill">{msg}</div>}
+                                <button className="jcc-btn" disabled={!file || perc > 0} onClick={onUpload}>
+                                    {perc > 0 ? `UPLOADING ${perc}%` : "UPLOAD TO PORTAL"}
                                 </button>
-                            </div>
-                        ))}
-                    </div>
+                            </section>
+                        ) : (
+                            <section>
+                                {msg && <div className="status-pill">{msg}</div>}
+                                <div className="gallery-view">
+                                    {items.map(i => (
+                                        <div key={i.id} className="img-card" onClick={() => window.open(i.url, '_blank')}>
+                                            <img src={i.url} loading="lazy" />
+                                            <div className="dl-icon">↓</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </main>
                 </div>
             );
-        }
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
