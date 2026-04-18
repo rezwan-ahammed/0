@@ -11,13 +11,15 @@
 
     <style>
         :root {
-            --bg-color: #fdfbf7;      /* Warm off-white */
-            --surface: #ffffff;       /* Pure white for cards */
-            --primary: #d97757;       /* Soft terracotta accent */
+            --bg-color: #fdfbf7;
+            --surface: #ffffff;
+            --primary: #d97757;
             --primary-hover: #c26547;
-            --text-main: #2c2a29;     /* Deep warm grey */
+            --text-main: #2c2a29;
             --text-muted: #827e7a;
             --border: #f0ebe1;
+            --error-bg: #fff0f0;
+            --error-text: #d32f2f;
             --shadow: 0 12px 32px rgba(44, 42, 41, 0.05);
             --radius: 16px;
         }
@@ -42,7 +44,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Top Navigation Tabs */
         .tabs { display: flex; border-bottom: 1px solid var(--border); }
         .tab { 
             flex: 1; padding: 1.2rem; text-align: center; font-weight: 600; 
@@ -55,7 +56,6 @@
         h2 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
         p.subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; }
 
-        /* Upload Area */
         .file-input-wrapper {
             position: relative; overflow: hidden; display: block;
             border: 2px dashed var(--border); border-radius: var(--radius);
@@ -79,28 +79,28 @@
         .progress-bar-bg { width: 100%; background: var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; height: 8px; }
         .progress-bar-fill { background: var(--primary); height: 100%; transition: width 0.3s ease; }
 
-        /* Gallery Grid */
+        .status-message {
+            margin-top: 1rem; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; text-align: center;
+        }
+        .status-error { background-color: var(--error-bg); color: var(--error-text); border: 1px solid #ffcdd2; }
+        .status-info { color: var(--text-main); }
+
         .gallery-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem; margin-top: 1rem;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;
         }
         .gallery-item {
-            position: relative; border-radius: 12px; overflow: hidden;
-            aspect-ratio: 1; background: var(--bg-color); border: 1px solid var(--border);
+            position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; 
+            background: var(--bg-color); border: 1px solid var(--border);
         }
-        .gallery-item img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-        }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        
         .download-btn {
             position: absolute; bottom: 8px; right: 8px; background: rgba(255, 255, 255, 0.9);
             border: none; border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            color: var(--text-main); text-decoration: none; font-size: 18px;
-            transition: transform 0.2s;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 18px; transition: transform 0.2s;
         }
         .download-btn:active { transform: scale(0.9); }
-        
         .loading { text-align: center; color: var(--text-muted); padding: 2rem; }
     </style>
 </head>
@@ -110,7 +110,7 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const BACKEND_URL = "https://janani-backend-api.onrender.com"; // UPDATE THIS IF NEEDED
+        const BACKEND_URL = "https://janani-backend-api.onrender.com"; 
 
         function App() {
             const [activeTab, setActiveTab] = useState('upload');
@@ -131,12 +131,20 @@
         function Uploader() {
             const [file, setFile] = useState(null);
             const [progress, setProgress] = useState(0);
-            const [status, setStatus] = useState("");
+            const [status, setStatus] = useState({ type: "", text: "" });
 
             const handleFileChange = (e) => {
-                if (e.target.files[0]) {
-                    setFile(e.target.files[0]);
-                    setStatus("");
+                const selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    // Pre-upload validation: Check file size (e.g., Max 10MB)
+                    const maxSizeInBytes = 10 * 1024 * 1024;
+                    if (selectedFile.size > maxSizeInBytes) {
+                        setFile(null);
+                        setStatus({ type: "error", text: "❌ File is too large. Please select an image under 10MB." });
+                        return;
+                    }
+                    setFile(selectedFile);
+                    setStatus({ type: "", text: "" });
                 }
             };
 
@@ -144,13 +152,21 @@
                 if (!file) return;
 
                 try {
-                    setStatus("Initializing secure connection...");
+                    // Step 1: Connect to Render Backend
+                    setStatus({ type: "info", text: "Waking up secure server (this may take 30s)..." });
                     const response = await fetch(`${BACKEND_URL}/api/get-b2-upload-url`);
                     
-                    if (!response.ok) throw new Error("Connection failed");
-                    const { uploadUrl, authorizationToken } = await response.json();
+                    if (!response.ok) {
+                        throw new Error(`Server returned status ${response.status}. Is the backend running?`);
+                    }
+                    
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
 
-                    setStatus("Uploading photo...");
+                    const { uploadUrl, authorizationToken } = data;
+
+                    // Step 2: Direct Upload to Backblaze
+                    setStatus({ type: "info", text: "Uploading photo to cloud..." });
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", uploadUrl, true);
                     
@@ -160,21 +176,34 @@
                     xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify"); 
 
                     xhr.upload.onprogress = (event) => {
-                        if (event.lengthComputable) setProgress(Math.round((event.loaded / event.total) * 100));
+                        if (event.lengthComputable) {
+                            setProgress(Math.round((event.loaded / event.total) * 100));
+                        }
                     };
 
                     xhr.onload = () => {
                         if (xhr.status >= 200 && xhr.status < 300) {
-                            setStatus("✅ Upload successful!");
+                            setStatus({ type: "info", text: "✅ Upload successful!" });
                             setFile(null); 
-                            setTimeout(() => { setProgress(0); setStatus(""); }, 3000);
+                            setTimeout(() => { setProgress(0); setStatus({ type: "", text: "" }); }, 4000);
                         } else {
-                            setStatus("❌ Upload failed.");
+                            console.error("Backblaze Upload Error:", xhr.responseText);
+                            setStatus({ type: "error", text: `❌ Upload rejected (Status ${xhr.status}). Check browser console for details.` });
+                            setProgress(0);
                         }
                     };
+
+                    xhr.onerror = () => {
+                        console.error("XHR Network Error. This is often caused by CORS blocking the request.");
+                        setStatus({ type: "error", text: "❌ Network error. Check your connection or CORS configuration." });
+                        setProgress(0);
+                    };
+
                     xhr.send(file);
                 } catch (error) {
-                    setStatus("❌ Error connecting to server.");
+                    console.error("Upload Pipeline Error:", error);
+                    setStatus({ type: "error", text: `❌ Error: ${error.message}` });
+                    setProgress(0);
                 }
             };
 
@@ -195,7 +224,11 @@
                         </div>
                     )}
                     
-                    {status && <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#2c2a29', textAlign: 'center' }}>{status}</p>}
+                    {status.text && (
+                        <div className={`status-message ${status.type === 'error' ? 'status-error' : 'status-info'}`}>
+                            {status.text}
+                        </div>
+                    )}
 
                     <button className="btn" onClick={handleUpload} disabled={!file || (progress > 0 && progress < 100)}>
                         {progress > 0 && progress < 100 ? `Uploading... ${progress}%` : "Upload Now"}
@@ -207,16 +240,22 @@
         function Gallery() {
             const [images, setImages] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
 
             useEffect(() => {
                 const fetchGallery = async () => {
                     try {
                         const response = await fetch(`${BACKEND_URL}/api/gallery`);
-                        if (!response.ok) throw new Error("Failed to load");
+                        if (!response.ok) {
+                            throw new Error(`Failed to contact server (Status: ${response.status})`);
+                        }
                         const data = await response.json();
+                        if (data.error) throw new Error(data.error);
+                        
                         setImages(data);
-                    } catch (error) {
-                        console.error(error);
+                    } catch (err) {
+                        console.error("Gallery Fetch Error:", err);
+                        setError(err.message);
                     } finally {
                         setLoading(false);
                     }
@@ -224,10 +263,10 @@
                 fetchGallery();
             }, []);
 
-            // Function to trigger a proper download on mobile devices
             const downloadImage = async (url, filename) => {
                 try {
                     const response = await fetch(url);
+                    if (!response.ok) throw new Error("File not accessible");
                     const blob = await response.blob();
                     const blobUrl = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
@@ -239,12 +278,19 @@
                     window.URL.revokeObjectURL(blobUrl);
                 } catch (error) {
                     console.error("Download failed:", error);
-                    // Fallback for strict browsers: just open the image
+                    alert("Download failed. Opening in a new tab instead.");
                     window.open(url, '_blank');
                 }
             };
 
-            if (loading) return <div className="loading">Loading secure gallery...</div>;
+            if (loading) return <div className="loading">Waking up server & loading gallery...</div>;
+            
+            if (error) return (
+                <div className="status-message status-error">
+                    <strong>Error Loading Archive:</strong> {error}
+                </div>
+            );
+
             if (images.length === 0) return <div className="loading">No photos uploaded yet.</div>;
 
             return (
