@@ -2,1334 +2,276 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezwan Ahammed — Digital Ecosystem</title>
-    <meta property="og:title" content="Rezwan Ahammed | Builder. Educator. Thinker."/>
-    <meta property="og:description" content="Software developer, educator, and thinker based in Thakurgaon, Bangladesh."/>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Student Portal | Gallery</title>
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800;900&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --text:             #1e293b;
-            --text-dim:         #475569;
-            --text-muted:       #94a3b8;
-            --accent:           #1877F2;
-            --accent-hover:     #166FE5;
-            --green:            #10b981;
-            --gold:             #f59e0b;
-            --purple:           #8b5cf6;
-            --glass-bg:         rgba(255,255,255,0.55);
-            --glass-border:     rgba(255,255,255,0.5);
-            --glass-border-hi:  rgba(255,255,255,0.9);
-            --glass-shadow:     0 8px 32px rgba(31,38,135,0.08);
-            --glass-blur:       blur(20px);
-            --mono:             'JetBrains Mono', monospace;
-            --sans:             'Sora', sans-serif;
+            --bg-color: #fdfbf7;      /* Warm off-white */
+            --surface: #ffffff;       /* Pure white for cards */
+            --primary: #d97757;       /* Soft terracotta accent */
+            --primary-hover: #c26547;
+            --text-main: #2c2a29;     /* Deep warm grey */
+            --text-muted: #827e7a;
+            --border: #f0ebe1;
+            --shadow: 0 12px 32px rgba(44, 42, 41, 0.05);
+            --radius: 16px;
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background: #f1f5f9;
-            color: var(--text);
-            font-family: var(--sans);
-            overflow-x: hidden;
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            padding: 1rem; 
             -webkit-font-smoothing: antialiased;
         }
-        body.lang-bn { font-family: 'Noto Sans Bengali', sans-serif; }
 
-        /* ── Animated background blobs ── */
-        .glass-bg-wrapper {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: -1; overflow: hidden;
-            background: #eef2f6;
-        }
-        .glass-blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(100px); opacity: 0.6;
-            animation: float 18s infinite alternate ease-in-out;
-        }
-        .blob-1 { width:55vw; height:55vw; background:#c4b5fd; top:-15%; left:-10%; animation-delay:0s; }
-        .blob-2 { width:50vw; height:50vw; background:#93c5fd; bottom:-10%; right:-15%; animation-delay:-4s; }
-        .blob-3 { width:40vw; height:40vw; background:#fca5a5; top:25%; left:35%; animation-delay:-8s; }
-        @keyframes float {
-            0%   { transform: translate(0,0) scale(1); }
-            50%  { transform: translate(40px,50px) scale(1.05); }
-            100% { transform: translate(-30px,60px) scale(0.95); }
-        }
-
-        /* ── Scrollbar ── */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 6px; }
-
-        /* ── Glass card ── */
-        .card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-top: 1px solid var(--glass-border-hi);
-            border-left: 1px solid var(--glass-border-hi);
-            border-radius: 20px;
-            box-shadow: var(--glass-shadow);
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-            position: relative;
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             overflow: hidden;
-        }
-        .card:hover {
-            box-shadow: 0 16px 48px rgba(31,38,135,0.12);
-            transform: translateY(-3px);
+            border: 1px solid var(--border);
         }
 
-        /* ── Pills ── */
-        .pill {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 12px; border-radius: 100px;
-            font-size: 11px; font-weight: 700;
-            letter-spacing: 0.04em; text-transform: uppercase;
-            font-family: var(--mono);
+        /* Top Navigation Tabs */
+        .tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .tab { 
+            flex: 1; padding: 1.2rem; text-align: center; font-weight: 600; 
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+            background: transparent; border: none; font-size: 1rem;
         }
-        .pill-blue   { background: rgba(24,119,242,0.12); color: var(--accent);  border: 1px solid rgba(24,119,242,0.25); }
-        .pill-green  { background: rgba(16,185,129,0.12); color: #047857;         border: 1px solid rgba(16,185,129,0.25); }
-        .pill-gold   { background: rgba(245,158,11,0.12); color: #b45309;         border: 1px solid rgba(245,158,11,0.25); }
+        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
 
-        /* ── Buttons ── */
-        .btn-primary {
-            display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; padding: 12px 24px;
-            background: rgba(24,119,242,0.9); color: #fff;
-            border-radius: 12px; font-weight: 600; font-size: 14px;
-            border: 1px solid rgba(255,255,255,0.3);
-            cursor: pointer; transition: all 0.2s ease;
-            font-family: var(--mono);
-            box-shadow: 0 4px 14px rgba(24,119,242,0.3);
-            text-decoration: none;
+        .content { padding: 2rem; }
+        h2 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
+        p.subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; }
+
+        /* Upload Area */
+        .file-input-wrapper {
+            position: relative; overflow: hidden; display: block;
+            border: 2px dashed var(--border); border-radius: var(--radius);
+            padding: 3rem 1rem; text-align: center; cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+            background: var(--bg-color);
         }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); }
-
-        .btn-ghost {
-            display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; padding: 12px 20px;
-            background: rgba(255,255,255,0.5); color: var(--text);
-            border-radius: 12px; font-weight: 600; font-size: 14px;
-            border: 1px solid var(--glass-border-hi);
-            cursor: pointer; transition: all 0.2s ease;
-            font-family: var(--mono);
-            text-decoration: none;
+        .file-input-wrapper:hover { border-color: var(--primary); background: #fbf5f3; }
+        .file-input-wrapper input[type=file] {
+            font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
         }
-        .btn-ghost:hover { background: rgba(255,255,255,0.8); transform: translateY(-1px); }
-
-        /* ── Language toggle (was missing) ── */
-        .lang-toggle {
-            display: inline-flex; align-items: center;
-            padding: 8px 16px; border-radius: 12px;
-            background: rgba(255,255,255,0.5);
-            border: 1px solid var(--glass-border-hi);
-            font-family: var(--mono); font-size: 13px; font-weight: 700;
-            color: var(--text-dim); cursor: pointer;
-            transition: all 0.2s ease;
+        
+        .btn { 
+            background: var(--primary); color: white; border: none; padding: 14px 24px; 
+            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem;
+            width: 100%; transition: background 0.2s; margin-top: 1.5rem;
         }
-        .lang-toggle:hover { background: rgba(255,255,255,0.8); color: var(--accent); }
+        .btn:hover { background: var(--primary-hover); }
+        .btn:disabled { background: #e0dcd5; cursor: not-allowed; color: #a39f98; }
 
-        /* ── Sidebar nav ── */
-        .nav-item {
-            display: flex; align-items: center; gap: 14px;
-            padding: 12px 16px; border-radius: 14px;
-            font-size: 14px; font-weight: 600; color: var(--text-dim);
-            transition: all 0.2s ease; cursor: pointer;
-            border: 1px solid transparent; background: transparent;
-            width: 100%; text-align: left;
+        .progress-bar-bg { width: 100%; background: var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; height: 8px; }
+        .progress-bar-fill { background: var(--primary); height: 100%; transition: width 0.3s ease; }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem; margin-top: 1rem;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.5); color: var(--text); }
-        .nav-item.active {
-            background: rgba(24,119,242,0.12); color: var(--accent);
-            border-color: rgba(24,119,242,0.2);
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+        .gallery-item {
+            position: relative; border-radius: 12px; overflow: hidden;
+            aspect-ratio: 1; background: var(--bg-color); border: 1px solid var(--border);
         }
-        .nav-label-main { font-family: var(--mono); font-size: 13px; font-weight: 700; }
-        .nav-label-sub  { font-size: 10px; font-weight: 500; color: var(--text-muted); margin-top: 2px; font-family: var(--sans); }
-
-        /* ── Status dots ── */
-        .avail-dot {
-            width: 8px; height: 8px; background: var(--green);
-            border-radius: 50%; animation: availPulse 2s ease infinite; flex-shrink: 0;
+        .gallery-item img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
         }
-        @keyframes availPulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-            50%      { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
-        }
-        .status-dot-live { width:8px; height:8px; background:var(--green); border-radius:50%; animation:availPulse 2s ease infinite; display:inline-block; }
-        .status-dot-dev  { width:8px; height:8px; background:var(--gold);  border-radius:50%; display:inline-block; }
-
-        /* ── Animations ── */
-        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-
-        /* ── Tech tags ── */
-        .tech-tag {
-            padding: 4px 12px;
-            background: rgba(255,255,255,0.5);
-            border: 1px solid var(--glass-border-hi);
-            border-radius: 8px; font-size: 11px; font-weight: 700;
-            color: var(--text-dim); transition: all 0.2s ease;
-            font-family: var(--mono);
-        }
-        .tech-tag:hover { background: var(--accent); color: white; border-color: var(--accent); }
-
-        /* ── Skill chips (was missing) ── */
-        .skill-chip {
-            display: inline-flex; align-items: center;
-            padding: 6px 14px; border-radius: 100px;
-            font-size: 12px; font-weight: 600;
-            background: rgba(255,255,255,0.7);
-            border: 1px solid rgba(255,255,255,0.8);
-            color: var(--text-dim);
-            transition: all 0.2s ease;
-            font-family: var(--mono);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-        .skill-chip:hover { background: rgba(24,119,242,0.08); color: var(--accent); border-color: rgba(24,119,242,0.3); }
-
-        /* ── Divider (was missing) ── */
-        .divider { height: 1px; background: rgba(0,0,0,0.06); }
-
-        /* ── Header ── */
-        header {
-            background: rgba(255,255,255,0.3) !important;
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--glass-border) !important;
-        }
-
-        /* ── Bottom mobile nav ── */
-        .bottom-nav {
-            display: none; position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(255,255,255,0.65); backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid var(--glass-border-hi);
-            z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-        }
-        @media (max-width:1024px) { .bottom-nav { display: flex; } }
-        .bottom-nav-item {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; gap: 4px; font-size: 10px; font-weight: 700;
-            color: var(--text-muted); font-family: var(--mono);
-            transition: color 0.2s; cursor: pointer;
-            background: transparent; border: none; padding: 4px 0;
-        }
-        .bottom-nav-item.active { color: var(--accent); }
-
-        /* ── Sidebar overlay ── */
-        .sidebar-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(15,23,42,0.4); backdrop-filter: blur(4px);
-            z-index: 49; transition: opacity 0.3s;
-        }
-        @media (max-width:1024px) { .sidebar-overlay.show { display: block; } }
-
-        /* ── Sidebar ── */
-        aside {
-            position: fixed; top: 0; left: 0;
-            height: 100%; width: 280px;
-            background: rgba(255,255,255,0.4); backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-right: 1px solid var(--glass-border-hi);
-            z-index: 50; display: flex; flex-direction: column;
-            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
-            box-shadow: 4px 0 24px rgba(0,0,0,0.05);
-        }
-        @media (max-width:1024px) { aside { transform: translateX(-100%); } aside.open { transform: translateX(0); } }
-        @media (min-width:1025px) { .main-wrapper { margin-left: 280px; } }
-
-        /* ── Inputs ── */
-        .glass-input {
-            background: rgba(255,255,255,0.5) !important;
-            border: 1px solid var(--glass-border-hi) !important;
-            color: var(--text); font-family: inherit;
-            width: 100%; padding: 12px 16px; border-radius: 14px;
-            font-size: 14px; transition: all 0.2s;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-            outline: none;
-        }
-        .glass-input:focus {
-            background: rgba(255,255,255,0.8) !important;
-            border-color: var(--accent) !important;
-        }
-        textarea.glass-input { resize: vertical; }
-
-        /* ── Profile cover ── */
-        .fb-cover {
-            width: 100%; height: 220px; position: relative;
-            background: linear-gradient(135deg, rgba(24,119,242,0.4) 0%, rgba(139,92,246,0.4) 50%, rgba(216,180,254,0.5) 100%);
-            overflow: hidden; border-radius: 20px 20px 0 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        @media (min-width:640px) { .fb-cover { height: 280px; } }
-        .fb-avatar-wrap { position: absolute; top: 160px; left: 24px; z-index: 10; }
-        @media (min-width:640px) { .fb-avatar-wrap { top: 210px; left: 32px; } }
-        .fb-avatar {
-            width: 110px; height: 110px; border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.9);
-            object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            background: white;
-        }
-        @media (min-width:640px) { .fb-avatar { width: 130px; height: 130px; } }
-        .fb-profile-body { padding: 70px 24px 28px; }
-        @media (min-width:640px) { .fb-profile-body { padding: 80px 32px 32px; } }
-
-        /* ── Post images ── */
-        .post-image { width: 100%; border-radius: 14px; object-fit: cover; max-height: 450px; border: 1px solid rgba(255,255,255,0.6); margin-top: 14px; }
-
-        /* ── Chat bubbles ── */
-        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.6; }
-        .chat-bubble.user { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; margin-left: auto; }
-        .chat-bubble.bot  { background: rgba(255,255,255,0.7); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--glass-border-hi); }
-
-        /* ── Progress ── */
-        .exec-card { background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border-hi); border-left: 4px solid var(--accent); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; transition: all 0.2s; }
-        .progress-track { height: 8px; background: rgba(0,0,0,0.06); border-radius: 100px; overflow: hidden; margin-top: 10px; }
-        .progress-fill  { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--purple)); transition: width 1s cubic-bezier(0.16,1,0.3,1); }
-
-        /* ── Social button ── */
-        .social-btn {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: rgba(255,255,255,0.5); border: 1px solid var(--glass-border-hi);
+        .download-btn {
+            position: absolute; bottom: 8px; right: 8px; background: rgba(255, 255, 255, 0.9);
+            border: none; border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
-            color: var(--text-dim); transition: all 0.2s; font-size: 18px;
-            text-decoration: none;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: var(--text-main); text-decoration: none; font-size: 18px;
+            transition: transform 0.2s;
         }
-        .social-btn:hover { background: rgba(255,255,255,0.9); color: var(--accent); transform: translateY(-2px); }
-
-        /* ── Post actions ── */
-        .post-action {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; border-radius: 10px;
-            font-size: 14px; font-weight: 600; color: var(--text-dim);
-            background: transparent; border: 1px solid transparent;
-            cursor: pointer; transition: all 0.2s;
-            flex: 1; justify-content: center; font-family: var(--sans);
-        }
-        .post-action:hover { background: rgba(255,255,255,0.5); color: var(--text); border-color: var(--glass-border); }
-        .post-action.liked { color: var(--accent); }
-
-        /* ── Modal ── */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(255,255,255,0.2); backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            z-index: 500; display: flex; align-items: center; justify-content: center;
-            padding: 20px;
-        }
-        .modal-box {
-            background: rgba(255,255,255,0.75); backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border-hi);
-            border-radius: 20px; padding: 24px; width: 100%; max-width: 400px;
-            box-shadow: 0 20px 60px rgba(31,38,135,0.15);
-            animation: fadeUp 0.3s ease both;
-        }
-
-        /* ── Toast ── */
-        .toast {
-            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-            background: rgba(255,255,255,0.9); color: var(--text);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 700;
-            z-index: 9999; display: flex; align-items: center; gap: 10px;
-            box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border-hi);
-            animation: fadeUp 0.3s ease both; font-family: var(--mono);
-            white-space: nowrap;
-        }
-
-        /* ── Contact form ── */
-        .contact-form-row { display: flex; flex-direction: column; gap: 12px; }
+        .download-btn:active { transform: scale(0.9); }
+        
+        .loading { text-align: center; color: var(--text-muted); padding: 2rem; }
     </style>
 </head>
 <body>
 
-<div class="glass-bg-wrapper">
-    <div class="glass-blob blob-1"></div>
-    <div class="glass-blob blob-2"></div>
-    <div class="glass-blob blob-3"></div>
-</div>
+    <div id="root"></div>
 
-<!-- FIX: Loading spinner uses correct HTML (not JSX className / no fa- icon in raw HTML) -->
-<div id="root">
-    <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#475569;">
-        <svg width="40" height="40" viewBox="0 0 40 40" style="animation:spin 0.8s linear infinite;margin-bottom:16px;" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="16" fill="none" stroke="#e2e8f0" stroke-width="4"/>
-            <path d="M20 4 A16 16 0 0 1 36 20" fill="none" stroke="#1877F2" stroke-width="4" stroke-linecap="round"/>
-        </svg>
-        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-        <span style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;">// Compiling RezwanOS...</span>
-    </div>
-</div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const BACKEND_URL = "https://janani-backend-api.onrender.com"; // UPDATE THIS IF NEEDED
 
-<script type="text/babel" data-presets="react">
-    const { useState, useEffect, useRef, useCallback } = React;
+        function App() {
+            const [activeTab, setActiveTab] = useState('upload');
 
-    /* ─── CONSTANTS ─────────────────────────────────────────────── */
-    // FIX: DEFAULT_AVATAR was used but never defined — defined here
-    const DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=RA&background=1877F2&color=fff&size=200";
-
-    async function bootPortfolio() {
-        try {
-            const { initializeApp }   = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
-            const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js");
-            const { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-
-            const APP_ID    = 'rezwan-portfolio-v1';
-            const GEMINI_KEY = "AIzaSyA8bLdXXxyMEC59fp4IhAP89w3ZYuGhMC8";
-
-            const fbApp  = initializeApp({ apiKey:"AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do", projectId:"rezwan-86f26" });
-            const fbAuth = getAuth(fbApp);
-            const fbDb   = getFirestore(fbApp);
-
-            const col  = (name)     => collection(fbDb, 'artifacts', APP_ID, 'public', 'data', name);
-            const dRef = (col, id)  => doc(fbDb, 'artifacts', APP_ID, 'public', 'data', col, id);
-
-            const MINIMAL_PROFILE_FALLBACK = {
-                name_en: "System User", role_en: "Awaiting Configuration",
-                bio_en: "Connect via Admin Terminal to deploy identity.",
-                avatar: DEFAULT_AVATAR, available: false
-            };
-
-            /* ── Translations ── */
-            // FIX: Added missing keys: recentUpdates, skills, emptySkills, contactTitle
-            const T = {
-                en: {
-                    home: "~/feed", portfolio: "~/build", academics: "~/learn",
-                    perspectives: "~/think", profile: "~/me",
-                    homeLabel: "live stream", portfolioLabel: "what i ship",
-                    academicsLabel: "stack overflow of my life",
-                    perspectivesLabel: "unfiltered commits", profileLabel: "the human behind the cursor",
-                    available: "> status: available",
-                    viewDetails: "View Profile", message: "Message", follow: "Follow",
-                    emptyFeed: "> waiting for signal...",
-                    emptyProjects: "// no commits yet",
-                    emptyAcademics: '$ grep -r "data" ./academic_life\n> empty',
-                    emptyPerspectives: "/* thoughts compiling... */",
-                    recentUpdates: "Recent Updates",
-                    skills: "Tech Stack & Skills",
-                    emptySkills: "// skills.json not yet deployed",
-                    contactTitle: "Get in Touch",
-                    aiResumeTitle: "AI Resume Matcher",
-                    aiResumePrompt: "Paste a Job Description. I'll analyze if I'm the right compiler for the job.",
-                    sendMessage: "Send Message", yourName: "Your Name",
-                    yourEmail: "Your Email", yourMessage: "Your Message",
-                    sending: "Sending...", sent: "Message Sent!"
-                },
-                bn: {
-                    home: "~/ফিড", portfolio: "~/বিল্ড", academics: "~/শেখা",
-                    perspectives: "~/ভাবনা", profile: "~/আমি",
-                    homeLabel: "লাইভ স্ট্রিম", portfolioLabel: "আমি যা বানাই",
-                    academicsLabel: "জীবনের স্ট্যাক ওভারফ্লো",
-                    perspectivesLabel: "আনফিল্টারড কমিট", profileLabel: "কার্সরের পেছনের মানুষ",
-                    available: "> স্ট্যাটাস: উপলব্ধ",
-                    viewDetails: "প্রোফাইল দেখুন", message: "মেসেজ", follow: "ফলো",
-                    emptyFeed: "> সিগন্যালের অপেক্ষায়...",
-                    emptyProjects: "// এখনো কোনো প্রজেক্ট নেই",
-                    emptyAcademics: '$ grep -r "data" ./একাডেমিক\n> empty',
-                    emptyPerspectives: "/* ভাবনা কম্পাইল হচ্ছে... */",
-                    recentUpdates: "সাম্প্রতিক আপডেট",
-                    skills: "টেক স্ট্যাক ও দক্ষতা",
-                    emptySkills: "// skills.json এখনো নেই",
-                    contactTitle: "যোগাযোগ করুন",
-                    aiResumeTitle: "AI রেজুমে ম্যাচ",
-                    aiResumePrompt: "জব ডেসক্রিপশন দিন। আমি বিশ্লেষণ করব আমি উপযুক্ত কিনা।",
-                    sendMessage: "বার্তা পাঠান", yourName: "আপনার নাম",
-                    yourEmail: "আপনার ইমেইল", yourMessage: "আপনার বার্তা",
-                    sending: "পাঠানো হচ্ছে...", sent: "বার্তা পাঠানো হয়েছে!"
-                }
-            };
-
-            const L = (item, key, lang) =>
-                (item ? (item[`${key}_${lang}`] || item[`${key}_en`] || item[key] || '') : '');
-
-            const timeAgo = (dateStr) => {
-                if (!dateStr) return '';
-                const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-                if (diff < 60)    return 'Just now';
-                if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
-                if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-                return new Date(dateStr).toLocaleDateString();
-            };
-
-            const renderMarkdown = (text) => {
-                if (!text) return { __html: '' };
-                let h = text
-                    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                    .replace(/\n/g,'<br/>');
-                h = h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-                h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
-                    '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-bold">$1</a>');
-                return { __html: h };
-            };
-
-            const callGemini = async (prompt, aiContext) => {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-                try {
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: aiContext }] }
-                        })
-                    });
-                    const data = await res.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "System error. Try again.";
-                } catch(e) { return "// Connection error."; }
-            };
-
-            /* ─── COMPONENTS ─────────────────────────────────────────── */
-
-            const Toast = ({ msg, onClose }) => {
-                useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
-                return (
-                    <div className="toast">
-                        <i className="fa-solid fa-circle-check text-green-500"></i> {msg}
+            return (
+                <div className="container">
+                    <div className="tabs">
+                        <button className={`tab ${activeTab === 'upload' ? 'active' : ''}`} onClick={() => setActiveTab('upload')}>Upload</button>
+                        <button className={`tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Gallery</button>
                     </div>
-                );
-            };
-
-            const SelectionModal = ({ title, options, onClose, onSelect }) => (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal-box" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-5">
-                            <span className="text-lg font-bold font-mono">{title}</span>
-                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center text-slate-500 hover:bg-white">
-                                <i className="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            {options.map((opt, i) => (
-                                <button key={i} onClick={() => onSelect(opt.url)}
-                                    className="flex items-center gap-4 p-3 bg-white/40 border border-white/60 hover:bg-white/80 rounded-xl transition-all text-left">
-                                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-100 shadow-sm">
-                                        {/* FIX: icon names are lowercase for font-awesome brands */}
-                                        <i className={`fa-brands fa-${opt.icon} text-xl text-blue-600`}></i>
-                                    </div>
-                                    <div>
-                                        <div className="font-bold text-slate-800">{opt.label}</div>
-                                        <div className="text-[10px] font-mono uppercase text-slate-500">{opt.sub}</div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                    <div className="content">
+                        {activeTab === 'upload' ? <Uploader /> : <Gallery />}
                     </div>
                 </div>
             );
-
-            const TypingHero = ({ lang, name }) => {
-                const roles = lang === 'en'
-                    ? ['> builder_', '> educator_', '> thinker_']
-                    : ['> নির্মাতা_', '> শিক্ষক_', '> চিন্তাবিদ_'];
-                const [idx, setIdx]           = useState(0);
-                const [displayed, setDisplayed] = useState('');
-                const [deleting, setDeleting]   = useState(false);
-
-                useEffect(() => {
-                    const target = roles[idx];
-                    if (deleting) {
-                        if (displayed.length === 0) { setDeleting(false); setIdx(i => (i+1) % roles.length); return; }
-                        const t = setTimeout(() => setDisplayed(d => d.slice(0,-1)), 30);
-                        return () => clearTimeout(t);
-                    }
-                    if (displayed.length < target.length) {
-                        const t = setTimeout(() => setDisplayed(target.slice(0, displayed.length+1)), 70);
-                        return () => clearTimeout(t);
-                    } else {
-                        const t = setTimeout(() => setDeleting(true), 2000);
-                        return () => clearTimeout(t);
-                    }
-                }, [displayed, deleting, idx, lang]);
-
-                return (
-                    <div className="font-mono text-sm md:text-base text-slate-500 mb-4 tracking-wide">
-                        <span className="text-green-500 font-bold">$</span>{' '}
-                        <span className="text-blue-600 font-semibold">{displayed}</span>
-                        <span className="animate-pulse">_</span>
-                    </div>
-                );
-            };
-
-            const VisitorCounter = () => {
-                const [count, setCount] = useState(null);
-                useEffect(() => {
-                    const sessionKey = 'rz_visited';
-                    (async () => {
-                        try {
-                            const counterRef = dRef('meta','visitors');
-                            const snap = await getDoc(counterRef);
-                            if (!snap.exists()) {
-                                await setDoc(counterRef, { count: 1 });
-                                setCount(1);
-                            } else {
-                                const c = snap.data().count || 0;
-                                if (!sessionStorage.getItem(sessionKey)) {
-                                    await updateDoc(counterRef, { count: increment(1) });
-                                    sessionStorage.setItem(sessionKey, '1');
-                                    setCount(c + 1);
-                                } else { setCount(c); }
-                            }
-                        } catch(_) {}
-                    })();
-                }, []);
-                if (count === null) return null;
-                return (
-                    <div className="text-[10px] font-mono text-slate-400 mt-4 uppercase tracking-widest border border-slate-200/60 bg-white/40 py-1.5 px-3 rounded-full mx-auto w-fit">
-                        <i className="fa-solid fa-eye mr-1"></i> {count.toLocaleString()} Visitors
-                    </div>
-                );
-            };
-
-            const PostCard = ({ p, user, lang, currentName, currentAvatar, onLike, onAddComment, setToast }) => {
-                const [showComments, setShowComments] = useState(false);
-                const [commentText, setCommentText]   = useState('');
-                const [guestName, setGuestName]       = useState('');
-                const [showNameInput, setShowNameInput] = useState(false);
-
-                const isLiked   = (p.likedBy||[]).includes(user?.uid);
-                const likeCount = (p.likedBy||[]).length;
-                const comments  = p.comments || [];
-
-                const handleComment = () => {
-                    if (!commentText.trim()) return;
-                    if (!guestName.trim()) { setShowNameInput(true); return; }
-                    onAddComment(p.id, commentText, guestName);
-                    setCommentText(''); setShowNameInput(false);
-                };
-
-                const handleShare = () => {
-                    const url = window.location.href;
-                    if (navigator.share) {
-                        navigator.share({ title:`${currentName}'s Post`, text: p.content, url }).catch(()=>{});
-                    } else {
-                        navigator.clipboard.writeText(url)
-                            .then(() => setToast("Link copied to clipboard!")).catch(()=>{});
-                    }
-                };
-
-                return (
-                    <div className="card p-0 mb-6">
-                        <div className="p-5 pb-2">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-3">
-                                    {/* FIX: Added alt attribute */}
-                                    <img src={currentAvatar} alt={currentName}
-                                        className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
-                                    <div>
-                                        <div className="font-bold text-slate-800">{currentName}</div>
-                                        <div className="text-xs text-slate-500 font-mono mt-0.5">{timeAgo(p.timestamp)}</div>
-                                    </div>
-                                </div>
-                                <span className="pill pill-blue"><i className="fa-solid fa-terminal mr-1"></i> Update</span>
-                            </div>
-
-                            <div className="text-[15px] text-slate-700 leading-relaxed mb-4"
-                                dangerouslySetInnerHTML={renderMarkdown(p.content)} />
-
-                            {p.imageUrl && <img src={p.imageUrl} alt="Post" className="post-image mb-4" />}
-
-                            {(likeCount > 0 || comments.length > 0) && (
-                                <div className="flex justify-between items-center text-xs text-slate-500 font-bold mb-3 px-1">
-                                    {likeCount > 0
-                                        ? <span className="flex items-center gap-1.5">
-                                            <div className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px]">
-                                                <i className="fa-solid fa-thumbs-up"></i>
-                                            </div> {likeCount}
-                                          </span>
-                                        : <span></span>
-                                    }
-                                    {comments.length > 0 &&
-                                        <button onClick={()=>setShowComments(!showComments)} className="hover:underline">
-                                            {comments.length} comments
-                                        </button>
-                                    }
-                                </div>
-                            )}
-                        </div>
-
-                        {/* FIX: .divider class now properly defined in CSS */}
-                        <div className="divider"></div>
-
-                        <div className="flex px-2 py-1.5 bg-white/20">
-                            <button className={`post-action ${isLiked?'liked':''}`} onClick={() => onLike(p.id, p.likedBy)}>
-                                <i className={`${isLiked?'fa-solid':'fa-regular'} fa-thumbs-up text-lg`}></i> Like
-                            </button>
-                            <button className="post-action" onClick={() => setShowComments(!showComments)}>
-                                <i className="fa-regular fa-comment-dots text-lg"></i> Comment
-                            </button>
-                            <button className="post-action" onClick={handleShare}>
-                                <i className="fa-solid fa-share-nodes text-lg"></i> Share
-                            </button>
-                        </div>
-
-                        {showComments && (
-                            <div className="p-4 bg-white/40 border-t border-slate-200/50">
-                                {comments.length > 0 && (
-                                    <div className="flex flex-col gap-3 mb-4">
-                                        {comments.map((c,i) => (
-                                            <div key={i} className="flex items-start gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                                                    {(c.name||'?')[0].toUpperCase()}
-                                                </div>
-                                                <div className="bg-white/60 border border-white/80 p-2.5 rounded-xl rounded-tl-sm text-sm text-slate-700">
-                                                    <span className="font-bold text-blue-600 block text-xs mb-0.5">{c.name}</span>
-                                                    {c.text_en}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {showNameInput &&
-                                    <input value={guestName} onChange={e=>setGuestName(e.target.value)}
-                                        placeholder="Enter your name to post..."
-                                        className="glass-input mb-2 text-sm"
-                                        style={{padding:'8px 14px'}}
-                                        onKeyDown={e=>e.key==='Enter'&&handleComment()}
-                                        autoFocus />
-                                }
-                                <div className="flex gap-2 mt-2">
-                                    <input value={commentText}
-                                        onChange={e=>setCommentText(e.target.value)}
-                                        onKeyDown={e=>e.key==='Enter'&&handleComment()}
-                                        placeholder="Write a comment..."
-                                        className="glass-input text-sm"
-                                        style={{padding:'8px 14px', borderRadius:'100px'}} />
-                                    <button onClick={handleComment}
-                                        className="w-10 h-10 rounded-full bg-blue-600 text-white shrink-0 flex items-center justify-center">
-                                        <i className="fa-solid fa-paper-plane text-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
-            };
-
-            /* ── AI Resume Matcher ── */
-            const AIResumeMatcher = ({ t, profileData, skills }) => {
-                const [jd, setJd]         = useState('');
-                const [result, setResult] = useState('');
-                const [loading, setLoading] = useState(false);
-                const [open, setOpen]     = useState(false);
-
-                const run = async () => {
-                    if (!jd.trim()) return;
-                    setLoading(true); setResult('');
-                    const skillStr = skills.map(s => (s.items||[]).map(i=>i.name).join(', ')).join(', ');
-                    const ctx = `You are an AI recruiter. Analyze the job description against this candidate. Be honest, highlight strengths and note gaps. Output markdown. Candidate: ${profileData?.name_en}. Bio: ${profileData?.bio_en}. Skills: ${skillStr}.`;
-                    const r = await callGemini(`Analyze this Job Description:\n${jd}`, ctx);
-                    setResult(r); setLoading(false);
-                };
-
-                return (
-                    <div className="bg-blue-50/50 border border-dashed border-blue-300 rounded-xl p-5 hover:bg-blue-50 transition-colors mt-6">
-                        <div className="flex items-center justify-between cursor-pointer" onClick={()=>setOpen(!open)}>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                                    <i className="fa-solid fa-wand-magic-sparkles"></i>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-800 font-mono text-sm">{t.aiResumeTitle}</h3>
-                                    <p className="text-xs text-slate-500">Gemini 2.0 Analysis</p>
-                                </div>
-                            </div>
-                            <i className={`fa-solid fa-chevron-${open?'up':'down'} text-slate-400`}></i>
-                        </div>
-                        {open && (
-                            <div className="mt-4 pt-4 border-t border-blue-200/50 flex flex-col gap-3 animate-fade-up">
-                                <p className="text-xs text-slate-600 font-mono">{t.aiResumePrompt}</p>
-                                <textarea value={jd} onChange={e=>setJd(e.target.value)}
-                                    placeholder="Paste JD here..." className="glass-input text-xs" rows="4" />
-                                <button onClick={run} disabled={loading||!jd.trim()}
-                                    className="btn-primary w-fit text-xs px-4 py-2"
-                                    style={{opacity: (loading||!jd.trim()) ? 0.6 : 1}}>
-                                    {loading
-                                        ? <><i className="fa-solid fa-spinner fa-spin"></i> Processing...</>
-                                        : "Run Analysis"
-                                    }
-                                </button>
-                                {result &&
-                                    <div className="mt-4 p-4 bg-white/80 rounded-xl border border-white text-sm text-slate-700 leading-relaxed shadow-sm"
-                                        dangerouslySetInnerHTML={renderMarkdown(result)} />
-                                }
-                            </div>
-                        )}
-                    </div>
-                );
-            };
-
-            /* ── Contact Form (was referenced but never defined) ── */
-            const ContactForm = ({ t, profileData }) => {
-                const [form, setForm]       = useState({ name:'', email:'', message:'' });
-                const [status, setStatus]   = useState('idle'); // idle | sending | sent | error
-
-                const handleChange = (e) => setForm(f => ({...f, [e.target.name]: e.target.value}));
-
-                const handleSubmit = async () => {
-                    if (!form.name.trim() || !form.message.trim()) return;
-                    setStatus('sending');
-                    try {
-                        await addDoc(col('contact_messages'), {
-                            ...form, timestamp: new Date().toISOString()
-                        });
-                        setStatus('sent');
-                        setForm({ name:'', email:'', message:'' });
-                        setTimeout(() => setStatus('idle'), 4000);
-                    } catch(e) {
-                        setStatus('error');
-                        setTimeout(() => setStatus('idle'), 3000);
-                    }
-                };
-
-                if (status === 'sent') {
-                    return (
-                        <div className="flex flex-col items-center gap-3 py-8 text-center animate-fade-up">
-                            <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-2xl">
-                                <i className="fa-solid fa-check"></i>
-                            </div>
-                            <p className="font-bold text-slate-700">{t.sent}</p>
-                            <p className="text-sm text-slate-500 font-mono">I'll get back to you soon.</p>
-                        </div>
-                    );
-                }
-
-                return (
-                    <div className="contact-form-row">
-                        <input name="name" value={form.name} onChange={handleChange}
-                            placeholder={t.yourName} className="glass-input" />
-                        <input name="email" value={form.email} onChange={handleChange}
-                            placeholder={t.yourEmail} type="email" className="glass-input" />
-                        <textarea name="message" value={form.message} onChange={handleChange}
-                            placeholder={t.yourMessage} className="glass-input" rows="4" />
-                        <button onClick={handleSubmit}
-                            disabled={status==='sending' || !form.name.trim() || !form.message.trim()}
-                            className="btn-primary w-full"
-                            style={{opacity: (status==='sending'||!form.name.trim()||!form.message.trim()) ? 0.6 : 1}}>
-                            {status === 'sending'
-                                ? <><i className="fa-solid fa-spinner fa-spin"></i> {t.sending}</>
-                                : <><i className="fa-solid fa-paper-plane"></i> {t.sendMessage}</>
-                            }
-                        </button>
-                        {status === 'error' &&
-                            <p className="text-xs text-red-500 font-mono text-center">// Send failed. Check connection.</p>
-                        }
-                    </div>
-                );
-            };
-
-            /* ─── MAIN APP ───────────────────────────────────────────── */
-            const App = () => {
-                const [lang, setLang]           = useState('en');
-                const t = T[lang];
-                const [activeMenu, setActiveMenu] = useState('Home');
-                const [sidebarOpen, setSidebarOpen] = useState(false);
-                const [isLoading, setIsLoading]   = useState(true);
-                const [user, setUser]             = useState(null);
-
-                const [activeModal, setActiveModal] = useState(null);
-                const [toast, setToast]             = useState(null);
-
-                const [posts, setPosts]             = useState([]);
-                const [projects, setProjects]       = useState([]);
-                const [academics, setAcademics]     = useState([]);
-                const [perspectives, setPerspectives] = useState([]);
-                const [skills, setSkills]           = useState([]);
-                const [profileData, setProfileData] = useState(null);
-
-                useEffect(() => {
-                    signInAnonymously(fbAuth);
-                    const unsub = onAuthStateChanged(fbAuth, u => setUser(u));
-
-                    const subs = [
-                        onSnapshot(col('posts'),        s => setPosts(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)))),
-                        onSnapshot(col('projects'),     s => setProjects(s.docs.map(x=>({id:x.id,...x.data()})))),
-                        onSnapshot(col('academics'),    s => setAcademics(s.docs.map(x=>({id:x.id,...x.data()})))),
-                        onSnapshot(col('perspectives'), s => setPerspectives(s.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)))),
-                        onSnapshot(col('skills'),       s => setSkills(s.docs.map(x=>({id:x.id,...x.data()})))),
-                        onSnapshot(col('profile'),      s => {
-                            setProfileData(s.empty ? MINIMAL_PROFILE_FALLBACK : s.docs[0].data());
-                            // FIX: isLoading ends when profile fires — this is correct since profile
-                            // is the most critical piece. Other collections update reactively.
-                            setIsLoading(false);
-                        })
-                    ];
-                    return () => { unsub(); subs.forEach(f=>f()); };
-                }, []);
-
-                const resolvedProfile = profileData || MINIMAL_PROFILE_FALLBACK;
-                const currentName   = L(resolvedProfile,'name',lang)  || 'System Admin';
-                const currentRole   = L(resolvedProfile,'role',lang)  || 'Role Unassigned';
-                const currentBio    = L(resolvedProfile,'bio',lang)   || '';
-                // FIX: DEFAULT_AVATAR is now properly defined above
-                const currentAvatar = resolvedProfile.avatar          || DEFAULT_AVATAR;
-                const activeMissions = academics.filter(a => a.type === 'current' && a.active);
-
-                const navItems = [
-                    { id:'Home',         fa:'fa-solid fa-terminal',       labelKey:'home',         subKey:'homeLabel' },
-                    { id:'Profile',      fa:'fa-solid fa-user',           labelKey:'profile',      subKey:'profileLabel' },
-                    { id:'Projects',     fa:'fa-solid fa-layer-group',    labelKey:'portfolio',    subKey:'portfolioLabel' },
-                    { id:'Academics',    fa:'fa-solid fa-graduation-cap', labelKey:'academics',    subKey:'academicsLabel' },
-                    { id:'Perspectives', fa:'fa-solid fa-quote-left',     labelKey:'perspectives', subKey:'perspectivesLabel' }
-                ];
-
-                const navTo = (id) => { setActiveMenu(id); setSidebarOpen(false); window.scrollTo(0,0); };
-
-                const toggleLike = async (id, likedBy) => {
-                    if (!user) return;
-                    const isLiked = (likedBy||[]).includes(user.uid);
-                    await updateDoc(dRef('posts',id), {
-                        likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
-                    });
-                };
-
-                const addComment = async (id, text, guestName) => {
-                    if (!user) return;
-                    const commentObj = { text_en:text, name:guestName, userId:user.uid, timestamp:new Date().toISOString() };
-                    await updateDoc(dRef('posts',id), { comments: arrayUnion(commentObj) });
-                };
-
-                // FIX: icon names are lowercase for font-awesome brands
-                const followOptions = [
-                    { label:'Facebook',  sub:'Social',       icon:'facebook-f',   url:resolvedProfile.facebookUrl },
-                    { label:'LinkedIn',  sub:'Professional', icon:'linkedin-in',  url:resolvedProfile.linkedinUrl }
-                ].filter(o => o.url);
-
-                const messageOptions = [
-                    { label:'Messenger', sub:'Chat',         icon:'facebook-messenger', url:resolvedProfile.messengerUrl }
-                ].filter(o => o.url);
-
-                // Apply language class to body
-                useEffect(() => {
-                    document.body.classList.toggle('lang-bn', lang === 'bn');
-                }, [lang]);
-
-                return (
-                    <div style={{ minHeight:'100vh', position:'relative', zIndex:1 }}>
-                        {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
-
-                        {activeModal==='follow' && followOptions.length > 0 &&
-                            <SelectionModal title={t.follow} options={followOptions}
-                                onClose={()=>setActiveModal(null)}
-                                onSelect={u=>{ u?window.open(u,'_blank'):setToast("Link not configured"); setActiveModal(null); }} />
-                        }
-                        {activeModal==='message' && messageOptions.length > 0 &&
-                            <SelectionModal title={t.message} options={messageOptions}
-                                onClose={()=>setActiveModal(null)}
-                                onSelect={u=>{ u?window.open(u,'_blank'):setToast("Link not configured"); setActiveModal(null); }} />
-                        }
-
-                        <div className={'sidebar-overlay'+(sidebarOpen?' show':'')} onClick={()=>setSidebarOpen(false)}></div>
-
-                        {/* ── SIDEBAR ── */}
-                        <aside className={sidebarOpen?'open':''}>
-                            <div className="p-8 text-center border-b border-white/20">
-                                {/* FIX: Added alt attribute */}
-                                <img src={currentAvatar} alt={currentName}
-                                    className="w-24 h-24 rounded-full object-cover border-4 border-white/90 mx-auto mb-4 shadow-xl" />
-                                <div className="font-bold text-xl text-slate-800 mb-1">{currentName}</div>
-                                <div className="text-xs text-blue-600 font-bold font-mono uppercase tracking-widest mb-4">{currentRole}</div>
-                                {resolvedProfile.available && (
-                                    <div className="pill pill-green mx-auto mb-2">
-                                        <div className="avail-dot"></div>
-                                        {L(resolvedProfile,'availableText',lang) || t.available}
-                                    </div>
-                                )}
-                                <VisitorCounter />
-                            </div>
-
-                            <nav className="flex-1 p-5 flex flex-col gap-3 overflow-y-auto">
-                                {navItems.map(item => (
-                                    <button key={item.id}
-                                        className={'nav-item'+(activeMenu===item.id?' active':'')}
-                                        onClick={()=>navTo(item.id)}>
-                                        <i className={item.fa} style={{ width:24, textAlign:'center', fontSize:'16px' }}></i>
-                                        <div>
-                                            <div className="nav-label-main">{t[item.labelKey]}</div>
-                                            <div className="nav-label-sub">{t[item.subKey]}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </nav>
-                        </aside>
-
-                        <div className="main-wrapper flex flex-col min-h-screen">
-                            {/* ── TOP HEADER ── */}
-                            <header className="sticky top-0 h-16 z-40 flex items-center px-4 md:px-8 gap-4 justify-between">
-                                <div className="flex items-center gap-4">
-                                    <button onClick={()=>setSidebarOpen(true)}
-                                        className="lg:hidden w-10 h-10 rounded-xl bg-white/40 border border-white/40 flex items-center justify-center">
-                                        <i className="fa-solid fa-bars"></i>
-                                    </button>
-                                    <span className="font-bold text-slate-600 font-mono text-sm">
-                                        {t[navItems.find(n=>n.id===activeMenu)?.labelKey] || activeMenu}
-                                    </span>
-                                </div>
-                                {/* FIX: .lang-toggle class is now properly defined in CSS */}
-                                <button className="lang-toggle" onClick={()=>setLang(lang==='en'?'bn':'en')}>
-                                    <i className="fa-solid fa-language text-blue-500 mr-2"></i>
-                                    {lang==='en'?'বাংলা':'English'}
-                                </button>
-                            </header>
-
-                            <main className="flex-1 max-w-3xl w-full mx-auto p-4 md:p-8 pb-24">
-                                {isLoading ? (
-                                    <div className="text-center mt-32">
-                                        <i className="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4 block"></i>
-                                        <span className="font-mono text-sm text-slate-500 uppercase tracking-widest">Compiling Assets...</span>
-                                    </div>
-                                ) : activeMenu === 'Home' ? (
-                                    <div className="animate-fade-up flex flex-col gap-8">
-                                        {/* Hero Card */}
-                                        <div className="card p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
-                                            <div className="flex-1 text-center md:text-left">
-                                                <TypingHero lang={lang} name={currentName} />
-                                                <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-5 text-slate-800">
-                                                    {lang==='en'
-                                                        ? <>Hey, I'm <br/>
-                                                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">{currentName}</span>.
-                                                          </>
-                                                        : currentName
-                                                    }
-                                                </h1>
-                                                <p className="text-slate-600 leading-relaxed mb-6">{currentBio}</p>
-                                                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                                                    <button className="btn-primary" onClick={()=>setActiveModal('follow')}>
-                                                        <i className="fa-solid fa-user-plus"></i> {t.follow}
-                                                    </button>
-                                                    <button className="btn-ghost" onClick={()=>setActiveModal('message')}>
-                                                        <i className="fa-regular fa-comment-dots"></i> {t.message}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div className="hidden md:block w-40 h-40 rounded-full overflow-hidden border-8 border-white shadow-xl shrink-0 rotate-3 hover:rotate-0 transition-transform duration-500">
-                                                {/* FIX: Added alt attribute */}
-                                                <img src={currentAvatar} alt={currentName} className="w-full h-full object-cover" />
-                                            </div>
-                                        </div>
-
-                                        {/* Current Missions */}
-                                        {activeMissions.length > 0 && (
-                                            <div className="card p-6 border-l-4 border-l-blue-500">
-                                                <div className="font-mono text-xs font-bold text-blue-500 mb-4 uppercase tracking-widest flex items-center gap-2">
-                                                    <i className="fa-solid fa-bolt text-amber-400"></i> Currently Executing
-                                                </div>
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    {activeMissions.map(m => (
-                                                        <div key={m.id} className="exec-card">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <div className="font-bold text-slate-800">{L(m,'subject',lang)}</div>
-                                                                <div className="text-blue-600 font-mono font-bold text-xs bg-blue-50 px-2 py-1 rounded-md">{m.progress}%</div>
-                                                            </div>
-                                                            <div className="text-xs text-slate-500 mb-3">{L(m,'goal',lang)}</div>
-                                                            <div className="progress-track">
-                                                                <div className="progress-fill" style={{width:`${m.progress}%`}}></div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-center gap-4 py-2">
-                                            {/* FIX: t.recentUpdates is now defined in translations */}
-                                            <span className="font-mono text-xs font-bold text-slate-400 uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-slate-200">
-                                                <i className="fa-solid fa-rss mr-2"></i>{t.recentUpdates}
-                                            </span>
-                                            <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
-                                        </div>
-
-                                        {posts.length === 0
-                                            ? <div className="text-center p-12 font-mono text-slate-400 border border-dashed border-slate-300 rounded-2xl bg-white/20">
-                                                <i className="fa-solid fa-satellite-dish text-4xl block mb-4 opacity-50"></i>{t.emptyFeed}
-                                              </div>
-                                            : <div className="flex flex-col gap-6">
-                                                {posts.map(p =>
-                                                    <PostCard key={p.id} p={p} user={user} lang={lang}
-                                                        currentName={currentName} currentAvatar={currentAvatar}
-                                                        onLike={toggleLike} onAddComment={addComment} setToast={setToast} />
-                                                )}
-                                              </div>
-                                        }
-                                    </div>
-
-                                ) : activeMenu === 'Projects' ? (
-                                    <div className="animate-fade-up">
-                                        <h2 className="text-4xl font-extrabold mb-8 text-slate-800 tracking-tight">{t.portfolioLabel}</h2>
-                                        {projects.length === 0
-                                            ? <div className="text-center p-12 font-mono text-slate-400 border border-dashed border-slate-300 rounded-2xl bg-white/20">
-                                                <i className="fa-solid fa-folder-open text-4xl block mb-4 opacity-50"></i>{t.emptyProjects}
-                                              </div>
-                                            : <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {[...projects].sort((a,b)=>b.featured-a.featured).map(p => (
-                                                    <div key={p.id} className={`card p-6 flex flex-col group ${p.featured?'border-l-4 border-l-blue-500':''}`}>
-                                                        {p.imageUrl &&
-                                                            <div className="overflow-hidden rounded-xl mb-5 border border-white/60">
-                                                                {/* FIX: Added alt attribute */}
-                                                                <img src={p.imageUrl} alt={L(p,'title',lang)}
-                                                                    className="w-full h-40 object-cover transform group-hover:scale-105 transition-transform duration-500" />
-                                                            </div>
-                                                        }
-                                                        <div className="flex justify-between items-start mb-3 gap-2 flex-wrap">
-                                                            <h3 className="font-bold text-xl text-slate-800">{L(p,'title',lang)}</h3>
-                                                            {p.status === 'live'
-                                                                ? <span className="pill pill-green"><div className="status-dot-live mr-1"></div> Live</span>
-                                                                : <span className="pill pill-gold"><div className="status-dot-dev mr-1"></div> Dev</span>
-                                                            }
-                                                        </div>
-                                                        <p className="text-[15px] text-slate-600 leading-relaxed mb-6 flex-1">{L(p,'desc',lang)}</p>
-                                                        <div className="flex flex-wrap gap-2 mb-6">
-                                                            {(p.tech||[]).map((tech,i) => <span key={i} className="tech-tag">{tech}</span>)}
-                                                        </div>
-                                                        <div className="pt-4 border-t border-slate-200/60 flex justify-between items-center">
-                                                            {p.featured && <span className="text-blue-500 text-xs font-bold uppercase tracking-widest font-mono"><i className="fa-solid fa-star mr-1"></i> Featured</span>}
-                                                            <div className="flex-1"></div>
-                                                            {p.url &&
-                                                                <a href={p.url} target="_blank" rel="noopener noreferrer"
-                                                                    className="btn-ghost"
-                                                                    style={{padding:'8px 16px', fontSize:'12px', background:'rgba(239,246,255,1)', color:'#2563eb', borderColor:'#bfdbfe'}}>
-                                                                    <i className="fa-solid fa-arrow-up-right-from-square"></i> Launch
-                                                                </a>
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                              </div>
-                                        }
-                                    </div>
-
-                                ) : activeMenu === 'Academics' ? (
-                                    <div className="animate-fade-up">
-                                        <h2 className="text-4xl font-extrabold mb-8 text-slate-800 tracking-tight">{t.academicsLabel}</h2>
-                                        {academics.length === 0
-                                            ? <div className="text-center p-12 font-mono text-slate-400 border border-dashed border-slate-300 rounded-2xl bg-white/20">
-                                                <i className="fa-solid fa-graduation-cap text-4xl block mb-4 opacity-50"></i>
-                                                <pre style={{fontFamily:'inherit'}}>{t.emptyAcademics}</pre>
-                                              </div>
-                                            : <div className="flex flex-col gap-6">
-                                                {[...academics].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).map(a => {
-                                                    const isRes = a.type === 'result';
-                                                    const isLog = a.type === 'studylog';
-                                                    const isCur = a.type === 'current';
-                                                    const moodEmojis = { focused:'🎯', tired:'😴', excited:'🚀', grinding:'💪' };
-                                                    return (
-                                                        <div key={a.id} className={`card p-6 border-l-4 ${isRes?'border-l-amber-500':isLog?'border-l-blue-500':'border-l-green-500'}`}>
-                                                            <div className="flex justify-between items-start mb-3 flex-wrap gap-2">
-                                                                <div className="flex gap-2 items-center flex-wrap">
-                                                                    <span className={isRes?'pill pill-gold':isLog?'pill pill-blue':'pill pill-green'}>
-                                                                        <i className={`fa-solid ${isRes?'fa-trophy':isLog?'fa-book-open':'fa-bolt'} mr-1`}></i> {a.type}
-                                                                    </span>
-                                                                    {isRes && a.category && <span className="pill" style={{background:'#f1f5f9',color:'#64748b',border:'1px solid #cbd5e1'}}>{a.category}</span>}
-                                                                    {isLog && a.subject_en && <span className="text-xs font-bold text-blue-600 font-mono tracking-wide">{L(a,'subject',lang)}</span>}
-                                                                </div>
-                                                                {a.timestamp && <span className="text-xs text-slate-400 font-mono">{timeAgo(a.timestamp)}</span>}
-                                                            </div>
-                                                            <h3 className="font-bold text-xl text-slate-800 mb-2">{L(a,'title',lang)}</h3>
-                                                            {isRes && (
-                                                                <div className="flex items-center gap-3 text-sm text-slate-600 font-bold mb-2">
-                                                                    <i className="fa-solid fa-building-columns text-slate-400"></i>
-                                                                    {L(a,'institution',lang)}
-                                                                    <span className="text-slate-300">|</span>
-                                                                    <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">{a.grade}</span>
-                                                                </div>
-                                                            )}
-                                                            {(isLog||isCur||(isRes&&a.body_en)) &&
-                                                                <p className="text-[15px] text-slate-600 leading-relaxed mb-3">{L(a,'body',lang)||L(a,'goal',lang)}</p>
-                                                            }
-                                                            {isLog && (
-                                                                <div className="flex gap-3 mt-4 pt-4 border-t border-slate-200/50 flex-wrap">
-                                                                    {a.mood && <span className="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full border border-slate-200">{moodEmojis[a.mood]||'🧠'} {a.mood}</span>}
-                                                                    {a.duration_minutes && <span className="text-xs font-mono font-bold text-slate-500 flex items-center gap-1.5"><i className="fa-solid fa-stopwatch"></i> {a.duration_minutes} mins</span>}
-                                                                </div>
-                                                            )}
-                                                            {isCur && (
-                                                                <div className="mt-4 pt-4 border-t border-slate-200/50">
-                                                                    <div className="flex justify-between text-xs font-bold font-mono text-slate-500 mb-1">
-                                                                        <span>Progress</span>
-                                                                        <span className="text-green-600">{a.progress}%</span>
-                                                                    </div>
-                                                                    <div className="progress-track">
-                                                                        <div className="progress-fill" style={{width:`${a.progress}%`, background:'linear-gradient(90deg,#34d399,#059669)'}}></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {/* FIX: Added alt attribute */}
-                                                            {a.imageUrl && <img src={a.imageUrl} alt={L(a,'title',lang)} className="w-full max-h-64 object-cover rounded-xl mt-4 border border-slate-200 shadow-sm" />}
-                                                        </div>
-                                                    );
-                                                })}
-                                              </div>
-                                        }
-                                    </div>
-
-                                ) : activeMenu === 'Perspectives' ? (
-                                    <div className="animate-fade-up">
-                                        <h2 className="text-4xl font-extrabold mb-8 text-slate-800 tracking-tight">{t.perspectivesLabel}</h2>
-                                        {perspectives.length === 0
-                                            ? <div className="text-center p-12 font-mono text-slate-400 border border-dashed border-slate-300 rounded-2xl bg-white/20">
-                                                <i className="fa-solid fa-code-commit text-4xl block mb-4 opacity-50"></i>{t.emptyPerspectives}
-                                              </div>
-                                            : <div className="flex flex-col gap-6">
-                                                {perspectives.map((p, i) => {
-                                                    const colors = ['border-l-blue-500','border-l-amber-500','border-l-purple-500','border-l-green-500'];
-                                                    return (
-                                                        <div key={p.id} className={`card overflow-hidden border-l-4 ${colors[i%colors.length]}`}>
-                                                            <div className="bg-white/40 p-3 border-b border-white/60 flex justify-between items-center text-[11px] font-mono font-bold text-slate-500 uppercase tracking-widest">
-                                                                <span className="flex items-center gap-2">
-                                                                    <i className="fa-solid fa-code-branch"></i> commit {p.id.slice(0,7)}
-                                                                </span>
-                                                                <span>{timeAgo(p.timestamp)}</span>
-                                                            </div>
-                                                            <div className="p-8">
-                                                                <p className="text-xl md:text-2xl font-sans text-slate-800 leading-relaxed relative z-10">
-                                                                    <span className="text-6xl text-slate-200 absolute -top-4 -left-4 -z-10 font-serif">"</span>
-                                                                    {L(p,'text',lang)}
-                                                                </p>
-                                                                {p.topic_en &&
-                                                                    <div className="mt-6 pt-4 border-t border-slate-200/50 flex items-center gap-2">
-                                                                        <span className="pill" style={{background:'#f1f5f9',color:'#64748b',border:'1px solid #cbd5e1'}}>#{p.topic_en}</span>
-                                                                    </div>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                              </div>
-                                        }
-                                    </div>
-
-                                ) : activeMenu === 'Profile' ? (
-                                    <div className="animate-fade-up flex flex-col gap-8">
-                                        <div className="card overflow-hidden shadow-lg">
-                                            <div className="fb-cover">
-                                                {resolvedProfile.coverPhoto &&
-                                                    <img src={resolvedProfile.coverPhoto} alt="Cover"
-                                                        className="w-full h-full object-cover absolute inset-0" />
-                                                }
-                                            </div>
-                                            <div className="fb-avatar-wrap">
-                                                {/* FIX: Added alt attribute */}
-                                                <img src={currentAvatar} alt={currentName} className="fb-avatar bg-white" />
-                                            </div>
-                                            <div className="fb-profile-body">
-                                                <div className="flex justify-between items-start flex-wrap gap-4 mb-2">
-                                                    <div>
-                                                        <h2 className="text-3xl font-extrabold text-slate-800">{currentName}</h2>
-                                                        <p className="text-sm text-blue-600 font-bold font-mono tracking-widest uppercase mt-1">{currentRole}</p>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        {resolvedProfile.resumeUrl &&
-                                                            <a href={resolvedProfile.resumeUrl} target="_blank" rel="noopener noreferrer"
-                                                                className="btn-primary" style={{padding:'8px 16px', fontSize:'12px'}}>
-                                                                <i className="fa-solid fa-download"></i> Resume
-                                                            </a>
-                                                        }
-                                                    </div>
-                                                </div>
-                                                <p className="text-base text-slate-600 leading-relaxed max-w-2xl mt-4">{currentBio}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 gap-6">
-                                            <div className="card p-6 md:p-8">
-                                                {/* FIX: t.skills is now defined in translations */}
-                                                <h3 className="font-bold text-xl mb-6 text-slate-800 border-b border-slate-200/60 pb-3">
-                                                    <i className="fa-solid fa-code text-blue-500 mr-2"></i> {t.skills}
-                                                </h3>
-                                                {/* FIX: t.emptySkills is now defined in translations */}
-                                                {skills.length === 0
-                                                    ? <p className="text-sm font-mono text-slate-400">{t.emptySkills}</p>
-                                                    : skills.map(cat => (
-                                                        <div key={cat.id} className="mb-6 last:mb-0">
-                                                            <div className="font-bold text-xs text-slate-500 mb-3 uppercase font-mono tracking-wider">
-                                                                <i className={`${cat.icon} mr-2`}></i>{L(cat,'cat',lang)}
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {/* FIX: .skill-chip class is now properly defined in CSS */}
-                                                                {(cat.items||[]).map((sk,i) => <span key={i} className="skill-chip">{sk.name}</span>)}
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                }
-                                                <AIResumeMatcher t={t} profileData={resolvedProfile} skills={skills} />
-                                            </div>
-
-                                            <div className="card p-6 md:p-8">
-                                                {/* FIX: t.contactTitle is now defined in translations */}
-                                                <h3 className="font-bold text-xl mb-6 text-slate-800 border-b border-slate-200/60 pb-3">
-                                                    <i className="fa-solid fa-satellite-dish text-green-500 mr-2"></i> {t.contactTitle}
-                                                </h3>
-                                                <div className="flex justify-center gap-4 mb-6">
-                                                    {resolvedProfile.facebookUrl &&
-                                                        <a href={resolvedProfile.facebookUrl} target="_blank" rel="noopener noreferrer"
-                                                            className="social-btn" style={{width:48, height:48, fontSize:'1.25rem'}}>
-                                                            <i className="fa-brands fa-facebook-f"></i>
-                                                        </a>
-                                                    }
-                                                    {resolvedProfile.githubUrl &&
-                                                        <a href={resolvedProfile.githubUrl} target="_blank" rel="noopener noreferrer"
-                                                            className="social-btn" style={{width:48, height:48, fontSize:'1.25rem'}}>
-                                                            <i className="fa-brands fa-github"></i>
-                                                        </a>
-                                                    }
-                                                    {resolvedProfile.linkedinUrl &&
-                                                        <a href={resolvedProfile.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                                                            className="social-btn" style={{width:48, height:48, fontSize:'1.25rem'}}>
-                                                            <i className="fa-brands fa-linkedin-in"></i>
-                                                        </a>
-                                                    }
-                                                </div>
-                                                {/* FIX: ContactForm is now properly defined above */}
-                                                <ContactForm t={t} profileData={resolvedProfile} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </main>
-                        </div>
-
-                        {/* ── MOBILE BOTTOM NAV ── */}
-                        <nav className="bottom-nav">
-                            {navItems.map(item => (
-                                /* FIX: mb:2 was wrong JSX-object syntax for icon style; fixed to proper style */
-                                <button key={item.id}
-                                    className={'bottom-nav-item'+(activeMenu===item.id?' active':'')}
-                                    onClick={()=>navTo(item.id)}>
-                                    <i className={item.fa} style={{ fontSize:18 }}></i>
-                                    <span>{t[item.labelKey].replace('~/','')}</span>
-                                </button>
-                            ))}
-                        </nav>
-                    </div>
-                );
-            };
-
-            ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-
-        } catch (error) {
-            console.error('RezwanOS Boot Error:', error);
-            document.getElementById('root').innerHTML = `
-                <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#ef4444;text-align:center;padding:20px;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:16px;opacity:0.7"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <div style="font-size:14px;color:#94a3b8;margin-top:8px;">Fatal Boot Error — Check Console</div>
-                    <div style="font-size:11px;color:#cbd5e1;margin-top:8px;max-width:300px;word-break:break-all;">${error.message||''}</div>
-                </div>`;
         }
-    }
 
-    bootPortfolio();
-</script>
+        function Uploader() {
+            const [file, setFile] = useState(null);
+            const [progress, setProgress] = useState(0);
+            const [status, setStatus] = useState("");
+
+            const handleFileChange = (e) => {
+                if (e.target.files[0]) {
+                    setFile(e.target.files[0]);
+                    setStatus("");
+                }
+            };
+
+            const handleUpload = async () => {
+                if (!file) return;
+
+                try {
+                    setStatus("Initializing secure connection...");
+                    const response = await fetch(`${BACKEND_URL}/api/get-b2-upload-url`);
+                    
+                    if (!response.ok) throw new Error("Connection failed");
+                    const { uploadUrl, authorizationToken } = await response.json();
+
+                    setStatus("Uploading photo...");
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", uploadUrl, true);
+                    
+                    xhr.setRequestHeader("Authorization", authorizationToken);
+                    xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(file.name)); 
+                    xhr.setRequestHeader("Content-Type", file.type || "b2/x-auto");
+                    xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify"); 
+
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) setProgress(Math.round((event.loaded / event.total) * 100));
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            setStatus("✅ Upload successful!");
+                            setFile(null); 
+                            setTimeout(() => { setProgress(0); setStatus(""); }, 3000);
+                        } else {
+                            setStatus("❌ Upload failed.");
+                        }
+                    };
+                    xhr.send(file);
+                } catch (error) {
+                    setStatus("❌ Error connecting to server.");
+                }
+            };
+
+            return (
+                <div>
+                    <h2>Submit Photo</h2>
+                    <p className="subtitle">High-quality images for the student registry.</p>
+                    
+                    <div className="file-input-wrapper">
+                        <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📁</span>
+                        {file ? <strong>{file.name}</strong> : <span style={{ color: '#827e7a' }}>Tap to select an image</span>}
+                        <input type="file" accept="image/*" onChange={handleFileChange} />
+                    </div>
+                    
+                    {progress > 0 && (
+                        <div className="progress-bar-bg">
+                            <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                        </div>
+                    )}
+                    
+                    {status && <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#2c2a29', textAlign: 'center' }}>{status}</p>}
+
+                    <button className="btn" onClick={handleUpload} disabled={!file || (progress > 0 && progress < 100)}>
+                        {progress > 0 && progress < 100 ? `Uploading... ${progress}%` : "Upload Now"}
+                    </button>
+                </div>
+            );
+        }
+
+        function Gallery() {
+            const [images, setImages] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const fetchGallery = async () => {
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/gallery`);
+                        if (!response.ok) throw new Error("Failed to load");
+                        const data = await response.json();
+                        setImages(data);
+                    } catch (error) {
+                        console.error(error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchGallery();
+            }, []);
+
+            // Function to trigger a proper download on mobile devices
+            const downloadImage = async (url, filename) => {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(blobUrl);
+                } catch (error) {
+                    console.error("Download failed:", error);
+                    // Fallback for strict browsers: just open the image
+                    window.open(url, '_blank');
+                }
+            };
+
+            if (loading) return <div className="loading">Loading secure gallery...</div>;
+            if (images.length === 0) return <div className="loading">No photos uploaded yet.</div>;
+
+            return (
+                <div>
+                    <h2>Archive</h2>
+                    <p className="subtitle">Securely loaded from the cloud registry.</p>
+                    
+                    <div className="gallery-grid">
+                        {images.map(img => (
+                            <div key={img.id} className="gallery-item">
+                                <img src={img.url} alt={img.name} loading="lazy" />
+                                <button 
+                                    className="download-btn" 
+                                    onClick={() => downloadImage(img.url, img.name)}
+                                    title="Download Image"
+                                >
+                                    📥
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
