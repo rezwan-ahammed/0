@@ -3,301 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Student Portal | Janani Coaching Centre</title>
+    <title>Maintenance | Janani Coaching Centre</title>
     
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <style>
         :root {
             --jcc-emerald: #00695c;
             --jcc-green: #2e7d32;
-            --jcc-glass: rgba(255, 255, 255, 0.7);
-            --jcc-border: rgba(255, 255, 255, 0.3);
-            --jcc-text: #1a2a26;
-            --jcc-bg-grad: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
+            --jcc-glass: rgba(255, 255, 255, 0.45);
+            --jcc-border: rgba(255, 255, 255, 0.4);
+            --jcc-shadow: 0 20px 50px rgba(0, 77, 64, 0.1);
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--jcc-bg-grad);
-            min-height: 100vh;
-            color: var(--jcc-text);
-            display: flex;
-            justify-content: center;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        .jcc-app-shell {
-            width: 100%;
-            max-width: 580px;
-            margin: 20px;
-            background: var(--jcc-glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--jcc-border);
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 77, 64, 0.08);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        header {
-            padding: 30px 20px 20px;
-            text-align: center;
-        }
-
-        .jcc-logo {
-            height: 75px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.04));
-        }
-
-        .jcc-nav {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: rgba(255,255,255,0.2);
-            border-bottom: 1px solid var(--jcc-border);
-        }
-
-        .nav-link {
-            padding: 15px;
-            border: none;
-            background: none;
-            font-weight: 700;
-            color: #5f7d78;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .nav-link.active {
-            color: var(--jcc-emerald);
-            background: rgba(255,255,255,0.4);
-            box-shadow: inset 0 -3px 0 var(--jcc-green);
-        }
-
-        .jcc-main { padding: 25px; }
-
-        .drop-zone {
-            border: 2px dashed rgba(0, 105, 92, 0.2);
-            border-radius: 18px;
-            padding: 40px 20px;
-            text-align: center;
-            background: rgba(255,255,255,0.3);
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-
-        .drop-zone:hover {
-            border-color: var(--jcc-emerald);
-            background: rgba(255,255,255,0.5);
-        }
-
-        .jcc-btn {
-            background: linear-gradient(135deg, var(--jcc-emerald), var(--jcc-green));
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 105, 92, 0.2);
-            margin-top: 20px;
-        }
-
-        .jcc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .progress-track {
-            height: 6px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 10px;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--jcc-green);
-            transition: width 0.3s ease;
-        }
-
-        .gallery-view {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 12px;
-        }
-
-        .img-card {
-            aspect-ratio: 1;
-            border-radius: 14px;
-            overflow: hidden;
-            background: white;
-            position: relative;
-            cursor: pointer;
-            border: 1px solid var(--jcc-border);
-        }
-
-        .img-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
-        .img-card:hover img { transform: scale(1.08); }
-
-        .dl-icon {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: var(--jcc-emerald);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
+        body { 
+            background: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            padding: 16px;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            color: #1a2a26;
+            overflow: hidden;
+        }
+
+        /* High-end Glassmorphism with Noise */
+        .jcc-maintenance-wrapper {
+            position: relative;
+            max-width: 480px;
+            width: 100%;
+            background: var(--jcc-glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1.5px solid var(--jcc-border);
+            border-radius: 32px;
+            padding: 50px 30px;
+            text-align: center;
+            box-shadow: var(--jcc-shadow);
+            z-index: 1;
+        }
+
+        /* Developer touch: Noise overlay for realistic glass */
+        .jcc-maintenance-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .brand-logo {
+            height: 85px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.05));
         }
 
         .status-pill {
-            text-align: center;
-            font-size: 0.85rem;
-            padding: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            font-weight: 800;
+            color: var(--jcc-green);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border: 1px solid var(--jcc-border);
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--jcc-green);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
             color: var(--jcc-emerald);
+            font-size: 1.75rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .desc {
+            color: #4a635e;
+            line-height: 1.5;
+            font-size: 1rem;
+            margin-bottom: 32px;
+            padding: 0 10px;
+        }
+
+        /* Modern Grid Timer */
+        .jcc-timer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .unit-box {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 16px 10px;
+            border-radius: 18px;
+            border: 1px solid var(--jcc-border);
+        }
+
+        .val {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--jcc-emerald);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lbl {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #728c87;
+        }
+
+        .launch-eta {
+            font-size: 0.85rem;
             font-weight: 600;
+            color: var(--jcc-emerald);
+            opacity: 0.8;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+        }
+
+        @media (max-width: 400px) {
+            .jcc-maintenance-wrapper { padding: 40px 20px; }
+            h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const API_BASE = "https://janani-backend-api.onrender.com";
+    <main class="jcc-maintenance-wrapper">
+        <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" alt="Janani" class="brand-logo">
+        
+        <div class="status-pill">
+            <span class="pulse-dot"></span>
+            Under Optimization
+        </div>
 
-        const compress = async (file) => {
-            return new Promise((res) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const scale = 1000 / Math.max(img.width, img.height);
-                        canvas.width = img.width * Math.min(scale, 1);
-                        canvas.height = img.height * Math.min(scale, 1);
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        canvas.toBlob((b) => res(new File([b], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.85);
-                    }
-                }
-            });
+        <h1>Development Mode</h1>
+        <p class="desc">The student portal is currently undergoing scheduled backend upgrades. We'll be back online for tonight's session.</p>
+
+        <div class="jcc-timer-grid">
+            <div class="unit-box">
+                <span class="val" id="h">00</span>
+                <span class="lbl">Hours</span>
+            </div>
+            <div class="unit-box">
+                <span class="val" id="m">00</span>
+                <span class="lbl">Mins</span>
+            </div>
+            <div class="unit-box">
+                <span class="val" id="s">00</span>
+                <span class="lbl">Secs</span>
+            </div>
+        </div>
+
+        <div class="launch-eta">
+            Return Expected: Today @ 20:30 BST
+        </div>
+    </main>
+
+    <script>
+        const update = () => {
+            const tgt = new Date();
+            tgt.setHours(20, 30, 0, 0);
+
+            const gap = tgt - new Date();
+            const d = gap > 0 ? gap : 0;
+
+            const h = Math.floor((d / 36e5) % 24);
+            const m = Math.floor((d / 6e4) % 60);
+            const s = Math.floor((d / 1e3) % 60);
+
+            document.getElementById('h').innerText = h.toString().padStart(2, '0');
+            document.getElementById('m').innerText = m.toString().padStart(2, '0');
+            document.getElementById('s').innerText = s.toString().padStart(2, '0');
         };
 
-        const App = () => {
-            const [view, setView] = useState('up');
-            const [file, setFile] = useState(null);
-            const [perc, setPerc] = useState(0);
-            const [msg, setMsg] = useState("");
-            const [items, setItems] = useState([]);
-
-            const onUpload = async () => {
-                try {
-                    setMsg("Preparing secure channel...");
-                    const r = await fetch(`${API_BASE}/api/get-b2-upload-url`);
-                    const { uploadUrl, authorizationToken } = await r.json();
-
-                    setMsg("Sending image...");
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", uploadUrl, true);
-                    xhr.setRequestHeader("Authorization", authorizationToken);
-                    xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(`jcc_${Date.now()}_${file.name}`));
-                    xhr.setRequestHeader("Content-Type", file.type);
-                    xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify");
-
-                    xhr.upload.onprogress = (e) => setPerc(Math.round((e.loaded/e.total)*100));
-                    xhr.onload = () => {
-                        if(xhr.status === 200) {
-                            setMsg("Registry updated successfully.");
-                            setFile(null);
-                            setTimeout(() => {setPerc(0); setMsg("");}, 3000);
-                        }
-                    };
-                    xhr.send(file);
-                } catch(e) { setMsg("Upload failed. Verify server status."); }
-            };
-
-            const loadItems = async () => {
-                setMsg("Syncing database...");
-                try {
-                    const r = await fetch(`${API_BASE}/api/gallery`);
-                    const d = await r.json();
-                    setItems(d);
-                    setMsg("");
-                } catch(e) { setMsg("Sync failed."); }
-            };
-
-            useEffect(() => { if(view === 'gal') loadItems(); }, [view]);
-
-            return (
-                <div className="jcc-app-shell">
-                    <header>
-                        <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="jcc-logo" />
-                    </header>
-
-                    <nav className="jcc-nav">
-                        <button className={`nav-link ${view==='up'?'active':''}`} onClick={()=>setView('up')}>SUBMISSION</button>
-                        <button className={`nav-link ${view==='gal'?'active':''}`} onClick={()=>setView('gal')}>REGISTRY</button>
-                    </nav>
-
-                    <main className="jcc-main">
-                        {view === 'up' ? (
-                            <section>
-                                <div className="drop-zone">
-                                    <input type="file" accept="image/*" style={{opacity:0, position:'absolute', inset:0}} 
-                                        onChange={async (e) => {
-                                            const f = e.target.files[0];
-                                            if(f) {
-                                                setMsg("Optimizing...");
-                                                const cf = await compress(f);
-                                                setFile(cf);
-                                                setMsg("Photo ready.");
-                                            }
-                                        }} />
-                                    <div style={{fontSize:'24px', marginBottom:'10px'}}>📸</div>
-                                    <div style={{fontWeight:600}}>{file ? file.name : "Select Student Photo"}</div>
-                                    <div style={{fontSize:'12px', color:'#7a928e', marginTop:'5px'}}>Standard identity formats supported</div>
-                                </div>
-                                {perc > 0 && <div className="progress-track"><div className="progress-fill" style={{width:`${perc}%`}}></div></div>}
-                                {msg && <div className="status-pill">{msg}</div>}
-                                <button className="jcc-btn" disabled={!file || perc > 0} onClick={onUpload}>
-                                    {perc > 0 ? `UPLOADING ${perc}%` : "UPLOAD TO PORTAL"}
-                                </button>
-                            </section>
-                        ) : (
-                            <section>
-                                {msg && <div className="status-pill">{msg}</div>}
-                                <div className="gallery-view">
-                                    {items.map(i => (
-                                        <div key={i.id} className="img-card" onClick={() => window.open(i.url, '_blank')}>
-                                            <img src={i.url} loading="lazy" />
-                                            <div className="dl-icon">↓</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-                    </main>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        setInterval(update, 1000);
+        update();
     </script>
 </body>
 </html>
