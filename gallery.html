@@ -60,6 +60,9 @@
         .file-card { background: rgba(255,255,255,0.7); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .remove-btn { background: #ffebee; color: #c62828; border: none; width: 24px; height: 24px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20; position: relative; }
 
+        .progress-bar { height: 6px; background: rgba(0, 105, 92, 0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width 0.3s ease; }
+
         .primary-btn {
             background: linear-gradient(135deg, var(--teal), var(--green));
             color: white; border: none; padding: 18px; border-radius: 16px;
@@ -101,13 +104,14 @@
 <script type="text/babel">
     const { useState, useEffect, useCallback } = React;
 
-    // ✅ FULLY CONNECTED BACKEND URL
+    // ✅ LIVE RENDER URL
     const API = "https://janani-backend-api.onrender.com/api/v1";
 
     const App = () => {
-        const [tab, setTab] = useState('upload'); // 'upload', 'gallery', 'admin'
+        const [tab, setTab] = useState('upload'); 
         const [queue, setQueue] = useState([]);
         const [loading, setLoading] = useState(false);
+        const [progress, setProgress] = useState(0); // Added for upload tracking
         const [items, setItems] = useState([]);
         const [taps, setTaps] = useState(0);
         const [isAdmin, setIsAdmin] = useState(false);
@@ -127,43 +131,49 @@
             setQueue(queue.filter((_, i) => i !== indexToRemove));
         };
 
-        const uploadSingleFile = (file, url, token) => new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            const safeName = `pending_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-            xhr.open("POST", url, true);
-            xhr.setRequestHeader("Authorization", token);
-            xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(safeName));
-            xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
-            xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify");
-            xhr.onload = () => xhr.status === 200 ? resolve() : reject(new Error(`Server error ${xhr.status}`));
-            xhr.onerror = () => reject(new Error("Internet connection lost"));
-            xhr.send(file);
-        });
-
+        // 🚀 CLAUDE'S BULLETPROOF UPLOAD LOGIC
         const handleUpload = async () => {
             if (!queue.length) return;
             setLoading(true);
-            try {
-                const tokenRes = await fetch(`${API}/auth/upload-token`);
-                if (!tokenRes.ok) throw new Error("Backend is waking up, try again in 10s.");
-                const token = await tokenRes.json();
+            setProgress(0);
+            let successCount = 0;
 
+            try {
                 for (let i = 0; i < queue.length; i++) {
-                    await uploadSingleFile(queue[i], token.uploadUrl, token.authorizationToken);
+                    const file = queue[i];
+
+                    // FormData handles the chunking and boundaries automatically for mobile browsers
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const res = await fetch(`${API}/registry/upload`, {
+                        method: 'POST',
+                        body: formData
+                        // DO NOT set Content-Type header here, the browser handles it.
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(()=>({}));
+                        throw new Error(err.details || err.error || "Upload failed");
+                    }
+
+                    successCount++;
+                    setProgress(Math.round(((i + 1) / queue.length) * 100));
                 }
-                
+
                 setQueue([]);
-                showToast(`✅ Successfully sent ${queue.length} file(s) for review!`);
-            } catch (e) { 
-                showToast(`❌ ${e.message}`, true); 
+                setProgress(0);
+                showToast(`✅ ${successCount} file(s) submitted for review!`);
+            } catch (e) {
+                showToast(`❌ ${e.message}`, true);
             }
+
             setLoading(false);
         };
 
         const fetchMedia = useCallback(async (mode) => {
             setLoading(true); setItems([]);
             try {
-                // mode is either 'public' (approved) or 'admin' (pending)
                 const res = await fetch(`${API}/registry/list?status=${mode}`);
                 if (!res.ok) throw new Error("Failed to load images.");
                 setItems(await res.json());
@@ -174,7 +184,6 @@
         }, []);
 
         const actionMedia = async (id, name, action) => {
-            // action = 'approve' or 'delete'
             try {
                 const res = await fetch(`${API}/registry/${action}`, {
                     method: action === 'delete' ? 'DELETE' : 'POST',
@@ -183,19 +192,17 @@
                 });
                 if (!res.ok) throw new Error(`Failed to ${action}`);
                 showToast(action === 'approve' ? "✅ File Approved!" : "🗑️ File Deleted");
-                fetchMedia('admin'); // Refresh pending list
+                fetchMedia('admin'); // Refresh list
             } catch (e) { 
                 showToast(`❌ ${e.message}`, true); 
             }
         };
 
-        // Logic for handling tabs
         useEffect(() => {
             if (tab === 'gallery') fetchMedia('public');
             if (tab === 'admin') fetchMedia('admin');
         }, [tab, fetchMedia]);
 
-        // Secret Admin Tap Logic
         const handleLogoTap = () => {
             const nextTaps = taps + 1;
             if (nextTaps >= 5 && !isAdmin) {
@@ -205,7 +212,6 @@
                 showToast("🔐 Admin Dashboard Unlocked");
             } else {
                 setTaps(nextTaps);
-                // Reset taps if they stop tapping for 2 seconds
                 setTimeout(() => setTaps(0), 2000); 
             }
         };
@@ -219,13 +225,11 @@
 
         return (
             <div className="app-shell">
-                {/* Header */}
                 <header onClick={handleLogoTap}>
                     <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="logo" alt="Janani Logo" />
                     {isAdmin ? <div className="admin-badge">ADMINISTRATION</div> : <div className="subtitle">STUDENT PORTAL</div>}
                 </header>
 
-                {/* Navigation (Dynamic based on Admin state) */}
                 <nav className="nav-bar">
                     <button className={`nav-btn ${tab==='upload'?'active':''}`} onClick={()=>setTab('upload')}>UPLOAD</button>
                     <button className={`nav-btn ${tab==='gallery'?'active':''}`} onClick={()=>setTab('gallery')}>GALLERY</button>
@@ -257,8 +261,14 @@
                                 </div>
                             )}
 
+                            {loading && progress > 0 && (
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+                                </div>
+                            )}
+
                             <button className="primary-btn" disabled={!queue.length || loading} onClick={handleUpload}>
-                                {loading ? "🔄 UPLOADING..." : queue.length ? `SUBMIT ${queue.length} FILES` : "CHOOSE FILES FIRST"}
+                                {loading ? `🔄 UPLOADING... ${progress}%` : queue.length ? `SUBMIT ${queue.length} FILES` : "CHOOSE FILES FIRST"}
                             </button>
                         </div>
                     )}
@@ -306,7 +316,6 @@
                     )}
                 </main>
 
-                {/* Toasts / Notifications */}
                 {toast && <div className={`toast ${toast.isError ? 'error' : ''}`}>{toast.msg}</div>}
             </div>
         );
