@@ -3,476 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Janani Coaching Centre — জননী ছাত্র পোর্টাল</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <title>Janani Coaching Centre | জননী ছাত্র পোর্টাল</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet" />
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <style>
-    :root {
-      --forest:   #1a4a3a;
-      --emerald:  #2d6a4f;
-      --leaf:     #52b788;
-      --mint:     #95d5b2;
-      --cream:    #f8f5ef;
-      --sand:     #e9e4d8;
-      --amber:    #c97d2e;
-      --clay:     #8b4513;
-      --ink:      #1c2b24;
-      --mist:     #6b8f7a;
-      --glass-bg: rgba(248,245,239,0.72);
-      --glass-bd: rgba(255,255,255,0.55);
-      --shadow-deep: 0 32px 64px rgba(26,74,58,0.18), 0 8px 24px rgba(26,74,58,0.1);
-      --shadow-card: 0 6px 24px rgba(26,74,58,0.10);
-      --radius-xl: 28px;
-      --radius-lg: 18px;
-      --radius-md: 12px;
-    }
-
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background: var(--cream);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px 16px 40px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* Background texture */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(82,183,136,0.22) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(45,106,79,0.18) 0%, transparent 55%),
-        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(201,125,46,0.06) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #root { position: relative; z-index: 1; width: 100%; max-width: 480px; }
-
-    .shell {
-      background: var(--glass-bg);
-      backdrop-filter: blur(28px) saturate(1.4);
-      -webkit-backdrop-filter: blur(28px) saturate(1.4);
-      border: 1.5px solid var(--glass-bd);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-deep);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: shellIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
-    }
-
-    @keyframes shellIn {
-      from { opacity: 0; transform: translateY(32px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .header {
-      padding: 32px 24px 22px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-      background: linear-gradient(160deg, rgba(45,106,79,0.08) 0%, transparent 60%);
-      border-bottom: 1px solid rgba(149,213,178,0.25);
-      user-select: none;
-    }
-
-    .logo-wrap {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 4px 20px rgba(26,74,58,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
-      margin-bottom: 12px;
-      transition: transform 0.2s ease;
-    }
-
-    .logo { height: 64px; width: 64px; object-fit: contain; }
-
-    .brand-name {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--forest);
-      letter-spacing: -0.3px;
-      line-height: 1.3;
-    }
-
-    .brand-tagline {
-      font-size: 0.72rem;
-      color: var(--mist);
-      font-weight: 500;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    .admin-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: linear-gradient(135deg, #c0392b, #96281b);
-      color: white;
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-top: 8px;
-      box-shadow: 0 4px 14px rgba(192,57,43,0.35);
-    }
-
-    .nav {
-      display: flex;
-      background: rgba(255,255,255,0.35);
-      border-bottom: 1px solid rgba(149,213,178,0.3);
-      position: relative;
-    }
-
-    .nav-btn {
-      flex: 1;
-      padding: 15px 0;
-      border: none;
-      background: none;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-weight: 700;
-      font-size: 0.82rem;
-      color: var(--mist);
-      cursor: pointer;
-      position: relative;
-      transition: color 0.25s;
-    }
-
-    .nav-btn.on { color: var(--forest); }
-
-    .nav-btn.on::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 20%; right: 20%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--leaf), var(--emerald));
-      border-radius: 3px 3px 0 0;
-      animation: tabLine 0.3s ease;
-    }
-
-    .main {
-      padding: 22px 20px 28px;
-      flex: 1;
-      overflow-y: auto;
-      min-height: 340px;
-    }
-
-    /* Modal Styling */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(26, 74, 58, 0.4);
-      backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center;
-      z-index: 10000; padding: 20px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal-card {
-      background: var(--glass-bg); border: 1.5px solid var(--glass-bd);
-      border-radius: var(--radius-xl); padding: 32px; width: 100%; max-width: 380px;
-      box-shadow: var(--shadow-deep); text-align: center;
-      animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .modal-input {
-      width: 100%; padding: 14px; border-radius: var(--radius-md);
-      border: 1.5px solid rgba(82, 183, 136, 0.3);
-      background: rgba(255, 255, 255, 0.6); font-family: 'Hind Siliguri', sans-serif;
-      font-size: 1rem; margin: 20px 0; outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .modal-input:focus { border-color: var(--leaf); }
-
-    .drop-zone {
-      border: 2px dashed rgba(82,183,136,0.45);
-      border-radius: var(--radius-lg);
-      padding: 38px 20px;
-      text-align: center;
-      background: rgba(255,255,255,0.42);
-      position: relative;
-      cursor: pointer;
-    }
-
-    .drop-zone input {
-      opacity: 0; position: absolute; inset: 0;
-      width: 100%; height: 100%; cursor: pointer; z-index: 10;
-    }
-
-    .btn-primary {
-      width: 100%; margin-top: 20px; padding: 17px;
-      background: linear-gradient(135deg, var(--emerald) 0%, var(--forest) 100%);
-      color: white; border: none; border-radius: var(--radius-lg);
-      font-family: 'Hind Siliguri', sans-serif; font-size: 0.95rem; font-weight: 700;
-      cursor: pointer; box-shadow: 0 8px 24px rgba(26,74,58,0.28);
-      transition: all 0.2s;
-    }
-
-    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-
+    :root { --forest: #1a4a3a; --leaf: #52b788; --cream: #f8f5ef; --glass: rgba(255,255,255,0.72); }
+    body { font-family: 'Hind Siliguri', sans-serif; background: var(--cream); padding: 15px; }
+    .shell { background: var(--glass); backdrop-filter: blur(20px); border-radius: 28px; overflow: hidden; max-width: 480px; margin: auto; border: 1px solid white; box-shadow: 0 30px 60px rgba(0,0,0,0.12); }
+    .header { padding: 30px; text-align: center; border-bottom: 1px solid rgba(82,183,136,0.2); }
+    .brand { font-family: 'Noto Serif Bengali', serif; font-size: 1.4rem; font-weight: 700; color: var(--forest); }
+    .nav { display: flex; border-bottom: 1px solid #e0e0e0; }
+    .nav-btn { flex: 1; padding: 15px; border: none; background: none; font-weight: 700; color: #888; cursor: pointer; }
+    .nav-btn.on { color: var(--forest); border-bottom: 3px solid var(--leaf); }
+    .main { padding: 20px; min-height: 350px; }
+    .drop-zone { border: 2px dashed var(--leaf); padding: 40px; border-radius: 20px; text-align: center; position: relative; }
+    .drop-zone input { opacity: 0; position: absolute; inset: 0; cursor: pointer; }
+    .btn-primary { width: 100%; margin-top: 20px; padding: 16px; background: var(--forest); color: white; border: none; border-radius: 15px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+    .modal { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+    .modal input { width: 100%; padding: 14px; margin: 20px 0; border: 1.5px solid #eee; border-radius: 12px; font-size: 1rem; }
     .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    
-    .media-card {
-      aspect-ratio: 1; border-radius: var(--radius-lg); overflow: hidden;
-      background: var(--sand); position: relative; box-shadow: var(--shadow-card);
-      border: 1.5px solid rgba(255,255,255,0.7);
-    }
-    
-    .media-card img, .media-card video { width: 100%; height: 100%; object-fit: cover; }
-
-    .uploader-badge {
-      position: absolute; top: 8px; left: 8px;
-      background: rgba(255,255,255,0.85);
-      padding: 4px 10px; border-radius: 6px;
-      font-size: 0.7rem; font-weight: 700; color: var(--forest);
-      z-index: 5; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .toast {
-      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-      background: var(--forest); color: white; padding: 13px 26px;
-      border-radius: 30px; font-weight: 700; z-index: 9999;
-    }
-
-    .progress-track {
-      height: 7px; background: rgba(82,183,136,0.15);
-      border-radius: 10px; margin-top: 14px; overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%; background: linear-gradient(90deg, var(--leaf), var(--emerald));
-      transition: width 0.4s ease;
-    }
-
-    .admin-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.82));
-      padding: 28px 8px 8px; display: flex; gap: 6px;
-    }
-
-    .btn-approve, .btn-reject {
-      flex: 1; border: none; padding: 9px 4px; border-radius: 9px;
-      color: white; font-weight: 800; font-size: 0.72rem; cursor: pointer;
-    }
-
-    .btn-approve { background: rgba(46,125,50,0.92); }
-    .btn-reject { background: rgba(192,57,43,0.92); }
+    .media-card { aspect-ratio: 1; border-radius: 18px; overflow: hidden; position: relative; background: #eee; border: 1px solid #fff; }
+    .media-card img { width: 100%; height: 100%; object-fit: cover; }
+    .uploader-badge { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; color: var(--forest); }
   </style>
 </head>
 <body>
 <div id="root"></div>
-
 <script type="text/babel">
   const { useState, useEffect, useCallback, useRef } = React;
-  
-  // API Endpoint
   const API = "https://janani-backend-api.onrender.com/api/v1";
 
   const App = () => {
     const [tab, setTab] = useState('upload');
     const [queue, setQueue] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [items, setItems] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [studentName, setStudentName] = useState('');
-    const [tapCount, setTapCount] = useState(0);
-    const [toast, setToast] = useState(null);
-    const timerRef = useRef(null);
-
-    const notify = (msg, isErr = false) => {
-      setToast({ msg, isErr });
-      setTimeout(() => setToast(null), 3500);
-    };
-
-    const handleSelect = (e) => {
-      setQueue(prev => [...prev, ...Array.from(e.target.files)]);
-      e.target.value = '';
-    };
-
-    const removeFile = (idx) => setQueue(q => q.filter((_, i) => i !== idx));
-
-    const startUpload = async () => {
-      if (!studentName.trim()) return alert("দয়া করে আপনার নাম লিখুন");
-      setShowModal(false);
-      setLoading(true);
-      let successCount = 0;
-
-      try {
-        for (let i = 0; i < queue.length; i++) {
-          const fd = new FormData();
-          fd.append('file', queue[i]);
-          fd.append('studentName', studentName); // Sending name to Firestore
-
-          const res = await fetch(`${API}/registry/upload`, { method: 'POST', body: fd });
-          if (!res.ok) throw new Error("আপলোড ব্যর্থ হয়েছে");
-          
-          successCount++;
-          setProgress(Math.round(((i + 1) / queue.length) * 100));
-        }
-        setQueue([]);
-        setProgress(0);
-        notify(`✅ ${successCount}টি ফাইল জননী পোর্টালে জমা হয়েছে`);
-      } catch (e) {
-        notify(`❌ ত্রুটি: ${e.message}`, true);
-      }
-      setLoading(false);
-    };
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [taps, setTaps] = useState(0);
 
     const fetchMedia = useCallback(async (mode) => {
       setLoading(true);
       try {
         const res = await fetch(`${API}/registry/list?status=${mode}`);
-        if (!res.ok) throw new Error("লোড করতে সমস্যা হয়েছে");
-        setItems(await res.json());
-      } catch (e) { notify(`❌ ${e.message}`, true); }
+        const data = await res.json();
+        setItems(data);
+      } catch (e) { console.error(e); }
       setLoading(false);
     }, []);
+
+    const handleUpload = async () => {
+      if (!studentName.trim()) return alert("নাম লিখুন");
+      setShowModal(false); setLoading(true);
+      try {
+        for (let file of queue) {
+          const fd = new FormData();
+          fd.append('file', file); fd.append('studentName', studentName);
+          await fetch(`${API}/registry/upload`, { method: 'POST', body: fd });
+        }
+        setQueue([]); setStudentName(''); alert("✅ জননী পোর্টালে জমা হয়েছে!");
+        setTab('gallery');
+      } catch (e) { alert("❌ আপলোড ব্যর্থ"); }
+      setLoading(false);
+    };
+
+    const handleApprove = async (id, name) => {
+      try {
+        await fetch(`${API}/registry/approve`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ id, name })
+        });
+        fetchMedia('admin');
+      } catch (e) { alert("Error"); }
+    };
 
     useEffect(() => {
       if (tab === 'gallery') fetchMedia('public');
       if (tab === 'admin') fetchMedia('admin');
     }, [tab, fetchMedia]);
 
-    const handleAction = async (id, name, action) => {
-      try {
-        const res = await fetch(`${API}/registry/${action}`, {
-          method: action === 'delete' ? 'DELETE' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, name }),
-        });
-        if (!res.ok) throw new Error("অ্যাকশন ব্যর্থ");
-        notify(action === 'approve' ? '✅ অনুমোদন দেওয়া হয়েছে' : '🗑️ মুছে ফেলা হয়েছে');
-        fetchMedia('admin');
-      } catch (e) { notify(`❌ ${e.message}`, true); }
-    };
-
-    const logoTap = () => {
-      const next = tapCount + 1;
-      if (next >= 5 && !isAdmin) {
-        setIsAdmin(true); setTab('admin'); setTapCount(0);
-        notify('🔐 অ্যাডমিন প্যানেল আনলক হয়েছে');
-      } else {
-        setTapCount(next);
-        clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => setTapCount(0), 2000);
-      }
-    };
-
     return (
       <div className="shell">
-        {/* Name Modal */}
         {showModal && (
           <div className="modal-overlay">
-            <div className="modal-card">
-              <h2 style={{fontFamily:'Noto Serif Bengali', color: 'var(--forest)'}}>আপনার নাম</h2>
-              <input 
-                className="modal-input" 
-                placeholder="যেমন: রেজওয়ান আহমেদ"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-              />
-              <button className="btn-primary" style={{marginTop: 0}} onClick={startUpload}>আপলোড শুরু করুন</button>
-              <button style={{marginTop:15, border:'none', background:'none', color:'#888', cursor:'pointer'}} onClick={() => setShowModal(false)}>বাতিল</button>
+            <div className="modal">
+              <h3>আপনার নাম লিখুন</h3>
+              <input type="text" placeholder="উদা: রেজওয়ান আহমেদ" onChange={(e)=>setStudentName(e.target.value)} />
+              <button className="btn-primary" onClick={handleUpload}>আপলোড শুরু করুন</button>
             </div>
           </div>
         )}
-
-        <header className="header" onClick={logoTap}>
-          <div className="logo-wrap">
-            <img className="logo" src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" alt="Janani Logo" />
-          </div>
-          <div className="brand-name">জননী কোচিং সেন্টার</div>
-          {isAdmin ? <div className="admin-pill">🔐 অ্যাডমিনিস্ট্রেশন</div> : <div className="brand-tagline">JANANI STUDENT PORTAL</div>}
+        <header className="header" onClick={()=>{const n=taps+1; if(n>=5){setIsAdmin(true);setTab('admin');setTaps(0);}else{setTaps(n)}}}>
+          <div className="brand">জননী কোচিং সেন্টার</div>
+          <div style={{fontSize:'0.7rem', color:'#666', marginTop:'4px'}}>JANANI STUDENT PORTAL</div>
         </header>
-
         <nav className="nav">
           <button className={`nav-btn ${tab==='upload'?'on':''}`} onClick={()=>setTab('upload')}>📤 আপলোড</button>
           <button className={`nav-btn ${tab==='gallery'?'on':''}`} onClick={()=>setTab('gallery')}>🖼️ গ্যালারি</button>
           {isAdmin && <button className={`nav-btn ${tab==='admin'?'on':''}`} onClick={()=>setTab('admin')}>⏳ পেন্ডিং</button>}
         </nav>
-
         <main className="main">
-          {tab === 'upload' && (
+          {tab === 'upload' ? (
             <div>
               <div className="drop-zone">
-                <input type="file" multiple accept="image/*,video/*" onChange={handleSelect} />
-                <span style={{fontSize:'2.4rem'}}>📸</span>
-                <div style={{fontWeight:600, color:'var(--forest)', marginTop:10}}>ফাইল বেছে নিন</div>
+                <input type="file" multiple onChange={(e)=>setQueue(Array.from(e.target.files))} />
+                <span style={{fontSize:'2.5rem'}}>📸</span>
+                <div style={{fontWeight:700, marginTop:'10px'}}>ফাইল বেছে নিন</div>
               </div>
-
-              {queue.length > 0 && (
-                <div style={{marginTop: 15}}>
-                  {queue.map((f, i) => (
-                    <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'10px', background:'white', borderRadius:'10px', marginBottom:5, fontSize:'0.8rem'}}>
-                      <span style={{overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'80%'}}>📎 {f.name}</span>
-                      <span style={{color:'#c0392b', cursor:'pointer'}} onClick={() => removeFile(i)}>✕</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {loading && progress > 0 && (
-                <div className="progress-track"><div className="progress-fill" style={{width:`${progress}%`}}></div></div>
-              )}
-
-              <button className="btn-primary" disabled={!queue.length || loading} onClick={() => setShowModal(true)}>
-                {loading ? `⏳ আপলোড হচ্ছে... ${progress}%` : `📤 ${queue.length}টি ফাইল আপলোড করুন`}
-              </button>
+              {queue.length > 0 && <button className="btn-primary" onClick={()=>setShowModal(true)}>📤 {queue.length}টি ফাইল জমা দিন</button>}
+              {loading && <p style={{textAlign:'center', marginTop:15}}>আপলোড হচ্ছে...</p>}
             </div>
-          )}
-
-          {(tab === 'gallery' || tab === 'admin') && (
+          ) : (
             <div className="gallery-grid">
-              {items.length === 0 ? <div style={{gridColumn:'1/3', textAlign:'center', color:'var(--mist)', padding:'40px 0'}}>কোন ফাইল পাওয়া যায়নি</div> : 
-                items.map(item => (
-                  <div key={item.id} className="media-card">
-                    <div className="uploader-badge">👤 {item.studentName}</div>
-                    {item.fileName.match(/\.(mp4|webm|mov)$/i) ? 
-                      <video src={item.src} muted playsInline /> : 
-                      <img src={item.src} loading="lazy" />
-                    }
-                    {tab === 'admin' && (
-                      <div className="admin-overlay">
-                        <button className="btn-approve" onClick={() => handleAction(item.fileId, item.fileName, 'approve')}>অনুমোদন</button>
-                        <button className="btn-reject" onClick={() => { if(confirm('মুছে ফেলবেন?')) handleAction(item.fileId, item.fileName, 'delete') }}>মুছুন</button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              }
+              {items.map(item => (
+                <div key={item.id} className="media-card">
+                  <div className="uploader-badge">👤 {item.studentName}</div>
+                  <img src={item.src} loading="lazy" />
+                  {tab === 'admin' && (
+                    <button style={{position:'absolute', bottom:0, width:'100%', background:'green', color:'white', border:'none', padding:5}} onClick={()=>handleApprove(item.id, item.fileName)}>APPROVE</button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </main>
-        {toast && <div className="toast">{toast.msg}</div>}
       </div>
     );
   };
-
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
