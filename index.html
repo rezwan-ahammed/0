@@ -1,209 +1,857 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Maintenance | Janani Coaching Centre</title>
-    
-    <style>
-        :root {
-            --jcc-emerald: #00695c;
-            --jcc-green: #2e7d32;
-            --jcc-glass: rgba(255, 255, 255, 0.45);
-            --jcc-border: rgba(255, 255, 255, 0.4);
-            --jcc-shadow: 0 20px 50px rgba(0, 77, 64, 0.1);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>জানানি কোচিং সেন্টার — ছাত্র পোর্টাল</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  <style>
+    :root {
+      --forest:   #1a4a3a;
+      --emerald:  #2d6a4f;
+      --leaf:     #52b788;
+      --mint:     #95d5b2;
+      --cream:    #f8f5ef;
+      --sand:     #e9e4d8;
+      --amber:    #c97d2e;
+      --clay:     #8b4513;
+      --ink:      #1c2b24;
+      --mist:     #6b8f7a;
+      --glass-bg: rgba(248,245,239,0.72);
+      --glass-bd: rgba(255,255,255,0.55);
+      --shadow-deep: 0 32px 64px rgba(26,74,58,0.18), 0 8px 24px rgba(26,74,58,0.1);
+      --shadow-card: 0 6px 24px rgba(26,74,58,0.10);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
 
-        body { 
-            background: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            color: #1a2a26;
-            overflow: hidden;
-        }
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* High-end Glassmorphism with Noise */
-        .jcc-maintenance-wrapper {
-            position: relative;
-            max-width: 480px;
-            width: 100%;
-            background: var(--jcc-glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1.5px solid var(--jcc-border);
-            border-radius: 32px;
-            padding: 50px 30px;
-            text-align: center;
-            box-shadow: var(--jcc-shadow);
-            z-index: 1;
-        }
+    html { font-size: 16px; }
 
-        /* Developer touch: Noise overlay for realistic glass */
-        .jcc-maintenance-wrapper::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 32px;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: -1;
-        }
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 16px 40px;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-        .brand-logo {
-            height: 85px;
-            margin-bottom: 24px;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.05));
-        }
+    /* Background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(82,183,136,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(45,106,79,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(201,125,46,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 11px;
-            letter-spacing: 1px;
-            font-weight: 800;
-            color: var(--jcc-green);
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            border: 1px solid var(--jcc-border);
-        }
+    /* Subtle grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
 
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--jcc-green);
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4);
-            animation: pulse 2s infinite;
-        }
+    #root { position: relative; z-index: 1; width: 100%; max-width: 480px; }
 
-        h1 {
-            color: var(--jcc-emerald);
-            font-size: 1.75rem;
-            letter-spacing: -0.5px;
-            margin-bottom: 12px;
-        }
+    /* ── Shell ────────────────────────────────────── */
+    .shell {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(1.4);
+      -webkit-backdrop-filter: blur(28px) saturate(1.4);
+      border: 1.5px solid var(--glass-bd);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-deep);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: shellIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
 
-        .desc {
-            color: #4a635e;
-            line-height: 1.5;
-            font-size: 1rem;
-            margin-bottom: 32px;
-            padding: 0 10px;
-        }
+    @keyframes shellIn {
+      from { opacity: 0; transform: translateY(32px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        /* Modern Grid Timer */
-        .jcc-timer-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 32px;
-        }
+    /* ── Header ───────────────────────────────────── */
+    .header {
+      padding: 32px 24px 22px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      background: linear-gradient(160deg, rgba(45,106,79,0.08) 0%, transparent 60%);
+      border-bottom: 1px solid rgba(149,213,178,0.25);
+      user-select: none;
+    }
 
-        .unit-box {
-            background: rgba(255, 255, 255, 0.6);
-            padding: 16px 10px;
-            border-radius: 18px;
-            border: 1px solid var(--jcc-border);
-        }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--leaf), var(--amber), var(--leaf));
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
+    }
 
-        .val {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--jcc-emerald);
-            font-variant-numeric: tabular-nums;
-        }
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
 
-        .lbl {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: #728c87;
-        }
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 4px 20px rgba(26,74,58,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+      margin-bottom: 12px;
+      transition: transform 0.2s ease;
+    }
 
-        .launch-eta {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--jcc-emerald);
-            opacity: 0.8;
-        }
+    .header:active .logo-wrap { transform: scale(0.93); }
 
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
-        }
+    .logo { height: 64px; width: 64px; object-fit: contain; }
 
-        @media (max-width: 400px) {
-            .jcc-maintenance-wrapper { padding: 40px 20px; }
-            h1 { font-size: 1.5rem; }
-        }
-    </style>
+    .brand-name {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--forest);
+      letter-spacing: -0.3px;
+      line-height: 1.3;
+    }
+
+    .brand-tagline {
+      font-size: 0.72rem;
+      color: var(--mist);
+      font-weight: 500;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .admin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, #c0392b, #96281b);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 8px;
+      box-shadow: 0 4px 14px rgba(192,57,43,0.35);
+    }
+
+    /* ── Nav ──────────────────────────────────────── */
+    .nav {
+      display: flex;
+      background: rgba(255,255,255,0.35);
+      border-bottom: 1px solid rgba(149,213,178,0.3);
+      position: relative;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 15px 0;
+      border: none;
+      background: none;
+      font-family: 'Hind Siliguri', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--mist);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.25s;
+    }
+
+    .nav-btn.on { color: var(--forest); }
+
+    .nav-btn.on::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20%; right: 20%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--leaf), var(--emerald));
+      border-radius: 3px 3px 0 0;
+      animation: tabLine 0.3s ease;
+    }
+
+    @keyframes tabLine {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    /* ── Main ─────────────────────────────────────── */
+    .main {
+      padding: 22px 20px 28px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 340px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Drop Zone ────────────────────────────────── */
+    .section-label {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--forest);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(82,183,136,0.4), transparent);
+    }
+
+    .drop-zone {
+      border: 2px dashed rgba(82,183,136,0.45);
+      border-radius: var(--radius-lg);
+      padding: 38px 20px;
+      text-align: center;
+      background: rgba(255,255,255,0.42);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+
+    .drop-zone:active {
+      transform: scale(0.975);
+      background: rgba(255,255,255,0.65);
+      border-color: var(--leaf);
+      box-shadow: 0 0 0 6px rgba(82,183,136,0.1);
+    }
+
+    .drop-zone input {
+      opacity: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .drop-icon {
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 6px rgba(82,183,136,0.3));
+    }
+
+    .drop-title {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--forest);
+      pointer-events: none;
+      margin-bottom: 4px;
+    }
+
+    .drop-sub {
+      font-size: 0.76rem;
+      color: var(--mist);
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    /* ── File List ────────────────────────────────── */
+    .file-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+    .file-card {
+      background: rgba(255,255,255,0.75);
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(149,213,178,0.4);
+      box-shadow: var(--shadow-card);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--ink);
+      animation: cardIn 0.25s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 82%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .remove-btn {
+      background: #ffeef0;
+      color: #c0392b;
+      border: 1px solid #fcc;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+      position: relative; z-index: 20;
+    }
+
+    .remove-btn:active { transform: scale(0.85); }
+
+    /* ── Progress ─────────────────────────────────── */
+    .progress-wrap { margin-top: 14px; }
+    .progress-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--mist);
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      height: 7px;
+      background: rgba(82,183,136,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--leaf), var(--emerald));
+      border-radius: 10px;
+      transition: width 0.4s cubic-bezier(0.25,1,0.5,1);
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 30px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
+      animation: glide 1s ease infinite;
+    }
+
+    @keyframes glide {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    /* ── Primary Button ───────────────────────────── */
+    .btn-primary {
+      width: 100%;
+      margin-top: 20px;
+      padding: 17px;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--forest) 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: 'Hind Siliguri', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      box-shadow: 0 8px 24px rgba(26,74,58,0.28), inset 0 1px 0 rgba(255,255,255,0.15);
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.5s ease;
+    }
+
+    .btn-primary:not(:disabled):active { transform: translateY(2px); box-shadow: 0 4px 12px rgba(26,74,58,0.25); }
+    .btn-primary:not(:disabled):hover::before { left: 140%; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Gallery ──────────────────────────────────── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .media-card {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--sand);
+      border: 1.5px solid rgba(255,255,255,0.7);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      animation: cardIn 0.3s ease both;
+    }
+
+    .media-card img,
+    .media-card video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .media-card:hover img,
+    .media-card:hover video { transform: scale(1.04); }
+
+    .admin-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.82));
+      padding: 28px 8px 8px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-approve, .btn-reject {
+      flex: 1;
+      border: none;
+      padding: 9px 4px;
+      border-radius: 9px;
+      font-family: 'Hind Siliguri', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-approve { background: rgba(46,125,50,0.92); border: 1px solid rgba(102,187,106,0.6); }
+    .btn-reject  { background: rgba(192,57,43,0.92); border: 1px solid rgba(239,83,80,0.6); }
+    .btn-approve:active, .btn-reject:active { opacity: 0.75; }
+
+    /* ── Empty / Loading States ───────────────────── */
+    .state-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 20px;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .state-icon { font-size: 2.6rem; opacity: 0.65; }
+    .state-title {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--forest);
+    }
+    .state-sub {
+      font-size: 0.8rem;
+      color: var(--mist);
+      font-weight: 500;
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    .spinner-ring {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(82,183,136,0.2);
+      border-top-color: var(--leaf);
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Pending-approval message box */
+    .pending-notice {
+      background: rgba(255,255,255,0.55);
+      border: 1.5px solid rgba(201,125,46,0.25);
+      border-radius: var(--radius-lg);
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(201,125,46,0.08);
+    }
+
+    .pending-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 14px;
+      filter: drop-shadow(0 4px 10px rgba(201,125,46,0.25));
+    }
+
+    .pending-title {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 10px;
+    }
+
+    .pending-body {
+      font-size: 0.85rem;
+      color: var(--mist);
+      font-weight: 500;
+      line-height: 1.75;
+    }
+
+    /* ── Toast ────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--forest);
+      color: white;
+      padding: 13px 26px;
+      border-radius: 30px;
+      font-family: 'Hind Siliguri', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.22);
+      z-index: 9999;
+      white-space: nowrap;
+      animation: toastIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .toast.err { background: #c0392b; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 24px) scale(0.9); }
+      to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+
+    /* Scrollbar */
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-track { background: transparent; }
+    .main::-webkit-scrollbar-thumb { background: rgba(82,183,136,0.3); border-radius: 4px; }
+  </style>
 </head>
 <body>
+<div id="root"></div>
 
-    <main class="jcc-maintenance-wrapper">
-        <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" alt="Janani" class="brand-logo">
-        
-        <div class="status-pill">
-            <span class="pulse-dot"></span>
-            Under Optimization
+<script type="text/babel">
+  const { useState, useEffect, useCallback, useRef } = React;
+  const API = "https://janani-backend-api.onrender.com/api/v1";
+
+  /* ─────────────────────────────────────────────── */
+  const App = () => {
+    const [tab,      setTab]      = useState('upload');
+    const [queue,    setQueue]    = useState([]);
+    const [loading,  setLoading]  = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [items,    setItems]    = useState([]);
+    const [tapCount, setTapCount] = useState(0);
+    const [isAdmin,  setIsAdmin]  = useState(false);
+    const [toast,    setToast]    = useState(null);
+    const tapTimer = useRef(null);
+
+    /* Toast helper */
+    const notify = (msg, isErr = false) => {
+      setToast({ msg, isErr });
+      setTimeout(() => setToast(null), 3500);
+    };
+
+    /* File selection */
+    const onSelect = (e) => {
+      const picked = Array.from(e.target.files || []);
+      setQueue(prev => [...prev, ...picked]);
+      e.target.value = '';
+    };
+
+    const removeFile = (idx) =>
+      setQueue(q => q.filter((_, i) => i !== idx));
+
+    /* Upload */
+    const handleUpload = async () => {
+      if (!queue.length) return;
+      setLoading(true);
+      setProgress(0);
+      let ok = 0;
+
+      try {
+        for (let i = 0; i < queue.length; i++) {
+          const fd = new FormData();
+          fd.append('file', queue[i]);
+          const res = await fetch(`${API}/registry/upload`, { method: 'POST', body: fd });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.details || err.error || 'আপলোড ব্যর্থ হয়েছে');
+          }
+          ok++;
+          setProgress(Math.round(((i + 1) / queue.length) * 100));
+        }
+        setQueue([]);
+        setProgress(0);
+        notify(`✅ ${ok}টি ফাইল পর্যালোচনার জন্য পাঠানো হয়েছে`);
+      } catch (e) {
+        notify(`❌ ${e.message}`, true);
+      }
+      setLoading(false);
+    };
+
+    /* Fetch media */
+    const fetchMedia = useCallback(async (mode) => {
+      setLoading(true);
+      setItems([]);
+      try {
+        const res = await fetch(`${API}/registry/list?status=${mode}`);
+        if (!res.ok) throw new Error('ছবি লোড করতে সমস্যা হয়েছে');
+        setItems(await res.json());
+      } catch (e) {
+        notify(`❌ ${e.message}`, true);
+      }
+      setLoading(false);
+    }, []);
+
+    /* Admin actions */
+    const doAction = async (id, name, action) => {
+      try {
+        const res = await fetch(`${API}/registry/${action}`, {
+          method: action === 'delete' ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, name }),
+        });
+        if (!res.ok) throw new Error(`${action} ব্যর্থ হয়েছে`);
+        notify(action === 'approve' ? '✅ অনুমোদন দেওয়া হয়েছে' : '🗑️ মুছে ফেলা হয়েছে');
+        fetchMedia('admin');
+      } catch (e) {
+        notify(`❌ ${e.message}`, true);
+      }
+    };
+
+    /* Tab load */
+    useEffect(() => {
+      if (tab === 'gallery') fetchMedia('public');
+      if (tab === 'admin')   fetchMedia('admin');
+    }, [tab, fetchMedia]);
+
+    /* Secret logo tap → admin unlock */
+    const logoTap = () => {
+      const next = tapCount + 1;
+      if (next >= 5 && !isAdmin) {
+        setIsAdmin(true);
+        setTab('admin');
+        setTapCount(0);
+        notify('🔐 অ্যাডমিন প্যানেল খোলা হয়েছে');
+      } else {
+        setTapCount(next);
+        clearTimeout(tapTimer.current);
+        tapTimer.current = setTimeout(() => setTapCount(0), 2000);
+      }
+    };
+
+    const isVideo = (name) => /\.(mp4|mov|webm|avi)$/i.test(name);
+
+    /* ── Render helpers ────────────────────────── */
+    const LoadState = ({ text }) => (
+      <div className="state-box">
+        <div className="spinner-ring"></div>
+        <div className="state-sub">{text}</div>
+      </div>
+    );
+
+    const EmptyState = ({ icon, title, sub }) => (
+      <div className="state-box">
+        <div className="state-icon">{icon}</div>
+        {title && <div className="state-title">{title}</div>}
+        {sub   && <div className="state-sub">{sub}</div>}
+      </div>
+    );
+
+    /* ── Upload Tab ──────────────────────────── */
+    const UploadTab = () => (
+      <div>
+        <div className="section-label">📤 মিডিয়া আপলোড করুন</div>
+
+        <div className="drop-zone">
+          <input type="file" multiple accept="image/*,video/*" onChange={onSelect} />
+          <span className="drop-icon">📸</span>
+          <div className="drop-title">ছবি বা ভিডিও বেছে নিন</div>
+          <div className="drop-sub">ছবি ও ভিডিও সমর্থিত • একাধিক ফাইল একসাথে দেওয়া যাবে</div>
         </div>
 
-        <h1>Development Mode</h1>
-        <p class="desc">The student portal is currently undergoing scheduled backend upgrades. We'll be back online for tonight's session.</p>
+        {queue.length > 0 && (
+          <div className="file-list">
+            {queue.map((f, i) => (
+              <div key={i} className="file-card">
+                <span className="file-name">
+                  <span>{isVideo(f.name) ? '🎬' : '🖼️'}</span>
+                  <span>{f.name}</span>
+                </span>
+                <button className="remove-btn" onClick={() => removeFile(i)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        <div class="jcc-timer-grid">
-            <div class="unit-box">
-                <span class="val" id="h">00</span>
-                <span class="lbl">Hours</span>
+        {loading && progress > 0 && (
+          <div className="progress-wrap">
+            <div className="progress-label">আপলোড হচ্ছে — {progress}%</div>
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: `${progress}%` }}></div>
             </div>
-            <div class="unit-box">
-                <span class="val" id="m">00</span>
-                <span class="lbl">Mins</span>
+          </div>
+        )}
+
+        <button
+          className="btn-primary"
+          disabled={!queue.length || loading}
+          onClick={handleUpload}
+        >
+          {loading
+            ? `⏳ আপলোড হচ্ছে... ${progress}%`
+            : queue.length
+              ? `📤 ${queue.length}টি ফাইল জমা দিন`
+              : 'প্রথমে ফাইল বেছে নিন'
+          }
+        </button>
+      </div>
+    );
+
+    /* ── Gallery Tab ─────────────────────────── */
+    const GalleryTab = () => (
+      <div>
+        <div className="section-label">🖼️ ফটো গ্যালারি</div>
+        {loading ? (
+          <LoadState text="গ্যালারি লোড হচ্ছে..." />
+        ) : (
+          /* Always show pending notice in public gallery */
+          <div className="pending-notice">
+            <span className="pending-icon">🕐</span>
+            <div className="pending-title">অনুমোদনের অপেক্ষায়</div>
+            <div className="pending-body">
+              অ্যাডমিন এখনও আপনার ছবিগুলো অনুমোদন করেননি।<br />
+              অনুমোদনের পরে ছবিগুলো এখানে দেখা যাবে।
             </div>
-            <div class="unit-box">
-                <span class="val" id="s">00</span>
-                <span class="lbl">Secs</span>
-            </div>
-        </div>
+          </div>
+        )}
+      </div>
+    );
 
-        <div class="launch-eta">
-            Return Expected: Today @ 20:30 BST
-        </div>
-    </main>
+    /* ── Admin Tab ───────────────────────────── */
+    const AdminTab = () => (
+      <div>
+        <div className="section-label">⏳ অনুমোদন বাকি</div>
+        {loading ? (
+          <LoadState text="ফাইল লোড হচ্ছে..." />
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon="👍"
+            title="সব ঠিকঠাক!"
+            sub="এই মুহূর্তে কোনো ফাইল অনুমোদনের অপেক্ষায় নেই।"
+          />
+        ) : (
+          <div className="gallery-grid">
+            {items.map(item => (
+              <div key={item.fileId} className="media-card">
+                {isVideo(item.fileName)
+                  ? <video src={item.src} muted playsInline />
+                  : <img src={item.src} loading="lazy" alt="পেন্ডিং মিডিয়া" />
+                }
+                <div className="admin-overlay">
+                  <button className="btn-approve" onClick={() => doAction(item.fileId, item.fileName, 'approve')}>
+                    ✅ অনুমোদন
+                  </button>
+                  <button className="btn-reject" onClick={() => {
+                    if (window.confirm('এই ফাইলটি স্থায়ীভাবে মুছে ফেলবেন?'))
+                      doAction(item.fileId, item.fileName, 'delete');
+                  }}>
+                    🗑️ মুছুন
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
 
-    <script>
-        const update = () => {
-            const tgt = new Date();
-            tgt.setHours(20, 30, 0, 0);
+    /* ── Root render ─────────────────────────── */
+    return (
+      <div className="shell">
+        <header className="header" onClick={logoTap}>
+          <div className="logo-wrap">
+            <img
+              className="logo"
+              src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png"
+              alt="জানানি লোগো"
+            />
+          </div>
+          <div className="brand-name">জানানি কোচিং সেন্টার</div>
+          {isAdmin
+            ? <div className="admin-pill">🔐 অ্যাডমিনিস্ট্রেশন</div>
+            : <div className="brand-tagline">ছাত্র পোর্টাল</div>
+          }
+        </header>
 
-            const gap = tgt - new Date();
-            const d = gap > 0 ? gap : 0;
+        <nav className="nav">
+          <button className={`nav-btn ${tab==='upload' ? 'on' : ''}`} onClick={() => setTab('upload')}>
+            📤 আপলোড
+          </button>
+          <button className={`nav-btn ${tab==='gallery' ? 'on' : ''}`} onClick={() => setTab('gallery')}>
+            🖼️ গ্যালারি
+          </button>
+          {isAdmin && (
+            <button className={`nav-btn ${tab==='admin' ? 'on' : ''}`} onClick={() => setTab('admin')}>
+              ⏳ পেন্ডিং
+            </button>
+          )}
+        </nav>
 
-            const h = Math.floor((d / 36e5) % 24);
-            const m = Math.floor((d / 6e4) % 60);
-            const s = Math.floor((d / 1e3) % 60);
+        <main className="main">
+          {tab === 'upload'  && <UploadTab  />}
+          {tab === 'gallery' && <GalleryTab />}
+          {tab === 'admin'   && <AdminTab   />}
+        </main>
 
-            document.getElementById('h').innerText = h.toString().padStart(2, '0');
-            document.getElementById('m').innerText = m.toString().padStart(2, '0');
-            document.getElementById('s').innerText = s.toString().padStart(2, '0');
-        };
+        {toast && <div className={`toast ${toast.isErr ? 'err' : ''}`}>{toast.msg}</div>}
+      </div>
+    );
+  };
 
-        setInterval(update, 1000);
-        update();
-    </script>
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
