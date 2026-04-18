@@ -1,327 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Student Portal | Janani Coaching Centre</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>জানানি কোচিং সেন্টার — ছাত্র পোর্টাল</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ... (জানানি পোর্টালের আগের সব স্টাইল এখানে থাকবে) ... */
+    
+    /* নাম মোডাল স্টাইল */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(26, 74, 58, 0.5);
+      backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    .modal-input {
+      width: 100%; padding: 14px; margin: 20px 0; border: 2px solid #eee; border-radius: 12px;
+      font-family: inherit; font-size: 1rem; outline: none;
+    }
+    .modal-input:focus { border-color: #52b788; }
 
-    <style>
-        :root {
-            --teal: #00695c;
-            --green: #2e7d32;
-            --glass: rgba(255, 255, 255, 0.6);
-            --border: rgba(255, 255, 255, 0.5);
-            --text-dark: #1f332f;
-            --text-light: #5d7570;
-            --grad: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: var(--grad); min-height: 100vh; display: flex; justify-content: center; padding: 15px; padding-top: env(safe-area-inset-top); }
-
-        .app-shell {
-            width: 100%; max-width: 500px;
-            background: var(--glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1.5px solid var(--border); border-radius: 28px;
-            box-shadow: 0 24px 48px rgba(0, 77, 64, 0.12);
-            display: flex; flex-direction: column; overflow: hidden;
-            position: relative;
-        }
-
-        /* --- Header --- */
-        header { padding: 30px 20px 20px; text-align: center; cursor: pointer; transition: 0.2s; }
-        header:active { opacity: 0.7; }
-        .logo { height: 75px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08)); }
-        .subtitle { font-size: 10px; color: var(--text-light); margin-top: 6px; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; }
-        .admin-badge { background: linear-gradient(90deg, #d32f2f, #c62828); color: white; padding: 4px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: inline-block; margin-top: 6px; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3); }
-
-        /* --- Navigation --- */
-        .nav-bar { display: flex; background: rgba(255,255,255,0.3); border-bottom: 1px solid var(--border); }
-        .nav-btn { flex: 1; padding: 16px 0; border: none; background: none; font-weight: 800; color: var(--text-light); font-size: 0.8rem; letter-spacing: 0.5px; transition: 0.3s; cursor: pointer; }
-        .nav-btn.active { color: var(--teal); background: rgba(255,255,255,0.5); box-shadow: inset 0 -3px 0 var(--teal); }
-
-        /* --- Body & Upload --- */
-        .main-content { padding: 24px; flex-grow: 1; overflow-y: auto; }
-        
-        .drop-zone {
-            border: 2.5px dashed rgba(0, 105, 92, 0.25); border-radius: 20px;
-            padding: 40px 20px; text-align: center; background: rgba(255,255,255,0.3);
-            position: relative; transition: all 0.2s ease; cursor: pointer;
-        }
-        .drop-zone:active { transform: scale(0.97); background: rgba(255,255,255,0.5); border-color: var(--teal); }
-        .drop-zone input { opacity: 0; position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; z-index: 10; }
-        
-        .file-list { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .file-card { background: rgba(255,255,255,0.7); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .remove-btn { background: #ffebee; color: #c62828; border: none; width: 24px; height: 24px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20; position: relative; }
-
-        .progress-bar { height: 6px; background: rgba(0, 105, 92, 0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width 0.3s ease; }
-
-        .primary-btn {
-            background: linear-gradient(135deg, var(--teal), var(--green));
-            color: white; border: none; padding: 18px; border-radius: 16px;
-            width: 100%; font-weight: 800; font-size: 0.95rem; cursor: pointer;
-            margin-top: 20px; box-shadow: 0 10px 24px rgba(0, 105, 92, 0.25);
-            transition: 0.2s; letter-spacing: 0.5px;
-        }
-        .primary-btn:disabled { opacity: 0.5; filter: grayscale(50%); cursor: not-allowed; box-shadow: none; }
-        .primary-btn:active:not(:disabled) { transform: translateY(2px); }
-
-        /* --- Gallery Grid --- */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .media-card { aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: #fff; border: 1px solid var(--border); position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .media-card img, .media-card video { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Admin Overlays */
-        .admin-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); display: flex; padding: 25px 6px 6px; gap: 6px; }
-        .btn-action { flex: 1; border: none; padding: 8px; border-radius: 8px; font-size: 10px; font-weight: 900; color: white; cursor: pointer; backdrop-filter: blur(4px); }
-        .btn-approve { background: rgba(46, 125, 50, 0.9); border: 1px solid #4caf50; }
-        .btn-reject { background: rgba(198, 40, 40, 0.9); border: 1px solid #ef5350; }
-
-        /* --- Utilities --- */
-        .empty-state { text-align: center; padding: 50px 20px; }
-        .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
-        .empty-text { color: var(--text-light); font-size: 14px; font-weight: 600; }
-        
-        .spinner { border: 3px solid rgba(0, 105, 92, 0.2); border-top-color: var(--teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1b5e20; color: white; padding: 14px 28px; border-radius: 30px; font-weight: 700; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1000; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.error { background: #c62828; }
-        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
-    </style>
+    /* গ্যালারিতে নাম দেখানোর স্টাইল */
+    .uploader-badge {
+      position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9);
+      padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+      color: #1a4a3a; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
-
 <div id="root"></div>
 
 <script type="text/babel">
-    const { useState, useEffect, useCallback } = React;
+  const { useState, useEffect, useCallback, useRef } = React;
+  const API = "https://janani-backend-api.onrender.com/api/v1";
 
-    // ✅ LIVE RENDER URL
-    const API = "https://janani-backend-api.onrender.com/api/v1";
+  const App = () => {
+    const [tab, setTab] = useState('upload');
+    const [queue, setQueue] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [items, setItems] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [toast, setToast] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [studentName, setStudentName] = useState('');
+    const [tapCount, setTapCount] = useState(0);
 
-    const App = () => {
-        const [tab, setTab] = useState('upload'); 
-        const [queue, setQueue] = useState([]);
-        const [loading, setLoading] = useState(false);
-        const [progress, setProgress] = useState(0); // Added for upload tracking
-        const [items, setItems] = useState([]);
-        const [taps, setTaps] = useState(0);
-        const [isAdmin, setIsAdmin] = useState(false);
-        const [toast, setToast] = useState(null);
-
-        const showToast = (msg, isError = false) => {
-            setToast({ msg, isError });
-            setTimeout(() => setToast(null), 3500);
-        };
-
-        const handleFileSelect = (e) => {
-            const selected = Array.from(e.target.files);
-            setQueue(prev => [...prev, ...selected]);
-        };
-
-        const removeFile = (indexToRemove) => {
-            setQueue(queue.filter((_, i) => i !== indexToRemove));
-        };
-
-        // 🚀 CLAUDE'S BULLETPROOF UPLOAD LOGIC
-        const handleUpload = async () => {
-            if (!queue.length) return;
-            setLoading(true);
-            setProgress(0);
-            let successCount = 0;
-
-            try {
-                for (let i = 0; i < queue.length; i++) {
-                    const file = queue[i];
-
-                    // FormData handles the chunking and boundaries automatically for mobile browsers
-                    const formData = new FormData();
-                    formData.append('file', file);
-
-                    const res = await fetch(`${API}/registry/upload`, {
-                        method: 'POST',
-                        body: formData
-                        // DO NOT set Content-Type header here, the browser handles it.
-                    });
-
-                    if (!res.ok) {
-                        const err = await res.json().catch(()=>({}));
-                        throw new Error(err.details || err.error || "Upload failed");
-                    }
-
-                    successCount++;
-                    setProgress(Math.round(((i + 1) / queue.length) * 100));
-                }
-
-                setQueue([]);
-                setProgress(0);
-                showToast(`✅ ${successCount} file(s) submitted for review!`);
-            } catch (e) {
-                showToast(`❌ ${e.message}`, true);
-            }
-
-            setLoading(false);
-        };
-
-        const fetchMedia = useCallback(async (mode) => {
-            setLoading(true); setItems([]);
-            try {
-                const res = await fetch(`${API}/registry/list?status=${mode}`);
-                if (!res.ok) throw new Error("Failed to load images.");
-                setItems(await res.json());
-            } catch (e) { 
-                showToast(`❌ ${e.message}`, true); 
-            }
-            setLoading(false);
-        }, []);
-
-        const actionMedia = async (id, name, action) => {
-            try {
-                const res = await fetch(`${API}/registry/${action}`, {
-                    method: action === 'delete' ? 'DELETE' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, name })
-                });
-                if (!res.ok) throw new Error(`Failed to ${action}`);
-                showToast(action === 'approve' ? "✅ File Approved!" : "🗑️ File Deleted");
-                fetchMedia('admin'); // Refresh list
-            } catch (e) { 
-                showToast(`❌ ${e.message}`, true); 
-            }
-        };
-
-        useEffect(() => {
-            if (tab === 'gallery') fetchMedia('public');
-            if (tab === 'admin') fetchMedia('admin');
-        }, [tab, fetchMedia]);
-
-        const handleLogoTap = () => {
-            const nextTaps = taps + 1;
-            if (nextTaps >= 5 && !isAdmin) {
-                setIsAdmin(true);
-                setTab('admin');
-                setTaps(0);
-                showToast("🔐 Admin Dashboard Unlocked");
-            } else {
-                setTaps(nextTaps);
-                setTimeout(() => setTaps(0), 2000); 
-            }
-        };
-
-        const renderEmptyState = (icon, text) => (
-            <div className="empty-state">
-                <div className="empty-icon">{icon}</div>
-                <div className="empty-text">{text}</div>
-            </div>
-        );
-
-        return (
-            <div className="app-shell">
-                <header onClick={handleLogoTap}>
-                    <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="logo" alt="Janani Logo" />
-                    {isAdmin ? <div className="admin-badge">ADMINISTRATION</div> : <div className="subtitle">STUDENT PORTAL</div>}
-                </header>
-
-                <nav className="nav-bar">
-                    <button className={`nav-btn ${tab==='upload'?'active':''}`} onClick={()=>setTab('upload')}>UPLOAD</button>
-                    <button className={`nav-btn ${tab==='gallery'?'active':''}`} onClick={()=>setTab('gallery')}>GALLERY</button>
-                    {isAdmin && <button className={`nav-btn ${tab==='admin'?'active':''}`} onClick={()=>setTab('admin')}>PENDING</button>}
-                </nav>
-
-                <main className="main-content">
-                    
-                    {/* --- UPLOAD TAB --- */}
-                    {tab === 'upload' && (
-                        <div>
-                            <div className="drop-zone">
-                                <input type="file" multiple accept="image/*,video/*" onChange={handleFileSelect} />
-                                <div style={{fontSize: 40, marginBottom: 10, pointerEvents: 'none'}}>📸</div>
-                                <h3 style={{color: 'var(--text-dark)', pointerEvents: 'none'}}>Tap to Select Media</h3>
-                                <p style={{fontSize: 12, color: 'var(--text-light)', marginTop: 4, pointerEvents: 'none'}}>Images and Videos supported</p>
-                            </div>
-
-                            {queue.length > 0 && (
-                                <div className="file-list">
-                                    {queue.map((file, i) => (
-                                        <div key={i} className="file-card">
-                                            <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%'}}>
-                                                📎 {file.name}
-                                            </span>
-                                            <button className="remove-btn" onClick={() => removeFile(i)}>✕</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {loading && progress > 0 && (
-                                <div className="progress-bar">
-                                    <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-                                </div>
-                            )}
-
-                            <button className="primary-btn" disabled={!queue.length || loading} onClick={handleUpload}>
-                                {loading ? `🔄 UPLOADING... ${progress}%` : queue.length ? `SUBMIT ${queue.length} FILES` : "CHOOSE FILES FIRST"}
-                            </button>
-                        </div>
-                    )}
-
-                    {/* --- PUBLIC GALLERY TAB --- */}
-                    {tab === 'gallery' && (
-                        <div>
-                            {loading ? (
-                                <div className="empty-state"><div className="spinner"></div><div className="empty-text">Loading Gallery...</div></div>
-                            ) : items.length === 0 ? (
-                                renderEmptyState("🖼️", "The gallery is currently empty.")
-                            ) : (
-                                <div className="gallery-grid">
-                                    {items.map(item => (
-                                        <div key={item.fileId} className="media-card">
-                                            {/\.(mp4|mov|webm)$/i.test(item.fileName) ? <video src={item.src} controls playsInline /> : <img src={item.src} loading="lazy" alt="Gallery item" />}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* --- ADMIN PENDING TAB --- */}
-                    {tab === 'admin' && (
-                        <div>
-                            {loading ? (
-                                <div className="empty-state"><div className="spinner"></div><div className="empty-text">Loading Pending Files...</div></div>
-                            ) : items.length === 0 ? (
-                                renderEmptyState("👍", "You're all caught up! No pending files.")
-                            ) : (
-                                <div className="gallery-grid">
-                                    {items.map(item => (
-                                        <div key={item.fileId} className="media-card">
-                                            {/\.(mp4|mov|webm)$/i.test(item.fileName) ? <video src={item.src} muted playsInline /> : <img src={item.src} loading="lazy" />}
-                                            <div className="admin-controls">
-                                                <button className="btn-action btn-approve" onClick={()=>actionMedia(item.fileId, item.fileName, 'approve')}>APPROVE</button>
-                                                <button className="btn-action btn-reject" onClick={()=>{if(confirm('Delete permanently?')) actionMedia(item.fileId, item.fileName, 'delete')}}>DELETE</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </main>
-
-                {toast && <div className={`toast ${toast.isError ? 'error' : ''}`}>{toast.msg}</div>}
-            </div>
-        );
+    const notify = (msg, isErr = false) => {
+      setToast({ msg, isErr });
+      setTimeout(() => setToast(null), 3500);
     };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    const handleUpload = async () => {
+      if (!studentName.trim()) return alert("আপনার নাম লিখুন!");
+      setShowModal(false);
+      setLoading(true);
+      try {
+        for (let i = 0; i < queue.length; i++) {
+          const fd = new FormData();
+          fd.append('file', queue[i]);
+          fd.append('studentName', studentName);
+          const res = await fetch(`${API}/registry/upload`, { method: 'POST', body: fd });
+          if (!res.ok) throw new Error('আপলোড সফল হয়নি');
+          setProgress(Math.round(((i + 1) / queue.length) * 100));
+        }
+        setQueue([]); setProgress(0); setStudentName('');
+        notify("✅ সফলভাবে পাঠানো হয়েছে!");
+      } catch (e) { notify("❌ ত্রুটি: " + e.message, true); }
+      setLoading(false);
+    };
+
+    const fetchMedia = useCallback(async (mode) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API}/registry/list?status=${mode}`);
+        setItems(await res.json());
+      } catch (e) { notify("❌ লোড করতে সমস্যা হয়েছে", true); }
+      setLoading(false);
+    }, []);
+
+    useEffect(() => {
+      if (tab === 'gallery') fetchMedia('public');
+      if (tab === 'admin')   fetchMedia('admin');
+    }, [tab, fetchMedia]);
+
+    const logoTap = () => {
+      const next = tapCount + 1;
+      if (next >= 5 && !isAdmin) {
+        setIsAdmin(true); setTab('admin'); setTapCount(0);
+        notify("🔐 অ্যাডমিন প্যানেল আনলক হয়েছে");
+      } else {
+        setTapCount(next);
+        setTimeout(() => setTapCount(0), 2000);
+      }
+    };
+
+    return (
+      <div className="shell">
+        {/* নাম ইনপুট মোডাল */}
+        {showModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h2 style={{fontFamily:'Noto Serif Bengali'}}>আপনার নাম</h2>
+              <input 
+                className="modal-input" 
+                placeholder="যেমন: রেজওয়ান আহমেদ" 
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+              />
+              <button className="btn-primary" onClick={handleUpload}>আপলোড শুরু করুন</button>
+              <button style={{marginTop:10, border:'none', background:'none', color:'#888', cursor:'pointer'}} onClick={()=>setShowModal(false)}>বাতিল</button>
+            </div>
+          </div>
+        )}
+
+        <header className="header" onClick={logoTap}>
+          <div className="brand-name">জানানি কোচিং সেন্টার</div>
+          {isAdmin && <div className="admin-pill">🔐 অ্যাডমিনিস্ট্রেশন</div>}
+        </header>
+
+        <nav className="nav">
+          <button className={`nav-btn ${tab==='upload'?'on':''}`} onClick={()=>setTab('upload')}>📤 আপলোড</button>
+          <button className={`nav-btn ${tab==='gallery'?'on':''}`} onClick={()=>setTab('gallery')}>🖼️ গ্যালারি</button>
+          {isAdmin && <button className={`nav-btn ${tab==='admin'?'on':''}`} onClick={()=>setTab('admin')}>⏳ পেন্ডিং</button>}
+        </nav>
+
+        <main className="main">
+          {tab === 'upload' && (
+            <div>
+              <div className="drop-zone">
+                <input type="file" multiple onChange={(e)=>setQueue(Array.from(e.target.files))} />
+                <span className="drop-icon">📸</span>
+                <div className="drop-title">ফাইল বেছে নিন</div>
+              </div>
+              {queue.length > 0 && (
+                <div className="file-list">
+                  {queue.map((f, i) => (
+                    <div key={i} className="file-card">📎 {f.name}</div>
+                  ))}
+                </div>
+              )}
+              {loading && <div className="progress-track"><div className="progress-fill" style={{width:`${progress}%`}}></div></div>}
+              <button className="btn-primary" disabled={!queue.length || loading} onClick={()=>setShowModal(true)}>
+                📤 আপলোড করুন
+              </button>
+            </div>
+          )}
+
+          {(tab === 'gallery' || tab === 'admin') && (
+            <div className="gallery-grid">
+              {items.map(item => (
+                <div key={item.id} className="media-card">
+                  <div className="uploader-badge">👤 {item.studentName}</div>
+                  <img src={item.src} loading="lazy" />
+                  {tab === 'admin' && (
+                    <div className="admin-overlay">
+                      <button className="btn-approve" onClick={()=> {/* Approve call */}}>অনুমোদন</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  };
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
