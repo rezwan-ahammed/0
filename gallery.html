@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal | Janani Coaching Centre</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        :root {
+            --jcc-emerald: #00695c;
+            --jcc-green: #2e7d32;
+            --jcc-glass: rgba(255, 255, 255, 0.45);
+            --jcc-border: rgba(255, 255, 255, 0.4);
+        }
+
+        body {
+            margin: 0; padding: 0; min-height: 100vh;
+            background: linear-gradient(135deg, #e0f2f1 0%, #c8e6c9 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex; justify-content: center;
+        }
+
+        .jcc-shell {
+            width: 100%; max-width: 600px; margin: 20px;
+            background: var(--jcc-glass);
+            backdrop-filter: blur(25px) saturate(160%);
+            -webkit-backdrop-filter: blur(25px) saturate(160%);
+            border-radius: 30px; border: 1.5px solid var(--jcc-border);
+            box-shadow: 0 20px 45px rgba(0, 77, 64, 0.1);
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        header { padding: 35px 20px 20px; text-align: center; cursor: pointer; }
+        .logo { height: 75px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
+
+        nav { display: grid; grid-template-columns: 1fr 1fr; background: rgba(255,255,255,0.2); }
+        .nav-tab {
+            padding: 16px; border: none; background: none; font-weight: 700;
+            color: #5f7a75; cursor: pointer; transition: 0.3s; font-size: 0.85rem;
+        }
+        .nav-tab.active { color: var(--jcc-emerald); background: rgba(255,255,255,0.4); box-shadow: inset 0 -3px 0 var(--jcc-green); }
+
+        .jcc-body { padding: 25px; }
+
+        .upload-area {
+            border: 2px dashed rgba(0, 105, 92, 0.2); border-radius: 20px;
+            padding: 40px 15px; text-align: center; background: rgba(255,255,255,0.2);
+            position: relative; transition: 0.3s;
+        }
+        .upload-area:active { transform: scale(0.98); background: rgba(255,255,255,0.4); }
+
+        .queue-pill {
+            background: rgba(255,255,255,0.6); padding: 10px 15px; border-radius: 12px;
+            margin-top: 8px; display: flex; justify-content: space-between; border: 1px solid var(--jcc-border);
+            font-size: 12px; font-weight: 600;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--jcc-emerald), var(--jcc-green));
+            color: white; border: none; padding: 16px; border-radius: 14px;
+            width: 100%; font-weight: 700; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0, 105, 92, 0.2);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        .grid-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid var(--jcc-border); position: relative; }
+        .grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+
+        .admin-tag { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); padding: 5px; display: flex; gap: 4px; }
+        .adm-btn { flex: 1; border: none; padding: 5px; border-radius: 4px; font-size: 9px; font-weight: 900; color: white; cursor: pointer; }
+        .btn-app { background: var(--jcc-green); } .btn-rej { background: #c62828; }
+        
+        .loading { text-align: center; color: var(--jcc-emerald); padding: 40px; font-weight: 600; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const BASE_URL = "https://janani-backend-api.onrender.com";
+
+        const App = () => {
+            const [view, setView] = useState('up');
+            const [files, setFiles] = useState([]);
+            const [busy, setBusy] = useState(false);
+            const [data, setData] = useState([]);
+            const [tapCount, setTapCount] = useState(0);
+
+            const handleUpload = async () => {
+                setBusy(true);
+                try {
+                    const auth = await fetch(`${BASE_URL}/api/get-b2-upload-url`).then(r => r.json());
+                    for (let f of files) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("POST", auth.uploadUrl, false); 
+                        xhr.setRequestHeader("Authorization", auth.authorizationToken);
+                        xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(`pending_${Date.now()}_${f.name.replace(/\s/g,'_')}`));
+                        xhr.setRequestHeader("Content-Type", f.type);
+                        xhr.setRequestHeader("X-Bz-Content-Sha1", "do_not_verify");
+                        xhr.send(f);
+                    }
+                    alert("Submission received. Awaiting approval.");
+                    setFiles([]);
+                } catch(e) { alert("Network Error"); }
+                setBusy(false);
+            };
+
+            const loadData = async (mode) => {
+                setBusy(true);
+                const r = await fetch(`${BASE_URL}/api/list-files?mode=${mode}`).then(r => r.json());
+                setData(r);
+                setBusy(false);
+            };
+
+            const approve = async (id, name) => {
+                await fetch(`${BASE_URL}/api/approve-file`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ fileId: id, fileName: name })
+                });
+                loadData('admin');
+            };
+
+            useEffect(() => { if(view !== 'up') loadData(view); }, [view]);
+
+            return (
+                <div className="jcc-shell">
+                    <header onClick={() => { setTapCount(c => c+1); if(tapCount >= 4) { setView('admin'); setTapCount(0); } }}>
+                        <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="logo" />
+                    </header>
+
+                    <nav>
+                        <button className={`nav-tab ${view==='up'?'active':''}`} onClick={()=>setView('up')}>SUBMIT</button>
+                        <button className={`nav-tab ${view==='gallery'?'active':''}`} onClick={()=>setView('gallery')}>GALLERY</button>
+                    </nav>
+
+                    <main className="jcc-body">
+                        {view === 'up' && (
+                            <section>
+                                <div className="upload-area">
+                                    <input type="file" multiple onChange={(e)=>setFiles(Array.from(e.target.files))} style={{opacity:0, position:'absolute', inset:0}} />
+                                    <div style={{fontSize:'28px'}}>📁</div>
+                                    <div style={{fontWeight:800, color:'#2c3e3a', marginTop:8}}>Upload Media</div>
+                                    <div style={{fontSize:'10px', color:'#6b8e88'}}>Photos or Videos are accepted</div>
+                                </div>
+                                {files.map((f, i) => (
+                                    <div key={i} className="queue-pill">
+                                        <span>{f.name.slice(0, 20)}</span>
+                                        <span style={{color: 'var(--jcc-green)'}}>{(f.size/1024/1024).toFixed(1)}MB</span>
+                                    </div>
+                                ))}
+                                <button className="primary-btn" disabled={!files.length || busy} onClick={handleUpload}>
+                                    {busy ? "SYNCING..." : `UPLOAD ${files.length} ITEMS`}
+                                </button>
+                            </section>
+                        )}
+
+                        {(view === 'gallery' || view === 'admin') && (
+                            <section>
+                                {busy ? <div className="loading">Checking Cloud Registry...</div> : (
+                                    <div className="grid">
+                                        {data.map(i => (
+                                            <div key={i.id} className="grid-item">
+                                                {i.name.match(/\.(mp4|mov|webm)$/i) ? <video src={i.url} /> : <img src={i.url} loading="lazy" />}
+                                                {view === 'admin' && (
+                                                    <div className="admin-tag">
+                                                        <button className="adm-btn btn-app" onClick={()=>approve(i.id, i.name)}>APP</button>
+                                                        <button className="adm-btn btn-rej">DEL</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
