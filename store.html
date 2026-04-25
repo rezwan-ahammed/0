@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mate Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    body { -webkit-tap-highlight-color: transparent; background-attachment: fixed; overscroll-behavior: none; }
+    .squircle { border-radius: 22.5%; }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes toastIn {
+      0% { opacity: 0; transform: translate(-50%, -16px) scale(0.95); }
+      100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .animate-slide-up { animation: slideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .animate-fade-in { animation: fadeIn 0.25s ease both; }
+    .animate-toast { animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .shimmer {
+      background: linear-gradient(90deg, #f0fdf4 25%, #d1fae5 50%, #f0fdf4 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    input, textarea { -webkit-appearance: none; appearance: none; }
+    .glass { background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.55); }
+    .glass-dark { background: rgba(19,55,45,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .btn-press { transition: transform 0.12s ease, opacity 0.12s ease; }
+    .btn-press:active { transform: scale(0.96); opacity: 0.88; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-teal-50 via-emerald-100 to-cyan-100 min-h-screen text-teal-950 overflow-x-hidden">
+
+  <!-- Ambient blobs -->
+  <div class="fixed top-[-15%] left-[-15%] w-[500px] h-[500px] bg-teal-200 rounded-full blur-[80px] opacity-50 pointer-events-none z-0"></div>
+  <div class="fixed bottom-[-15%] right-[-15%] w-[500px] h-[500px] bg-emerald-200 rounded-full blur-[80px] opacity-40 pointer-events-none z-0"></div>
+  <div class="fixed top-[40%] right-[-10%] w-64 h-64 bg-cyan-200 rounded-full blur-[60px] opacity-30 pointer-events-none z-0"></div>
+
+  <div id="root" class="relative z-10 max-w-md mx-auto min-h-screen bg-white/20 backdrop-blur-sm border-x border-white/30 shadow-2xl overflow-hidden"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+    window.FirebaseLibs = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc };
+    window.dispatchEvent(new Event('FirebaseLoaded'));
+  </script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+    // ─── Icons ────────────────────────────────────────────────────────────────
+    const Ic = {
+      Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+      X: ({ size=18 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+      Back: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
+      Download: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+      Plus: ({ size=24 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+      Box: ({ size=24 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+      Phone: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>,
+      Cloud: ({ size=24 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>,
+      Trash: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+      Link: ({ size=16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+      Star: ({ size=12, fill=true }) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill?"currentColor":"none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+      Shield: ({ size=16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>,
+      Upload: ({ size=28 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>,
+      Edit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+      Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+      Grid: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+    };
+
+    // ─── Utilities ─────────────────────────────────────────────────────────────
+    const fmtDate = (ts) => {
+      if (!ts) return '—';
+      return new Date(ts).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+
+    // ─── Skeleton ──────────────────────────────────────────────────────────────
+    const Skeleton = () => (
+      <div className="flex items-center p-3 rounded-3xl glass mb-3">
+        <div className="w-[72px] h-[72px] squircle shimmer flex-shrink-0 rounded-[22.5%]"></div>
+        <div className="flex-1 ml-4 space-y-2">
+          <div className="h-4 shimmer rounded-full w-3/4"></div>
+          <div className="h-3 shimmer rounded-full w-1/2"></div>
+          <div className="h-3 shimmer rounded-full w-2/3"></div>
+        </div>
+      </div>
+    );
+
+    // ─── Toast ─────────────────────────────────────────────────────────────────
+    const Toast = ({ message, type = 'info' }) => {
+      if (!message) return null;
+      const colors = {
+        info: 'from-teal-800 to-teal-900',
+        success: 'from-emerald-700 to-teal-800',
+        error: 'from-rose-600 to-rose-800',
+      };
+      return (
+        <div className="fixed top-5 left-1/2 z-[100] animate-toast" style={{transform:'translateX(-50%)', width:'calc(100% - 40px)', maxWidth:'400px'}}>
+          <div className={`bg-gradient-to-r ${colors[type]} text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold`}>
+            {type === 'success' && <span className="text-emerald-300"><Ic.Check /></span>}
+            {type === 'error' && <span className="text-rose-300"><Ic.X size={16} /></span>}
+            {type === 'info' && <span className="text-teal-300"><Ic.Shield size={16} /></span>}
+            {message}
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Confirm Modal ─────────────────────────────────────────────────────────
+    const Modal = ({ isOpen, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', confirmClass = 'bg-rose-500 shadow-rose-500/30' }) => {
+      if (!isOpen) return null;
+      return (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0">
+          <div className="absolute inset-0 bg-teal-950/30 backdrop-blur-sm animate-fade-in" onClick={onCancel}></div>
+          <div className="relative w-full max-w-sm glass bg-white/80! rounded-3xl p-6 shadow-2xl animate-slide-up">
+            <h3 className="text-[19px] font-black text-teal-950 mb-2">{title}</h3>
+            <p className="text-teal-700 text-sm font-medium leading-relaxed mb-7">{message}</p>
+            <div className="flex gap-3">
+              <button onClick={onCancel} className="flex-1 py-3 bg-teal-50 border border-teal-100 text-teal-800 font-bold rounded-2xl btn-press">Cancel</button>
+              <button onClick={onConfirm} className={`flex-1 py-3 text-white font-bold rounded-2xl shadow-lg btn-press ${confirmClass}`}>{confirmLabel}</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── App Icon ──────────────────────────────────────────────────────────────
+    const AppIcon = ({ app, size = 72 }) => (
+      <div
+        className="squircle bg-white flex-shrink-0 overflow-hidden border border-white/80 shadow-md flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
+        {app.iconUrl ? (
+          <img src={app.iconUrl} alt={app.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-100 to-emerald-200">
+            <Ic.Box size={Math.round(size * 0.44)} />
+          </div>
+        )}
+      </div>
+    );
+
+    // ─── Rating Stars ──────────────────────────────────────────────────────────
+    const Stars = ({ n = 4.9, size = 11 }) => (
+      <span className="flex items-center gap-0.5 text-amber-400">
+        {[1,2,3,4,5].map(i => (
+          <span key={i} style={{opacity: i <= Math.round(n) ? 1 : 0.25}}>
+            <Ic.Star size={size} />
+          </span>
+        ))}
+        <span className="text-teal-800 font-bold ml-1" style={{fontSize: size + 1}}>{n}</span>
+      </span>
+    );
+
+    // ─── Field ─────────────────────────────────────────────────────────────────
+    const Field = ({ label, children, hint }) => (
+      <div>
+        <label className="block text-[11px] font-black uppercase tracking-widest text-teal-600 mb-1.5">{label}</label>
+        {children}
+        {hint && <p className="text-[11px] text-teal-500 font-medium mt-1">{hint}</p>}
+      </div>
+    );
+
+    const Input = ({ mono, ...props }) => (
+      <input
+        {...props}
+        className={`w-full bg-white/70 border border-white/80 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white text-teal-950 font-semibold text-[14px] transition-all shadow-sm ${mono ? 'mono' : ''} ${props.className || ''}`}
+      />
+    );
+
+    const Textarea = (props) => (
+      <textarea
+        {...props}
+        className={`w-full bg-white/70 border border-white/80 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white text-teal-950 font-semibold text-[14px] transition-all shadow-sm resize-none ${props.className || ''}`}
+      />
+    );
+
+    // ─── Category Pill ─────────────────────────────────────────────────────────
+    const Pill = ({ label, active, onClick }) => (
+      <button
+        onClick={onClick}
+        className={`px-5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap btn-press transition-all ${
+          active
+            ? 'bg-teal-800 text-white shadow-md shadow-teal-800/20'
+            : 'glass text-teal-800 border-white/60'
+        }`}
+      >
+        {label}
+      </button>
+    );
+
+    // ─── CATEGORY TAGS for filtering ──────────────────────────────────────────
+    const CATEGORIES = ['All', 'Tools', 'Games', 'Blockers', 'Premium', 'System'];
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MAIN APP
+    // ═══════════════════════════════════════════════════════════════════════════
+    const App = () => {
+      const [view, setView] = useState('home');
+      const [selectedApp, setSelectedApp] = useState(null);
+      const [editingApp, setEditingApp] = useState(null);
+      const [apps, setApps] = useState([]);
+      const [user, setUser] = useState(null);
+      const [fbReady, setFbReady] = useState(false);
+      const [isLoading, setIsLoading] = useState(true);
+      const [toast, setToast] = useState(null);
+      const [modal, setModal] = useState({ isOpen: false });
+      const [dbRefs, setDbRefs] = useState(null);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [activeCategory, setActiveCategory] = useState('All');
+      const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+
+      // ── Toast helper ────────────────────────────────────────────────────────
+      const showToast = useCallback((message, type = 'info') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3200);
+      }, []);
+
+      // ── Navigate ────────────────────────────────────────────────────────────
+      const goTo = useCallback((v, payload = null) => {
+        setView(v);
+        if (v === 'details') setSelectedApp(payload);
+        if (v === 'upload') setEditingApp(payload);
+        if (v === 'home') { setSelectedApp(null); setEditingApp(null); }
+        window.scrollTo(0, 0);
+      }, []);
+
+      // ── Firebase init ───────────────────────────────────────────────────────
+      useEffect(() => {
+        const load = async () => {
+          try {
+            if (!window.FirebaseLibs) await new Promise(r => window.addEventListener('FirebaseLoaded', r, { once: true }));
+            const fb = window.FirebaseLibs;
+            
+            const cfg = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'mate-store';
+            
+            const fbApp = fb.initializeApp(cfg);
+            const auth = fb.getAuth(fbApp);
+            const db = fb.getFirestore(fbApp);
+            
+            setDbRefs({ db, appId, ...fb });
+            
+            try {
+              if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await fb.signInWithCustomToken(auth, __initial_auth_token);
+              } else {
+                await fb.signInAnonymously(auth);
+              }
+            } catch (e) {
+               console.warn("Auth Failed.", e);
+            }
+            
+            fb.onAuthStateChanged(auth, u => { setUser(u); setFbReady(true); });
+          } catch (err) {
+            console.warn('Firebase init failed, offline demo mode:', err);
+            setFbReady(false);
+            setIsLoading(false);
+          }
+        };
+        load();
+      }, []);
+
+      // ── Firestore listener ──────────────────────────────────────────────────
+      useEffect(() => {
+        if (!user || !dbRefs) return;
+        setIsLoading(true);
+        // Using strictly compliant path for Canvas environment
+        const ref = dbRefs.collection(dbRefs.db, 'artifacts', dbRefs.appId, 'users', user.uid, 'apps');
+        const unsub = dbRefs.onSnapshot(ref, snap => {
+          const loaded = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          loaded.sort((a, b) => b.createdAt - a.createdAt);
+          setApps(loaded);
+          setIsLoading(false);
+        }, err => {
+          console.error(err);
+          setIsLoading(false);
+        });
+        return unsub;
+      }, [user, dbRefs]);
+
+      // ── Delete ──────────────────────────────────────────────────────────────
+      const confirmDelete = useCallback((appId) => {
+        setModal({
+          isOpen: true,
+          title: 'Remove App?',
+          message: 'This permanently removes the app from your vault. The APK data cannot be recovered.',
+          confirmLabel: 'Delete',
+          confirmClass: 'bg-gradient-to-r from-rose-500 to-rose-600 shadow-rose-500/30',
+          onConfirm: async () => {
+            setModal({ isOpen: false });
+            try {
+              // Using strictly compliant path for Canvas environment
+              await dbRefs.deleteDoc(dbRefs.doc(dbRefs.db, 'artifacts', dbRefs.appId, 'users', user.uid, 'apps', appId));
+              showToast('App removed from vault', 'success');
+              if (selectedApp?.id === appId) goTo('home');
+            } catch {
+              showToast('Delete failed', 'error');
+            }
+          },
+          onCancel: () => setModal({ isOpen: false }),
+        });
+      }, [dbRefs, user, selectedApp, showToast, goTo]);
+
+      // ── Download / Install ──────────────────────────────────────────────────
+      const installApp = useCallback((app) => {
+        if (app.downloadType === 'url' && app.apkUrl) {
+          window.open(app.apkUrl, '_blank');
+          showToast('Opening download link…', 'info');
+        } else if (app.apkData) {
+          const a = document.createElement('a');
+          a.href = app.apkData;
+          a.download = (app.packageName || 'app') + '.apk';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('Download started!', 'success');
+        } else {
+          showToast('No APK data found', 'error');
+        }
+      }, [showToast]);
+
+      // ── Filtered apps ───────────────────────────────────────────────────────
+      const filteredApps = useMemo(() => {
+        return apps.filter(a => {
+          const q = searchQuery.toLowerCase().trim();
+          const matchQ = !q || a.name?.toLowerCase().includes(q) || a.packageName?.toLowerCase().includes(q) || a.description?.toLowerCase().includes(q);
+          const matchCat = activeCategory === 'All' || (a.category || 'Tools') === activeCategory;
+          return matchQ && matchCat;
+        });
+      }, [apps, searchQuery, activeCategory]);
+
+      // ══════════════════════════════════════════════════════════════════════
+      // VIEW: HOME
+      // ══════════════════════════════════════════════════════════════════════
+      const HomeView = () => (
+        <div className="pb-28 animate-slide-up">
+
+          {/* Header */}
+          <div className="sticky top-0 z-30 px-4 pt-5 pb-3 glass border-b border-white/40">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/30">
+                  <Ic.Box size={17} />
+                </div>
+                <span className="text-[19px] font-black text-teal-950 tracking-tight">Mate Store</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode(v => v === 'list' ? 'grid' : 'list')}
+                  className="w-9 h-9 glass rounded-xl flex items-center justify-center text-teal-700 btn-press shadow-sm"
+                  title="Toggle view"
+                >
+                  <Ic.Grid />
+                </button>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center text-white text-[11px] font-black shadow-md">
+                  ME
+                </div>
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none">
+                <Ic.Search />
+              </span>
+              <input
+                type="text"
+                placeholder="Search apps, packages…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-white/60 border border-white/70 rounded-2xl pl-10 pr-10 py-2.5 text-[14px] font-semibold text-teal-900 placeholder-teal-500/60 outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white transition-all shadow-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-400 hover:text-teal-700 transition-colors"
+                >
+                  <Ic.X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide border-b border-white/30">
+            {CATEGORIES.map(cat => (
+              <Pill key={cat} label={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)} />
+            ))}
+          </div>
+
+          {/* App count */}
+          {!isLoading && (
+            <div className="px-4 pt-4 pb-1 flex items-center justify-between">
+              <span className="text-[13px] font-bold text-teal-600">
+                {filteredApps.length} {filteredApps.length === 1 ? 'app' : 'apps'}
+                {searchQuery && <span className="text-teal-400"> for "{searchQuery}"</span>}
+              </span>
+            </div>
+          )}
+
+          {/* App list */}
+          <div className={`px-4 pt-2 ${viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}`}>
+            {isLoading ? (
+              [1,2,3].map(i => <Skeleton key={i} />)
+            ) : filteredApps.length > 0 ? (
+              viewMode === 'list' ? filteredApps.map(app => (
+                <AppListItem key={app.id} app={app} onClick={() => goTo('details', app)} />
+              )) : filteredApps.map(app => (
+                <AppGridItem key={app.id} app={app} onClick={() => goTo('details', app)} />
+              ))
+            ) : (
+              <div className="col-span-2">
+                <EmptyState searchQuery={searchQuery} onPublish={() => goTo('upload')} />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+      const AppListItem = ({ app, onClick }) => (
+        <div
+          onClick={onClick}
+          className="glass flex items-center p-3 rounded-3xl cursor-pointer hover:bg-white/70 btn-press shadow-sm"
+        >
+          <AppIcon app={app} size={72} />
+          <div className="flex-1 min-w-0 ml-3.5">
+            <h4 className="text-[15px] font-bold text-teal-950 truncate leading-tight">{app.name}</h4>
+            <p className="text-[12px] text-teal-600 font-semibold truncate mt-0.5">{app.category || 'Tools'} • Mate Studio</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <Stars n={app.rating || 4.9} size={10} />
+              <span className="text-[10px] mono font-bold text-teal-700/50 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100/80 truncate max-w-[130px]">
+                {app.packageName}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center ml-2">
+            <span className="text-[11px] font-bold text-teal-500 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-full">
+              v{app.version || '1.0'}
+            </span>
+          </div>
+        </div>
+      );
+
+      const AppGridItem = ({ app, onClick }) => (
+        <div
+          onClick={onClick}
+          className="glass rounded-3xl p-4 cursor-pointer hover:bg-white/70 btn-press shadow-sm flex flex-col items-center text-center"
+        >
+          <AppIcon app={app} size={64} />
+          <h4 className="text-[13px] font-bold text-teal-950 mt-2.5 leading-tight line-clamp-2">{app.name}</h4>
+          <p className="text-[11px] text-teal-500 font-semibold mt-0.5">{app.category || 'Tools'}</p>
+          <Stars n={app.rating || 4.9} size={9} />
+        </div>
+      );
+
+      const EmptyState = ({ searchQuery, onPublish }) => (
+        <div className="glass rounded-3xl py-14 px-6 flex flex-col items-center text-center border-dashed border-2 border-teal-200/60 bg-teal-50/30 mt-2">
+          <div className="w-16 h-16 rounded-full bg-teal-100/60 flex items-center justify-center text-teal-400 mb-4 shadow-inner">
+            <Ic.Cloud size={28} />
+          </div>
+          <p className="font-black text-teal-900 text-lg mb-1">
+            {searchQuery ? 'No results' : 'Vault is empty'}
+          </p>
+          <p className="text-[13px] text-teal-600/80 font-medium leading-relaxed mb-6 max-w-xs">
+            {searchQuery
+              ? `No apps match "${searchQuery}". Try a different search.`
+              : 'Your private Mate Vault has no apps yet. Publish your first custom APK.'}
+          </p>
+          {!searchQuery && (
+            <button
+              onClick={onPublish}
+              className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-500 text-white font-bold rounded-full shadow-lg shadow-teal-500/30 btn-press text-sm"
+            >
+              + Publish First App
+            </button>
+          )}
+        </div>
+      );
+
+      // ══════════════════════════════════════════════════════════════════════
+      // VIEW: DETAILS
+      // ══════════════════════════════════════════════════════════════════════
+      const DetailsView = () => {
+        if (!selectedApp) return null;
+        const app = selectedApp;
+        const size = app.downloadType === 'url' ? 'External' : (app.size || '—');
+
+        return (
+          <div className="animate-slide-up pb-28 min-h-screen">
+
+            {/* Topbar */}
+            <div className="sticky top-0 z-30 glass border-b border-white/40 px-4 py-3 flex items-center justify-between">
+              <button onClick={() => goTo('home')} className="p-2 rounded-full glass btn-press shadow-sm border-white">
+                <Ic.Back />
+              </button>
+              <span className="font-black text-[15px] text-teal-950 flex-1 text-center truncate px-3">{app.name}</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => goTo('upload', app)}
+                  className="p-2 rounded-full glass btn-press shadow-sm border-white text-teal-700"
+                  title="Edit"
+                >
+                  <Ic.Edit />
+                </button>
+                <button
+                  onClick={() => confirmDelete(app.id)}
+                  className="p-2 rounded-full glass btn-press shadow-sm border-white text-rose-500"
+                  title="Delete"
+                >
+                  <Ic.Trash />
+                </button>
+              </div>
+            </div>
+
+            <div className="px-5 pt-6">
+
+              {/* App header */}
+              <div className="flex gap-5 items-start">
+                <AppIcon app={app} size={100} />
+                <div className="flex-1 pt-1 min-w-0">
+                  <h1 className="text-[22px] font-black text-teal-950 leading-snug">{app.name}</h1>
+                  <p className="text-teal-600 font-semibold text-sm mt-0.5">Mate Studio</p>
+                  <span className="inline-block mt-1.5 text-[11px] font-bold text-teal-600 bg-teal-50 border border-teal-100 px-2.5 py-0.5 rounded-full">
+                    {app.category || 'Tools'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-5 mt-7 py-4 border-y border-teal-900/8">
+                <div className="flex flex-col items-center flex-1">
+                  <Stars n={app.rating || 4.9} size={13} />
+                  <span className="text-teal-500 text-[11px] font-bold mt-1">Rating</span>
+                </div>
+                <div className="w-px h-8 bg-teal-900/10"></div>
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-teal-950 font-black text-sm">{size}</span>
+                  <span className="text-teal-500 text-[11px] font-bold mt-1">Size</span>
+                </div>
+                <div className="w-px h-8 bg-teal-900/10"></div>
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-teal-950 font-black text-sm">v{app.version || '1.0'}</span>
+                  <span className="text-teal-500 text-[11px] font-bold mt-1">Version</span>
+                </div>
+              </div>
+
+              {/* Install button */}
+              <button
+                onClick={() => installApp(app)}
+                className="w-full mt-5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-black py-4 rounded-2xl btn-press shadow-xl shadow-teal-500/25 text-[16px] flex items-center justify-center gap-2"
+              >
+                {app.downloadType === 'url' ? <Ic.Link size={18} /> : <Ic.Download />}
+                {app.downloadType === 'url' ? 'Open Download Link' : 'Install APK'}
+              </button>
+
+              <div className="mt-3 flex items-center justify-center gap-2 text-[12px] font-bold text-teal-600 bg-teal-50/70 py-2.5 rounded-xl border border-teal-100/60">
+                <span className="text-teal-500"><Ic.Shield size={14} /></span>
+                Verified by Mate Protect
+              </div>
+
+              {/* About */}
+              <div className="mt-7">
+                <h3 className="font-black text-teal-950 text-[17px] mb-3">About this app</h3>
+                <div className="glass rounded-2xl p-5 bg-white/60!">
+                  <p className="text-teal-800 text-[14px] leading-relaxed font-medium">
+                    {app.description || 'No description provided.'}
+                  </p>
+
+                  <div className="mt-5 pt-4 border-t border-teal-900/8 space-y-3">
+                    {[
+                      ['Package ID', <span className="mono text-[12px] font-bold text-teal-800 bg-white px-2.5 py-1 rounded-xl shadow-sm border border-teal-100">{app.packageName}</span>],
+                      ['Version', `v${app.version || '1.0'}`],
+                      ['Category', app.category || 'Tools'],
+                      ['Updated', fmtDate(app.createdAt)],
+                      ['Type', app.downloadType === 'url' ? 'External URL' : 'APK Bundle'],
+                    ].map(([k, v]) => (
+                      <div key={k} className="flex justify-between items-center">
+                        <span className="text-teal-500 text-[13px] font-bold">{k}</span>
+                        {typeof v === 'string'
+                          ? <span className="text-teal-950 text-[13px] font-bold">{v}</span>
+                          : v}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ══════════════════════════════════════════════════════════════════════
+      // VIEW: UPLOAD / EDIT
+      // ══════════════════════════════════════════════════════════════════════
+      const UploadView = () => {
+        const isEditing = !!editingApp;
+        const [formData, setFormData] = useState({
+          name: editingApp?.name || '',
+          packageName: editingApp?.packageName || 'com.',
+          description: editingApp?.description || '',
+          version: editingApp?.version || '1.0',
+          category: editingApp?.category || 'Tools',
+          apkUrl: editingApp?.apkUrl || '',
+          rating: editingApp?.rating || 4.9,
+        });
+        const [uploadType, setUploadType] = useState(editingApp?.downloadType || 'file');
+        const [iconPreview, setIconPreview] = useState(editingApp?.iconUrl || null);
+        const [apkFile, setApkFile] = useState(null);
+        const [isSubmitting, setIsSubmitting] = useState(false);
+        const iconRef = useRef(null);
+        const apkRef = useRef(null);
+
+        const handleChange = (e) => {
+          const { name, value } = e.target;
+          setFormData(f => ({ ...f, [name]: value }));
+        };
+
+        const handleIcon = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onloadend = () => setIconPreview(reader.result);
+          reader.readAsDataURL(file);
+        };
+
+        const handleApk = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          if (file.size > 900 * 1024) {
+            showToast('APK exceeds 900 KB Firestore limit. Use URL mode instead.', 'error');
+            e.target.value = '';
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setApkFile({ data: reader.result, name: file.name, size: (file.size / 1024).toFixed(1) + ' KB' });
+          };
+          reader.readAsDataURL(file);
+        };
+
+        const validate = () => {
+          if (!formData.name.trim()) { showToast('App name is required', 'error'); return false; }
+          if (!formData.packageName || formData.packageName === 'com.') { showToast('Package name is required', 'error'); return false; }
+          if (uploadType === 'url' && !formData.apkUrl.trim()) { showToast('Download URL is required', 'error'); return false; }
+          if (uploadType === 'file' && !apkFile && !isEditing) { showToast('APK file is required', 'error'); return false; }
+          return true;
+        };
+
+        const handleSubmit = async () => {
+          if (!validate()) return;
+          if (!user || !dbRefs) { showToast('Not connected to cloud', 'error'); return; }
+          setIsSubmitting(true);
+          try {
+            const payload = {
+              name: formData.name.trim(),
+              packageName: formData.packageName.trim(),
+              description: formData.description.trim(),
+              version: formData.version.trim() || '1.0',
+              category: formData.category,
+              rating: parseFloat(formData.rating) || 4.9,
+              iconUrl: iconPreview,
+              downloadType: uploadType,
+              apkData: uploadType === 'file' ? (apkFile ? apkFile.data : editingApp?.apkData || null) : null,
+              apkUrl: uploadType === 'url' ? formData.apkUrl.trim() : null,
+              size: uploadType === 'file'
+                ? (apkFile ? apkFile.size : editingApp?.size || '—')
+                : 'External',
+              createdAt: isEditing ? (editingApp.createdAt || Date.now()) : Date.now(),
+              updatedAt: Date.now(),
+            };
+
+            // Using strictly compliant path for Canvas environment
+            const ref = dbRefs.collection(dbRefs.db, 'artifacts', dbRefs.appId, 'users', user.uid, 'apps');
+
+            if (isEditing) {
+              const docRef = dbRefs.doc(dbRefs.db, 'artifacts', dbRefs.appId, 'users', user.uid, 'apps', editingApp.id);
+              await dbRefs.updateDoc(docRef, payload);
+              showToast('App updated!', 'success');
+            } else {
+              await dbRefs.addDoc(ref, payload);
+              showToast('Published to Mate Store!', 'success');
+            }
+            goTo('home');
+          } catch (err) {
+            console.error(err);
+            showToast(err.message?.includes('size') ? 'File too large for Firestore' : 'Failed to save. Try URL mode.', 'error');
+          } finally {
+            setIsSubmitting(false);
+          }
+        };
+
+        return (
+          <div className="animate-slide-up pb-28 min-h-screen">
+            {/* Topbar */}
+            <div className="sticky top-0 z-30 glass border-b border-white/40 px-4 py-3 flex items-center gap-3">
+              <button onClick={() => goTo('home')} className="p-2 rounded-full glass btn-press shadow-sm">
+                <Ic.Back />
+              </button>
+              <h2 className="text-[18px] font-black text-teal-950">{isEditing ? 'Edit App' : 'Publish App'}</h2>
+            </div>
+
+            <div className="px-4 py-5 space-y-4">
+
+              {/* Icon picker */}
+              <div className="glass rounded-3xl p-6 flex flex-col items-center">
+                <div
+                  onClick={() => iconRef.current.click()}
+                  className="w-24 h-24 squircle bg-white/60 border-2 border-dashed border-teal-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden btn-press shadow-sm"
+                >
+                  {iconPreview ? (
+                    <img src={iconPreview} alt="Icon" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center text-teal-400">
+                      <Ic.Plus size={22} />
+                      <span className="text-[10px] font-black uppercase tracking-wider mt-1">Icon</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-teal-500 font-semibold mt-2">Tap to {iconPreview ? 'change' : 'add'} icon</p>
+                <input type="file" accept="image/*" ref={iconRef} onChange={handleIcon} className="hidden" />
+              </div>
+
+              {/* Basic info */}
+              <div className="glass rounded-3xl p-5 space-y-4">
+                <Field label="App Name">
+                  <Input name="name" value={formData.name} onChange={handleChange} placeholder="e.g., Block Facebook" required />
+                </Field>
+                <Field label="Package Name" hint="Reverse-DNS format: com.example.app">
+                  <Input name="packageName" value={formData.packageName} onChange={handleChange} placeholder="com.example.app" mono required />
+                </Field>
+                <Field label="Description">
+                  <Textarea name="description" value={formData.description} onChange={handleChange} placeholder="What does this app do?" rows={3} />
+                </Field>
+              </div>
+
+              {/* Meta */}
+              <div className="glass rounded-3xl p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Version">
+                    <Input name="version" value={formData.version} onChange={handleChange} placeholder="1.0.0" />
+                  </Field>
+                  <Field label="Rating (1-5)">
+                    <Input name="rating" type="number" min="1" max="5" step="0.1" value={formData.rating} onChange={handleChange} placeholder="4.9" />
+                  </Field>
+                </div>
+                <Field label="Category">
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {CATEGORIES.filter(c => c !== 'All').map(cat => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setFormData(f => ({ ...f, category: cat }))}
+                        className={`px-3.5 py-1.5 rounded-full text-[13px] font-bold btn-press transition-all ${
+                          formData.category === cat
+                            ? 'bg-teal-700 text-white shadow-md'
+                            : 'bg-white/70 border border-teal-100 text-teal-700'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
+
+              {/* APK / URL */}
+              <div className="glass rounded-3xl p-5 space-y-4">
+                <Field label="APK Source">
+                  <div className="flex bg-teal-900/5 p-1 rounded-xl border border-teal-900/5 mt-1">
+                    {[['file', 'Local File'], ['url', 'External URL']].map(([val, label]) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setUploadType(val)}
+                        className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${
+                          uploadType === val ? 'bg-white shadow-sm text-teal-900' : 'text-teal-500'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+
+                {uploadType === 'file' ? (
+                  <div>
+                    <div
+                      onClick={() => apkRef.current.click()}
+                      className={`w-full border-2 border-dashed rounded-2xl p-7 flex flex-col items-center cursor-pointer btn-press transition-all ${
+                        apkFile ? 'border-teal-500 bg-teal-50/50' : 'border-teal-200 bg-white/30 hover:bg-white/50'
+                      }`}
+                    >
+                      {apkFile ? (
+                        <>
+                          <Ic.Box size={32} />
+                          <span className="font-bold text-teal-800 text-[14px] mt-2">{apkFile.name}</span>
+                          <span className="text-[12px] text-teal-500 font-semibold">{apkFile.size} · Tap to change</span>
+                        </>
+                      ) : isEditing && editingApp?.apkData ? (
+                        <>
+                          <Ic.Box size={32} />
+                          <span className="font-bold text-teal-800 text-[14px] mt-2">Existing APK kept</span>
+                          <span className="text-[12px] text-teal-500 font-semibold">{editingApp.size} · Tap to replace</span>
+                        </>
+                      ) : (
+                        <>
+                          <Ic.Upload size={30} />
+                          <span className="font-bold text-teal-800 text-[15px] mt-2">Choose .apk file</span>
+                          <span className="text-[11px] text-teal-400 font-semibold mt-1">Max 900 KB (Firestore limit)</span>
+                        </>
+                      )}
+                    </div>
+                    <input type="file" accept=".apk" ref={apkRef} onChange={handleApk} className="hidden" />
+                  </div>
+                ) : (
+                  <Field label="Download URL">
+                    <Input name="apkUrl" type="url" value={formData.apkUrl} onChange={handleChange} placeholder="https://storage.example.com/app.apk" />
+                  </Field>
+                )}
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`w-full py-4 rounded-2xl text-[16px] font-black text-white flex items-center justify-center gap-2 btn-press transition-all shadow-xl ${
+                  isSubmitting
+                    ? 'bg-teal-300 shadow-none cursor-not-allowed'
+                    : 'bg-gradient-to-r from-teal-600 to-emerald-500 shadow-teal-600/25'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {isEditing ? 'Saving…' : 'Publishing…'}
+                  </>
+                ) : (
+                  <>{isEditing ? '💾 Save Changes' : '🚀 Publish to Mate Store'}</>
+                )}
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      // ══════════════════════════════════════════════════════════════════════
+      // RENDER
+      // ══════════════════════════════════════════════════════════════════════
+      return (
+        <div className="relative flex flex-col h-full min-h-screen">
+          {toast && <Toast message={toast.message} type={toast.type} />}
+          <Modal {...modal} />
+
+          <main className="flex-1">
+            {view === 'home'    && <HomeView />}
+            {view === 'details' && <DetailsView />}
+            {view === 'upload'  && <UploadView />}
+          </main>
+
+          {/* Bottom Nav (only on home) */}
+          {view === 'home' && (
+            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md glass border-t border-white/50 z-40">
+              <div className="flex justify-around items-center py-2 px-4 safe-area-bottom">
+                <button className="flex flex-col items-center gap-0.5 py-1.5 px-5 rounded-2xl bg-teal-100/60 text-teal-800">
+                  <Ic.Phone />
+                  <span className="text-[10px] font-black tracking-tight">Apps</span>
+                </button>
+                <button
+                  onClick={() => goTo('upload')}
+                  className="flex flex-col items-center gap-0.5 py-1.5 px-5 rounded-2xl text-teal-500 hover:text-teal-800 btn-press transition-colors"
+                >
+                  <Ic.Plus size={22} />
+                  <span className="text-[10px] font-black tracking-tight">Publish</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
