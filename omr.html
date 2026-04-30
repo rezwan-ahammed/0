@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>জননী কোচিং সেন্টার | OMR Evaluation AI</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel for in-browser JSX parsing -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Firebase Compat SDK (Used for raw HTML projects) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <!-- QR Code & Lucide Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --nature-50: #ecfdf5; --nature-100: #d1fae5; --nature-200: #a7f3d0;
+            --nature-300: #6ee7b7; --nature-400: #34d399; --nature-500: #10b981;
+            --nature-600: #059669; --nature-700: #047857; --nature-800: #065f46;
+            --nature-900: #064e3b; --nature-950: #022c22;
+            --warn: #f59e0b; --warn-light: #fef3c7; --warn-border: #fde68a;
+        }
+        
+        body { 
+            background-color: var(--nature-50); 
+            font-family: 'Noto Sans Bengali', sans-serif !important; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased; 
+        }
+        
+        .glass-panel { background: rgba(255,255,255,0.45); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 10px 40px 0 rgba(4,120,87,0.08); }
+        .glass-panel-dark { background: rgba(2,44,34,0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 32px 0 rgba(0,0,0,0.3); }
+        .glass-nav { background: rgba(236,253,245,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.9); }
+        .glass-btn { background: linear-gradient(135deg, #10b981, #059669); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 15px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.4); color: white; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; }
+        .glass-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.5); background: linear-gradient(135deg, #059669, #047857); }
+        .glass-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .bg-shapes { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: linear-gradient(135deg, #f0fdf4 0%, #ccfbf1 100%); }
+        .shape-1 { position: absolute; top: -10%; left: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(52,211,153,0.3) 0%, rgba(16,185,129,0) 70%); border-radius: 50%; filter: blur(60px); animation: blob 10s infinite alternate; }
+        .shape-2 { position: absolute; top: 40%; right: -20%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(45,212,191,0.25) 0%, rgba(20,184,166,0) 70%); border-radius: 50%; filter: blur(80px); animation: blob 12s infinite alternate-reverse; }
+        
+        .gradient-text { background: linear-gradient(to right, #065f46, #0d9488); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .answer-cell-uncertain { background: var(--warn-light) !important; border-color: var(--warn-border) !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
+        .answer-cell-uncertain select { color: #92400e !important; }
+        
+        .progress-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,0.3); overflow: hidden; width: 100%; max-width: 300px; margin: 10px 0; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(to right, #34d399, #10b981); transition: width 0.8s ease; }
+        
+        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.5); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Firebase Initialization (Compat Mode) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'janani-omr-official';
+
+        // --- GEMINI 3.1 PRO CONFIGURATION ---
+        const USER_API_KEY = "AIzaSyAKDIZslBwLtudndenShD_TNsJh_X4y3qA";
+        const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent";
+
+        const SET_NAMES = ["শহীদ ওসমান হাদী", "শহীদ মীর মুগ্ধ", "শহীদ আবু সাঈদ", "শহীদ আবরার ফাহাদ"];
+        const SUBJECTS = ["বাংলা", "ইংরেজি", "গণিত", "পদার্থবিজ্ঞান", "রসায়ন", "জীববিজ্ঞান", "উচ্চতর গণিত", "ICT", "ইসলাম ও নৈতিক শিক্ষা", "বাংলাদেশ ও বিশ্বপরিচয়", "অন্যান্য"];
+        const CLASSES = ["ষষ্ঠ শ্রেণি", "সপ্তম শ্রেণি", "অষ্টম শ্রেণি", "নবম শ্রেণি", "দশম শ্রেণি", "একাদশ শ্রেণি", "দ্বাদশ শ্রেণি"];
+        const OPTIONS = ['ক', 'খ', 'গ', 'ঘ'];
+
+        // --- Lucide Icon Helper ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const elRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && window.lucide.icons[name] && elRef.current) {
+                    const iconNode = window.lucide.createElement(window.lucide.icons[name]);
+                    iconNode.setAttribute('width', size);
+                    iconNode.setAttribute('height', size);
+                    if (className) iconNode.setAttribute('class', className);
+                    elRef.current.innerHTML = '';
+                    elRef.current.appendChild(iconNode);
+                }
+            }, [name, size, className]);
+            return <span ref={elRef} className="inline-flex items-center justify-center"></span>;
+        };
+
+        // --- Prompt Engineering Core ---
+        const buildPass1Prompt = (totalQuestions, setNames) => `
+You are an expert OMR (Optical Mark Recognition) evaluation AI with 20 years of experience reading Bangladeshi MCQ answer sheets. Your task is to analyze this sheet with maximum accuracy.
+
+══════════════════════════════════
+BUBBLE DETECTION CRITERIA (STRICT)
+══════════════════════════════════
+A bubble is considered FILLED if:
+  ✓ More than 40% of its circular area is darkened/shaded/penned
+  ✓ It is visually darker than the other bubbles in the same row
+  ✓ Even light pencil shading counts if it's clearly darker than empty bubbles
+
+A bubble is EMPTY if:
+  ✗ It has little or no shading
+  ✗ It appears as just a printed circle outline
+
+CONFLICT RULE: If TWO bubbles appear equally filled in one row → pick the DARKER one AND add that question number to the "uncertain" array.
+BLANK RULE: If NO bubble is filled in a row → record "?" and add to "uncertain".
+
+══════════════════════════════════
+STEP 1 — STUDENT NAME
+══════════════════════════════════
+Read the printed "নাম" field. Output exactly what is written.
+
+══════════════════════════════════
+STEP 2 — ROLL NUMBER (CRITICAL - BUBBLE GRID ONLY)
+══════════════════════════════════
+Location: Find the "রোল নম্বর" section which has a PRINTED GRID of bubbles.
+Method:
+  1. The grid has multiple COLUMNS (typically 6 columns for a 6-digit roll)
+  2. Each column contains bubbles for digits 0 through 9 arranged vertically
+  3. For each column LEFT to RIGHT: find the ONE darkened bubble → that digit is the roll digit
+  4. Concatenate all column digits → the complete roll number
+
+⛔ ABSOLUTE PROHIBITION: Do NOT read any handwritten numbers, pre-printed roll numbers, or stickers. ONLY read from the bubble grid.
+
+If a column has no filled bubble → use "0" as default for that position.
+
+══════════════════════════════════
+STEP 3 — SET IDENTIFICATION  
+══════════════════════════════════
+Available sets: ${setNames.join(', ')}
+Look for a dedicated "সেট" selection area. Match the filled bubble to one of the above sets.
+If unclear, make your best judgment and add "set" to the uncertain array.
+
+══════════════════════════════════
+STEP 4 — ANSWER EXTRACTION (Q1 to Q${totalQuestions})
+══════════════════════════════════
+Method:
+  1. Find question row 1. Check bubbles for options: ক, খ, গ, ঘ
+  2. Apply BUBBLE DETECTION CRITERIA above
+  3. Record the answer. Move to next row.
+  4. Repeat for ALL ${totalQuestions} questions without skipping.
+  5. Double-check rows you were unsure about. Add those question numbers to "uncertain".
+
+Do NOT skip any question. Every question from 1 to ${totalQuestions} must have an entry.
+
+══════════════════════════════════
+OUTPUT FORMAT (JSON ONLY - NO MARKDOWN)
+══════════════════════════════════
+Return ONLY valid JSON. No text before or after. No \`\`\`json fences:
+{
+  "name": "student name here",
+  "roll": "6-digit roll from bubble grid",
+  "set": "exact set name from the list",
+  "answers": {
+    "1": "ক",
+    "2": "খ",
+    "3": "গ"
+  },
+  "uncertain": ["3", "7", "15"]
+}
+`.trim();
+
+        const buildPass2Prompt = (uncertainList, totalQ) => `
+You are re-examining an OMR answer sheet. In a previous scan, these specific question numbers were flagged as UNCERTAIN or AMBIGUOUS: [${uncertainList.join(', ')}]
+
+YOUR TASK: Look ONLY at these question rows and determine the correct answer with fresh eyes.
+
+For each flagged question:
+  1. Locate that specific row on the sheet
+  2. Examine all 4 option bubbles (ক, খ, গ, ঘ) with extreme care
+  3. Look for the DARKEST / most filled bubble
+  4. If two bubbles are truly equally dark, pick the one that appears INTENTIONALLY filled (rounder, more uniform shading)
+  5. Record your final answer
+
+Also re-check the ROLL NUMBER bubble grid one more time:
+  - Verify each column has exactly ONE filled bubble
+  - Output the corrected roll if it differs from previous reading
+
+Return ONLY valid JSON (no markdown):
+{
+  "roll_verified": "6-digit roll from bubbles",
+  "answers": {
+    ${uncertainList.map(q => `"${q}": "ক"`).join(',\n    ')}
+  }
+}
+`.trim();
+
+
+        // --- Custom Select Component ---
+        const CustomExamSelect = ({ exams, selected, onSelect, onNew }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [searchTerm, setSearchTerm] = useState("");
+            const dropdownRef = useRef(null);
+
+            useEffect(() => {
+                const clickOutside = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false); };
+                document.addEventListener("mousedown", clickOutside);
+                return () => document.removeEventListener("mousedown", clickOutside);
+            }, []);
+
+            const filtered = exams.filter(ex => ex.name.toLowerCase().includes(searchTerm.toLowerCase()) || ex.className.includes(searchTerm));
+
+            return (
+                <div className="relative w-full" ref={dropdownRef}>
+                    <div onClick={() => setIsOpen(!isOpen)} className="glass-panel w-full rounded-3xl p-5 flex items-center justify-between cursor-pointer hover:bg-white/60 transition-all group">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white/60 rounded-2xl text-[#059669] border border-white/80 shadow-sm group-hover:scale-105 transition-all">
+                                <Icon name="BookOpen" size={24} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-[#047857] uppercase tracking-widest">বর্তমান পরীক্ষা</p>
+                                <h3 className="text-lg font-black text-[#022c22] leading-none mt-1">
+                                    {selected ? `${selected.name} (${selected.className})` : "পরীক্ষা নির্বাচন করুন"}
+                                </h3>
+                            </div>
+                        </div>
+                        <div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                            <Icon name="ChevronDown" size={20} className="text-[#047857]" />
+                        </div>
+                    </div>
+
+                    {isOpen && (
+                        <div className="absolute top-full left-0 right-0 mt-3 glass-panel rounded-[35px] shadow-2xl z-50 overflow-hidden">
+                            <div className="p-4 border-b border-white/60 bg-white/40">
+                                <div className="flex items-center gap-3 bg-white/60 border border-white/80 rounded-2xl px-4 py-2 focus-within:bg-white transition-all shadow-inner">
+                                    <Icon name="Search" size={18} className="text-[#047857]" />
+                                    <input type="text" placeholder="খুঁজুন..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-transparent outline-none font-bold text-sm text-[#022c22]"/>
+                                </div>
+                            </div>
+                            <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
+                                {filtered.length === 0 ? (
+                                    <p className="text-center p-8 text-[#047857] font-bold italic">কোনো পরীক্ষা পাওয়া যায়নি!</p>
+                                ) : (
+                                    filtered.map(ex => (
+                                        <div key={ex.id} onClick={() => { onSelect(ex); setIsOpen(false); }} className={`p-4 rounded-2xl cursor-pointer mb-1 transition-all flex items-center justify-between ${selected?.id === ex.id ? 'glass-btn shadow-md border-0' : 'hover:bg-white/50 border border-transparent'}`}>
+                                            <div>
+                                                <p className={`font-black ${selected?.id === ex.id ? 'text-white' : 'text-[#022c22]'}`}>{ex.name}</p>
+                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${selected?.id === ex.id ? 'text-white/80' : 'text-[#065f46]'}`}>{ex.className} · {ex.subject}</p>
+                                            </div>
+                                            {selected?.id === ex.id && <Icon name="CheckCircle2" size={20} className="text-white" />}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <div onClick={() => { onNew(); setIsOpen(false); }} className="p-5 bg-white/40 text-[#059669] border-t border-white/40 text-center font-black cursor-pointer hover:bg-white/60 transition-all flex items-center justify-center gap-2">
+                                <Icon name="Plus" size={20} /> নতুন পরীক্ষা তৈরি করুন
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Progress Overlay ---
+        const ScanProgressOverlay = ({ step, pass, totalPasses }) => {
+            const progressPct = pass === 1 ? 40 : pass === 2 ? 80 : 100;
+            const stepLabels = {
+                1: "১ম পাস: সম্পূর্ণ খাতা বিশ্লেষণ",
+                2: "২য় পাস: অনিশ্চিত উত্তর যাচাই",
+                3: "ফলাফল প্রস্তুত হচ্ছে"
+            };
+            
+            return (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/50 backdrop-blur-xl rounded-[50px] border border-white/80 shadow-2xl animate-fade-in">
+                    <div className="relative w-28 h-28 mb-6">
+                        <div className="absolute inset-0 border-8 border-white/60 rounded-full shadow-inner"></div>
+                        <div className="absolute inset-0 border-8 border-[#10b981] rounded-full border-t-transparent animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-[#059669]">
+                            {pass === 2 ? <div className="animate-pulse"><Icon name="Shield" size={36} /></div> : <div className="animate-pulse"><Icon name="Cpu" size={36} /></div>}
+                        </div>
+                    </div>
+                    
+                    <h3 className="text-xl font-black text-[#022c22] mb-2 uppercase tracking-widest drop-shadow-sm">Gemini 3.1 Pro Processing</h3>
+                    <p className="text-sm font-bold text-[#047857] mb-5 bg-white/60 px-4 py-1 rounded-full shadow-sm">{stepLabels[pass] || step}</p>
+                    
+                    <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${progressPct}%` }}></div>
+                    </div>
+                    <p className="text-[10px] font-bold text-[#059669] uppercase tracking-widest mt-2">পাস {pass}/{totalPasses}</p>
+                </div>
+            );
+        };
+
+        // --- Correction Grid ---
+        const AnswerCorrectionGrid = ({ answers, uncertain, totalQ, onChange }) => {
+            return (
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                    {[...Array(totalQ)].map((_, i) => {
+                        const q = String(i + 1);
+                        const isUncertain = uncertain?.includes(q);
+                        return (
+                            <div key={q} className={`flex flex-col items-center gap-1 p-2 rounded-2xl border transition-all shadow-sm ${isUncertain ? 'answer-cell-uncertain' : 'bg-white/70 border-white/80 hover:bg-white'}`}>
+                                <span className={`text-[10px] font-black uppercase tracking-wider ${isUncertain ? 'text-amber-600' : 'text-[#059669]'}`}>
+                                    {isUncertain ? '⚠ Q' : 'Q'}{i + 1}
+                                </span>
+                                <select
+                                    value={answers[q] || ''}
+                                    onChange={e => onChange(q, e.target.value)}
+                                    className={`w-full bg-transparent font-black text-xl outline-none cursor-pointer text-center appearance-none rounded-lg ${isUncertain ? 'text-amber-700' : 'text-[#022c22]'}`}
+                                >
+                                    <option value="">-</option>
+                                    {OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                                </select>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [activeTab, setActiveTab] = useState('scan');
+            const [exams, setExams] = useState([]);
+            const [selectedExam, setSelectedExam] = useState(null);
+            const [allResults, setAllResults] = useState([]);
+            const [multiSetKeys, setMultiSetKeys] = useState({});
+            
+            const [showExamModal, setShowExamModal] = useState(false);
+            const [isScanning, setIsScanning] = useState(false);
+            const [scanPass, setScanPass] = useState(1);
+            const [scanStep, setScanStep] = useState("");
+            const [tempScanData, setTempScanData] = useState(null);
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+            const [targetSet, setTargetSet] = useState(SET_NAMES[0]);
+            const [keyInputText, setKeyInputText] = useState("");
+            const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
+            const [searchTerm, setSearchTerm] = useState("");
+
+            const fileInputRef = useRef(null);
+            const keyImageInputRef = useRef(null);
+
+            // Auth
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await auth.signInWithCustomToken(__initial_auth_token);
+                        else await auth.signInAnonymously();
+                    } catch (err) { console.error("Auth Fail:", err); }
+                };
+                initAuth();
+                return auth.onAuthStateChanged(setUser);
+            }, []);
+
+            // Data Listeners
+            useEffect(() => {
+                if (!user) return;
+                
+                const unsubExams = db.collection(`artifacts/${appId}/public/data/exams`).onSnapshot((snap) => {
+                    const data = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+                        const t1 = a.createdAt?.seconds || 0;
+                        const t2 = b.createdAt?.seconds || 0;
+                        return t2 - t1;
+                    });
+                    setExams(data);
+                    if (!selectedExam && data.length > 0) setSelectedExam(data[0]);
+                });
+                
+                const unsubResults = db.collection(`artifacts/${appId}/public/data/results`).onSnapshot((snap) => {
+                    setAllResults(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                });
+                
+                return () => { unsubExams(); unsubResults(); };
+            }, [user]);
+
+            // Load Answer Keys
+            useEffect(() => {
+                if (!user || !selectedExam) return;
+                db.collection(`artifacts/${appId}/public/data/answerKeys`).doc(selectedExam.examId).get().then(snap => {
+                    if (snap.exists) setMultiSetKeys(snap.data()); else setMultiSetKeys({});
+                });
+            }, [user, selectedExam]);
+
+            const showStatus = (type, text) => {
+                setStatusMsg({ type, text });
+                setTimeout(() => setStatusMsg({ type: '', text: '' }), 5000);
+            };
+
+            const calculateScore = (ans, set) => {
+                const key = multiSetKeys[set] || {};
+                let score = 0;
+                const total = selectedExam?.totalQuestions || 30;
+                for (let i = 1; i <= total; i++) { if (ans[i] && ans[i] === key[i]) score++; }
+                return { score, total };
+            };
+
+            const safeJsonParse = (text) => {
+                try {
+                    const cleaned = (text || '').replace(/```json[\s\S]*?```|```[\s\S]*?```/g, m => m.replace(/```json|```/g, '')).trim();
+                    try { return JSON.parse(cleaned); } catch (_) {}
+                    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+                    throw new Error("No valid JSON found");
+                } catch (e) { throw new Error("AI দিয়ে ডেটা পার্স করা সম্ভব হয়নি।"); }
+            };
+
+            // GEMINI 3.1 PRO NATIVE API CALL
+            const callGemini = async (prompt, b64, mimeType, temperature = 0.1) => {
+                const res = await fetch(GEMINI_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-goog-api-key': USER_API_KEY
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: prompt },
+                                ...(b64 ? [{ inlineData: { mimeType: mimeType || 'image/jpeg', data: b64 } }] : [])
+                            ]
+                        }],
+                        generationConfig: {
+                            temperature,
+                            topP: 0.8,
+                            topK: 10,
+                        }
+                    })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message);
+                return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            };
+
+            const handleScan = async (e) => {
+                const file = e.target.files[0];
+                if (!file || !selectedExam) return;
+                e.target.value = ''; 
+                
+                setIsScanning(true);
+                setScanPass(1);
+
+                try {
+                    const b64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                        reader.onerror = reject;
+                    });
+                    const mimeType = file.type || 'image/jpeg';
+
+                    // PASS 1
+                    setScanStep("১ম পাস: সম্পূর্ণ খাতা বিশ্লেষণ...");
+                    setScanPass(1);
+
+                    const prompt1 = buildPass1Prompt(selectedExam.totalQuestions, SET_NAMES);
+                    const raw1 = await callGemini(prompt1, b64, mimeType, 0.1);
+                    const pass1 = safeJsonParse(raw1);
+
+                    const answers = {};
+                    for (let i = 1; i <= selectedExam.totalQuestions; i++) {
+                        answers[String(i)] = pass1.answers?.[String(i)] || pass1.answers?.[i] || '?';
+                    }
+
+                    let uncertainList = (pass1.uncertain || []).map(String);
+                    Object.entries(answers).forEach(([q, a]) => {
+                        if (a === '?' && !uncertainList.includes(q)) uncertainList.push(q);
+                    });
+
+                    let finalRoll = pass1.roll || '';
+                    let finalAnswers = { ...answers };
+
+                    // PASS 2
+                    if (uncertainList.length > 0) {
+                        setScanStep(`২য় পাস: ${uncertainList.length}টি অনিশ্চিত উত্তর যাচাই...`);
+                        setScanPass(2);
+
+                        const prompt2 = buildPass2Prompt(uncertainList, selectedExam.totalQuestions);
+                        try {
+                            const raw2 = await callGemini(prompt2, b64, mimeType, 0.05); 
+                            const pass2 = safeJsonParse(raw2);
+
+                            if (pass2.answers) {
+                                Object.entries(pass2.answers).forEach(([q, a]) => {
+                                    if (a && a !== '?') {
+                                        finalAnswers[String(q)] = a;
+                                    }
+                                });
+                            }
+                            if (pass2.roll_verified && /^\d{6}$/.test(pass2.roll_verified)) {
+                                finalRoll = pass2.roll_verified;
+                            }
+                        } catch (pass2Err) {
+                            console.warn("Pass 2 failed, using pass 1 results:", pass2Err);
+                        }
+                    }
+
+                    setScanStep("ফলাফল প্রস্তুত হচ্ছে...");
+                    setScanPass(3);
+
+                    const detectedSet = SET_NAMES.find(s => 
+                        s === pass1.set || s.includes(pass1.set) || (pass1.set && pass1.set.includes(s.split(' ')[1]))
+                    ) || SET_NAMES[0];
+
+                    const scoreInfo = calculateScore(finalAnswers, detectedSet);
+                    setTempScanData({
+                        name: pass1.name || '',
+                        roll: finalRoll,
+                        set: detectedSet,
+                        answers: finalAnswers,
+                        uncertain: uncertainList.filter(q => finalAnswers[q] === '?' || finalAnswers[q] === undefined),
+                        allUncertain: uncertainList,
+                        ...scoreInfo
+                    });
+
+                    setShowConfirmModal(true);
+                    setIsScanning(false);
+                } catch (err) {
+                    console.error("Scan error:", err);
+                    showStatus('error', `স্ক্যান ব্যর্থ: ছবি পরিষ্কার ও সঠিকভাবে দিন।`);
+                    setIsScanning(false);
+                }
+            };
+
+            const updateAnswer = (q, val) => {
+                const newAnswers = { ...tempScanData.answers, [q]: val };
+                const scoreInfo = calculateScore(newAnswers, tempScanData.set);
+                setTempScanData(prev => ({ ...prev, answers: newAnswers, ...scoreInfo }));
+            };
+
+            const saveToFirebase = async () => {
+                const isDuplicate = allResults.some(r => r.examId === selectedExam.examId && r.roll === tempScanData.roll);
+                if (isDuplicate) {
+                    if (!window.confirm(`সতর্কতা: রোল "${tempScanData.roll}" আগেই আছে! ওভাররাইট করবেন?`)) return;
+                    const oldDoc = allResults.find(r => r.examId === selectedExam.examId && r.roll === tempScanData.roll);
+                    if (oldDoc) await db.collection(`artifacts/${appId}/public/data/results`).doc(oldDoc.id).delete();
+                }
+                const scoreInfo = calculateScore(tempScanData.answers, tempScanData.set);
+                try {
+                    await db.collection(`artifacts/${appId}/public/data/results`).add({
+                        name: tempScanData.name,
+                        roll: tempScanData.roll,
+                        set: tempScanData.set,
+                        answers: tempScanData.answers,
+                        uncertainCount: (tempScanData.allUncertain || []).length,
+                        ...scoreInfo,
+                        examId: selectedExam.examId,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showStatus('success', 'রেজাল্ট সফলভাবে সংরক্ষিত হয়েছে।');
+                    setShowConfirmModal(false);
+                    setTempScanData(null);
+                } catch (e) { showStatus('error', 'সেভ ইরর: ' + e.message); }
+            };
+
+            const handleCreateExam = async (e) => {
+                e.preventDefault();
+                if (!user) return;
+                const fd = new FormData(e.target);
+                const data = {
+                    name: fd.get('name'), subject: fd.get('subject'), className: fd.get('className'),
+                    totalQuestions: parseInt(fd.get('totalQuestions')) || 30,
+                    examId: `EX-${Date.now().toString(36).toUpperCase()}`, 
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                try {
+                    await db.collection(`artifacts/${appId}/public/data/exams`).add(data);
+                    showStatus('success', 'পরীক্ষা তৈরি হয়েছে।');
+                    setShowExamModal(false);
+                } catch (e) { showStatus('error', 'সেভ ব্যর্থ হয়েছে।'); }
+            };
+
+            const handleDeleteResult = async (resultId) => {
+                if (!window.confirm("এই রেজাল্টটি মুছে ফেলবেন?")) return;
+                try {
+                    await db.collection(`artifacts/${appId}/public/data/results`).doc(resultId).delete();
+                    showStatus('success', 'মুছে ফেলা হয়েছে।');
+                } catch (e) { showStatus('error', 'মুছতে সমস্যা।'); }
+            };
+
+            const extractKeysAI = async (type, data) => {
+                if (!selectedExam) return;
+                setIsGeneratingKeys(true);
+                try {
+                    const prompt = `You are extracting answer keys from a Bangladeshi MCQ answer sheet.
+Extract answers for questions 1 to ${selectedExam.totalQuestions}.
+Each answer is one of: ক, খ, গ, ঘ
+Return ONLY valid JSON (no markdown):
+{"1": "ক", "2": "খ", ...for all ${selectedExam.totalQuestions} questions}
+
+Input: ${type === 'text' ? `Text input: ${data}` : 'Image attached below'}`;
+
+                    let res;
+                    if (type === 'image') {
+                        res = await callGemini(prompt, data, 'image/jpeg', 0.05);
+                    } else {
+                        const r = await fetch(GEMINI_URL, {
+                            method: 'POST', headers: { 
+                                'Content-Type': 'application/json',
+                                'X-goog-api-key': USER_API_KEY
+                            },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: prompt }] }],
+                                generationConfig: { temperature: 0.05 }
+                            })
+                        });
+                        const d = await r.json();
+                        res = d?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    }
+
+                    const parsed = safeJsonParse(res);
+                    const newKeys = { ...multiSetKeys, [targetSet]: parsed };
+                    await db.collection(`artifacts/${appId}/public/data/answerKeys`).doc(selectedExam.examId).set(newKeys);
+                    setMultiSetKeys(newKeys);
+                    showStatus('success', 'মাস্টার কী আপডেট হয়েছে।');
+                } catch (e) { showStatus('error', 'এআই বুঝতে পারেনি: ' + e.message); }
+                finally { setIsGeneratingKeys(false); }
+            };
+
+            const filteredResults = allResults.filter(r => r.examId === selectedExam?.examId)
+                .filter(r => (r.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || (r.roll || "").includes(searchTerm));
+
+            return (
+                <div className="min-h-screen text-[#022c22] font-sans relative z-10 overflow-hidden pb-24">
+                    <div className="bg-shapes"><div className="shape-1"></div><div className="shape-2"></div></div>
+                    
+                    {/* NAVBAR */}
+                    <nav className="glass-nav sticky top-0 z-40 transition-all duration-300">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center p-4">
+                            <div className="flex items-center gap-3 group cursor-pointer">
+                                <div className="bg-white/50 p-1.5 rounded-xl border border-white/60 shadow-sm group-hover:scale-105 transition duration-300">
+                                    <img src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png" className="h-10 object-contain drop-shadow-md" alt="Logo" />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-extrabold tracking-tight gradient-text drop-shadow-sm">Janani Scanner</h1>
+                                    <p className="text-[10px] font-bold text-[#059669] uppercase tracking-widest leading-none mt-0.5">Gemini 3.1 Pro Engine</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 bg-white/40 p-1.5 rounded-2xl border border-white/60 shadow-sm backdrop-blur-md">
+                                {['scan', 'keys', 'results'].map(tab => (
+                                    <button key={tab} onClick={() => setActiveTab(tab)} className={`flex items-center gap-2 px-5 py-2 rounded-xl transition-all font-bold text-xs ${activeTab === tab ? 'bg-white text-[#059669] shadow-sm border border-white' : 'text-[#065f46] hover:bg-white/40'}`}>
+                                        {tab === 'scan' ? <Icon name="Camera" size={16}/> : tab === 'keys' ? <Icon name="Wand2" size={16}/> : <Icon name="List" size={16}/>}
+                                        <span className="hidden md:inline uppercase">{tab === 'scan' ? 'স্ক্যান' : tab === 'keys' ? 'উত্তরপত্র' : 'রেজাল্ট'}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-6xl mx-auto p-4 mt-8 relative z-10 animate-fade-in">
+                        
+                        {/* EXAM SELECTOR & STATS */}
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
+                            <div className="lg:col-span-3">
+                                <CustomExamSelect exams={exams} selected={selectedExam} onSelect={setSelectedExam} onNew={() => setShowExamModal(true)} />
+                            </div>
+                            <div className="glass-btn p-6 rounded-[35px] text-white flex flex-col justify-center text-center relative overflow-hidden border-white/40 shadow-xl hover:scale-[1.02] transition-transform">
+                                <div className="absolute -right-4 -bottom-4 opacity-10"><Icon name="Database" size={100}/></div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a7f3d0]">মোট মূল্যায়ন</p>
+                                <h2 className="text-5xl font-black mt-1">{allResults.length}</h2>
+                                <p className="font-bold text-[10px] mt-1 text-[#d1fae5]">টি খাতা সংরক্ষিত</p>
+                            </div>
+                        </div>
+
+                        {statusMsg.text && (
+                            <div className={`glass-panel p-4 rounded-2xl mb-8 flex items-center gap-4 ${statusMsg.type === 'success' ? 'text-[#059669]' : 'text-red-600'}`}>
+                                <div className="bg-white/60 p-2 rounded-full shadow-sm">{statusMsg.type === 'success' ? <Icon name="CheckCircle2" size={18}/> : <Icon name="AlertCircle" size={18}/>}</div>
+                                <p className="font-bold text-sm">{statusMsg.text}</p>
+                            </div>
+                        )}
+
+                        {/* TABS */}
+                        {!selectedExam ? (
+                            <div className="glass-panel p-20 rounded-[50px] text-center border border-white/80 shadow-md">
+                                <div className="w-24 h-24 bg-white/60 rounded-[35px] flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/80">
+                                    <Icon name="GraduationCap" size={40} className="text-[#059669]" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-[#064e3b]">শুরু করতে একটি পরীক্ষা নির্বাচন করুন।</h2>
+                            </div>
+                        ) : (
+                            <>
+                                {/* SCAN TAB */}
+                                {activeTab === 'scan' && (
+                                    <div className="relative">
+                                        <div className={`glass-panel p-12 rounded-[50px] text-center flex flex-col items-center transition-all duration-500 ${isScanning ? 'blur-md pointer-events-none scale-95 opacity-50' : 'hover:shadow-2xl'}`}>
+                                            <div className="w-36 h-36 bg-white/60 rounded-[40px] flex items-center justify-center mb-10 shadow-lg border border-white/80 hover:scale-110 transition-transform duration-500">
+                                                <Icon name="Camera" className="text-[#059669]" size={72}/>
+                                            </div>
+                                            <h2 className="text-4xl font-extrabold mb-4 text-[#022c22] tracking-tight drop-shadow-sm">{selectedExam.name}</h2>
+                                            <div className="flex flex-wrap justify-center gap-3 mb-4">
+                                                <span className="bg-white/80 text-[#064e3b] border border-white/60 shadow-sm px-5 py-2 rounded-xl font-bold text-xs uppercase">{selectedExam.className}</span>
+                                                <span className="bg-white/80 text-[#064e3b] border border-white/60 shadow-sm px-5 py-2 rounded-xl font-bold text-xs uppercase">{selectedExam.subject}</span>
+                                                <span className="bg-white/80 text-[#064e3b] border border-white/60 shadow-sm px-5 py-2 rounded-xl font-bold text-xs uppercase">{selectedExam.totalQuestions} প্রশ্ন</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-white/60 border border-white/80 px-5 py-2 rounded-full mb-10 shadow-sm">
+                                                <Icon name="Zap" size={14} className="text-amber-500"/>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#065f46]">Gemini 3.1 Pro · স্বয়ংক্রিয় যাচাই</span>
+                                                <Icon name="Shield" size={14} className="text-[#059669]"/>
+                                            </div>
+                                            <button onClick={() => fileInputRef.current.click()} className="glass-btn px-16 py-6 rounded-[35px] font-extrabold text-2xl flex items-center gap-4 w-full md:w-auto justify-center">
+                                                <Icon name="Upload" size={28}/> ওএমআর স্ক্যান করুন
+                                            </button>
+                                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleScan}/>
+                                        </div>
+
+                                        {isScanning && (
+                                            <ScanProgressOverlay step={scanStep} pass={scanPass} totalPasses={2} />
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* KEYS TAB */}
+                                {activeTab === 'keys' && (
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <div className="glass-panel p-8 rounded-[40px] h-fit border border-white/80 hover:shadow-xl transition duration-500">
+                                            <div className="flex items-center gap-4 mb-8">
+                                                <div className="p-4 bg-white/60 border border-white/80 rounded-2xl text-[#059669] shadow-sm"><Icon name="Wand2" size={28}/></div>
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-[#022c22]">মাস্টার কী</h2>
+                                                    <p className="text-[#065f46] font-bold text-xs mt-1">অটোমেটিক উত্তরমালা তৈরি</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 custom-scrollbar">
+                                                {SET_NAMES.map(s => (
+                                                    <button key={s} onClick={() => setTargetSet(s)} className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all border ${targetSet === s ? 'glass-btn border-white/40' : 'bg-white/40 text-[#065f46] border-white/60 hover:bg-white/60'}`}>
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <textarea value={keyInputText} onChange={e => setKeyInputText(e.target.value)} placeholder="১-ক, ২-খ... টাইপ করুন অথবা উত্তরপত্রের ছবি দিন" className="w-full h-32 p-5 bg-white/50 border border-white/60 rounded-[25px] font-bold outline-none focus:border-[#10b981] focus:bg-white/80 transition-all mb-6 resize-none shadow-inner text-[#022c22]" />
+                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                <button onClick={() => keyImageInputRef.current.click()} className="flex-1 p-4 bg-white/60 border border-white/80 shadow-sm rounded-2xl font-bold text-[#064e3b] flex items-center justify-center gap-2 hover:bg-white transition-all"><Icon name="Image" size={20}/> ছবি</button>
+                                                <button onClick={() => extractKeysAI('text', keyInputText)} disabled={isGeneratingKeys || !keyInputText} className="flex-1 p-4 glass-btn rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+                                                    {isGeneratingKeys ? <Icon name="RefreshCw" className="animate-spin" size={20}/> : <Icon name="Send" size={20}/>} জেনারেট
+                                                </button>
+                                                <input type="file" ref={keyImageInputRef} className="hidden" accept="image/*" onChange={e => {
+                                                    const f = e.target.files[0];
+                                                    if (f) { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => extractKeysAI('image', r.result.split(',')[1]); }
+                                                }}/>
+                                            </div>
+                                        </div>
+
+                                        <div className="glass-panel-dark rounded-[40px] p-8 text-white relative overflow-hidden h-[550px] flex flex-col border border-white/10 hover:shadow-2xl transition duration-500">
+                                            <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none"><Icon name="ClipboardList" size={180}/></div>
+                                            <h3 className="text-xl font-bold mb-8 flex items-center gap-3 text-[#34d399]"><Icon name="Database" size={20}/> {targetSet}</h3>
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto flex-1 pr-2 custom-scrollbar z-10">
+                                                {[...Array(selectedExam.totalQuestions)].map((_, i) => (
+                                                    <div key={i} className="bg-white/10 border border-white/20 p-3 rounded-2xl flex flex-col items-center gap-1 hover:bg-white/20 backdrop-blur-md">
+                                                        <span className="text-[10px] font-bold text-[#a7f3d0] uppercase">Q {i+1}</span>
+                                                        <select value={multiSetKeys[targetSet]?.[i+1] || ''} onChange={e => setMultiSetKeys({...multiSetKeys, [targetSet]: {...multiSetKeys[targetSet], [i+1]: e.target.value}})} className="bg-transparent font-black text-white text-xl outline-none cursor-pointer text-center appearance-none">
+                                                            <option value="" className="text-slate-800">-</option>
+                                                            {OPTIONS.map(o => <option key={o} value={o} className="text-slate-900">{o}</option>)}
+                                                        </select>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* RESULTS TAB */}
+                                {activeTab === 'results' && (
+                                    <div className="glass-panel rounded-[40px] overflow-hidden border border-white/80 hover:shadow-2xl transition duration-500">
+                                        <div className="p-8 bg-white/40 border-b border-white/60 flex justify-between items-center flex-wrap gap-4">
+                                            <div>
+                                                <h2 className="text-2xl font-extrabold text-[#022c22]">ফলাফল ডাটাবেস</h2>
+                                                <p className="text-[10px] font-bold text-[#065f46] mt-1 uppercase tracking-widest bg-white/50 inline-block px-3 py-1 rounded-full border border-white/60">{selectedExam.name}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-white/60 p-3 rounded-2xl border border-white/80 shadow-inner w-full md:w-72 focus-within:bg-white transition-all">
+                                                <Icon name="Search" size={18} className="text-[#059669]" />
+                                                <input type="text" placeholder="নাম বা রোল দিয়ে খুঁজুন..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent outline-none font-bold text-sm flex-1 text-[#022c22]"/>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead className="bg-white/30 text-[10px] uppercase font-bold text-[#065f46] tracking-widest border-b border-white/60">
+                                                    <tr><th className="px-8 py-5">শিক্ষার্থী</th><th className="px-8 py-5 text-center">রোল</th><th className="px-8 py-5 text-center">সেট</th><th className="px-8 py-5 text-center">নম্বর</th><th className="px-8 py-5 text-center">স্ট্যাটাস</th><th className="px-8 py-5 text-right">অ্যাকশন</th></tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/40">
+                                                    {filteredResults.map(res => (
+                                                        <tr key={res.id} className="hover:bg-white/60 transition-all group cursor-default">
+                                                            <td className="px-8 py-5">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-10 h-10 bg-white/80 border border-white rounded-xl flex items-center justify-center font-black text-[#059669] group-hover:bg-[#10b981] group-hover:text-white transition-all shadow-sm">{res.name?.charAt(0) || '?'}</div>
+                                                                    <span className="font-bold text-[#022c22]">{res.name || "অজানা"}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-8 py-5 font-mono font-bold text-[#064e3b] text-lg text-center tracking-widest">{res.roll}</td>
+                                                            <td className="px-8 py-5 text-center">
+                                                                <span className="text-[10px] font-bold bg-white/80 text-[#059669] px-3 py-1.5 rounded-xl uppercase shadow-sm border border-white">{res.set}</span>
+                                                            </td>
+                                                            <td className="px-8 py-5 text-center">
+                                                                <div className="flex items-baseline justify-center gap-1">
+                                                                    <span className="text-3xl font-black text-[#022c22]">{res.score}</span>
+                                                                    <span className="text-xs font-bold text-[#059669]">/{res.total}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-8 py-5 text-center">
+                                                                {(res.uncertainCount || 0) > 0 ? (
+                                                                    <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-200 shadow-sm flex items-center gap-1 justify-center w-fit mx-auto">
+                                                                        <Icon name="AlertTriangle" size={12}/> {res.uncertainCount}টি অনিশ্চিত
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[10px] font-bold bg-white/80 text-[#059669] px-3 py-1.5 rounded-xl border border-white shadow-sm flex items-center gap-1 justify-center w-fit mx-auto">
+                                                                        <Icon name="CheckCircle2" size={12}/> নির্ভুল
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-8 py-5 text-right">
+                                                                <button onClick={() => handleDeleteResult(res.id)} className="p-2 bg-white/50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm border border-white/80" title="ডিলিট করুন">
+                                                                    <Icon name="Trash2" size={16} />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                    {filteredResults.length === 0 && (
+                                                        <tr><td colSpan={6} className="px-8 py-16 text-center text-[#059669] font-bold italic">কোনো ফলাফল নেই।</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </main>
+
+                    {/* MODALS */}
+                    
+                    {/* Create Exam Modal */}
+                    {showExamModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-nature-950/60 backdrop-blur-md animate-in fade-in duration-200">
+                            <form onSubmit={handleCreateExam} className="glass-panel bg-white/80 w-full max-w-lg rounded-[40px] shadow-2xl p-10 space-y-5 animate-in zoom-in-95">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="text-3xl font-extrabold text-[#022c22] drop-shadow-sm">নতুন পরীক্ষা</h2>
+                                    <button type="button" onClick={() => setShowExamModal(false)} className="p-2 bg-white/60 border border-white/80 rounded-full text-[#065f46] hover:bg-white hover:text-red-500 shadow-sm transition-all"><Icon name="X" size={20}/></button>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-[#059669] ml-2 tracking-widest">পরীক্ষার নাম</label>
+                                    <input name="name" placeholder="উদা: মডেল টেস্ট ০১" required className="w-full p-4 bg-white/60 border border-white/80 shadow-inner rounded-2xl font-bold text-[#022c22] outline-none focus:border-[#10b981] focus:bg-white" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-[#059669] ml-2 tracking-widest">বিষয়</label>
+                                        <select name="subject" required className="w-full p-4 bg-white/60 border border-white/80 shadow-inner rounded-2xl font-bold text-[#022c22] outline-none focus:border-[#10b981] focus:bg-white">{SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}</select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-[#059669] ml-2 tracking-widest">শ্রেণি</label>
+                                        <select name="className" required className="w-full p-4 bg-white/60 border border-white/80 shadow-inner rounded-2xl font-bold text-[#022c22] outline-none focus:border-[#10b981] focus:bg-white">{CLASSES.map(c => <option key={c} value={c}>{c}</option>)}</select>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-[#059669] uppercase ml-2 tracking-widest">মোট প্রশ্ন</label>
+                                    <input name="totalQuestions" type="number" defaultValue="30" className="w-full p-4 bg-white/60 border border-white/80 shadow-inner rounded-2xl font-bold text-center text-[#022c22] outline-none focus:border-[#10b981] focus:bg-white" />
+                                </div>
+                                <button type="submit" className="w-full py-5 glass-btn rounded-3xl font-extrabold text-xl shadow-lg mt-4">
+                                    তৈরি করুন
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Validation Modal */}
+                    {showConfirmModal && tempScanData && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#022c22]/80 backdrop-blur-md animate-in fade-in">
+                            <div className="glass-panel bg-white/90 w-full max-w-2xl rounded-[50px] overflow-hidden shadow-2xl border-2 border-white flex flex-col max-h-[90vh] animate-in zoom-in-95">
+                                
+                                <div className="bg-gradient-to-r from-[#10b981] to-[#059669] p-8 text-white text-center relative flex-shrink-0">
+                                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+                                    <div className="inline-flex items-center justify-center bg-white/20 p-4 rounded-[30px] mb-4 shadow-inner border border-white/30 backdrop-blur-md relative z-10">
+                                        <Icon name="CheckCircle2" size={40}/>
+                                    </div>
+                                    <h2 className="text-2xl font-extrabold tracking-tight drop-shadow-md relative z-10">খাতা মূল্যায়িত হয়েছে</h2>
+                                    
+                                    {(tempScanData.allUncertain?.length || 0) > 0 && (
+                                        <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/90 text-amber-900 border border-amber-300 px-4 py-2 rounded-full shadow-lg relative z-10 animate-bounce">
+                                            <Icon name="AlertTriangle" size={14}/>
+                                            <span className="text-xs font-bold">{tempScanData.allUncertain.length}টি উত্তর হলুদ বক্সে যাচাই করুন</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-[#059669] uppercase ml-2 tracking-widest">নাম</label>
+                                            <input type="text" value={tempScanData.name} onChange={e => setTempScanData({...tempScanData, name: e.target.value})} className="w-full p-4 bg-white/60 rounded-2xl font-bold text-nature-900 border border-white/80 shadow-inner outline-none focus:border-[#10b981] focus:bg-white"/>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-[#059669] uppercase ml-2 tracking-widest">রোল নম্বর</label>
+                                            <input type="text" value={tempScanData.roll} onChange={e => setTempScanData({...tempScanData, roll: e.target.value})} className="w-full p-4 bg-white/60 rounded-2xl font-mono font-bold text-[#065f46] border border-white/80 shadow-inner outline-none focus:border-[#10b981] focus:bg-white tracking-widest"/>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-[#059669] uppercase ml-2 tracking-widest">সেট</label>
+                                            <select value={tempScanData.set} onChange={e => { const s = e.target.value; setTempScanData(p => ({...p, set: s, ...calculateScore(p.answers, s)})); }} className="w-full p-4 bg-white/60 rounded-2xl font-bold text-nature-900 border border-white/80 shadow-inner outline-none focus:border-[#10b981] focus:bg-white">
+                                                {SET_NAMES.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="glass-panel p-4 rounded-3xl flex flex-col items-center justify-center shadow-inner border-white/80 bg-white/40">
+                                            <div className="text-[10px] font-bold text-[#059669] uppercase mb-1 tracking-widest">প্রাপ্ত নম্বর</div>
+                                            <div className="text-4xl font-black text-nature-900 drop-shadow-sm">{tempScanData.score}<span className="text-lg text-[#059669]">/{tempScanData.total}</span></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="flex items-center justify-between mb-4 px-2 border-b border-emerald-100 pb-2">
+                                            <h3 className="font-bold text-nature-900 flex items-center gap-2"><Icon name="Edit3" size={16} className="text-[#059669]"/> উত্তর যাচাই</h3>
+                                        </div>
+                                        <AnswerCorrectionGrid answers={tempScanData.answers} uncertain={tempScanData.allUncertain} totalQ={selectedExam?.totalQuestions || 30} onChange={updateAnswer} />
+                                    </div>
+                                </div>
+
+                                <div className="p-8 pt-4 flex gap-4 flex-shrink-0 bg-white/50 border-t border-white/60 backdrop-blur-md">
+                                    <button onClick={() => { setShowConfirmModal(false); setTempScanData(null); }} className="flex-1 py-4 bg-white/60 border border-white/80 shadow-sm rounded-[25px] font-bold text-[#065f46] hover:bg-white transition-all">বাতিল</button>
+                                    <button onClick={saveToFirebase} className="flex-1 py-4 glass-btn rounded-[25px] font-extrabold text-xl shadow-lg flex justify-center items-center gap-2">
+                                        <Icon name="Save" size={20}/> সেভ করুন
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
