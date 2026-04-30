@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>জননী কোচিং সেন্টার | OMR Evaluation AI</title>
+    <title>জননী কোচিং সেন্টার | OMR AI System</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
+    <!-- React & ReactDOM (UMD) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
     <!-- Babel for in-browser JSX parsing -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Firebase Compat SDK (Used for raw HTML projects) -->
+    <!-- Firebase Compat SDK (For pure HTML integration) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <!-- QR Code & Lucide Icons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -72,25 +71,46 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // ─── DESTRUCTURE REACT HOOKS ────────────────────────────────────────────────
         const { useState, useEffect, useRef } = React;
 
-        // --- Firebase Initialization (Compat Mode) ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // ─── FIREBASE CRASH FIX (Fallback Config Included) ──────────────────────────
+        const fallbackFirebaseConfig = {
+            apiKey: "AIzaSyDML6tbSONWaW8-5_SfaIC63MtVk4Oq_Xs",
+            authDomain: "general-57884.firebaseapp.com",
+            projectId: "general-57884",
+            storageBucket: "general-57884.firebasestorage.app",
+            messagingSenderId: "5002724584",
+            appId: "1:5002724584:web:9ad7ef66d69265b8b9b55d"
+        };
+
+        let configToUse = fallbackFirebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            try { 
+                const parsed = JSON.parse(__firebase_config); 
+                if (parsed.apiKey) configToUse = parsed;
+            } catch(e) {}
+        }
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(configToUse);
+        }
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'janani-omr-official';
 
-        // --- GEMINI 3.1 PRO CONFIGURATION ---
+        // ─── GEMINI 3.1 PRO CONFIGURATION ───────────────────────────────────────────
         const USER_API_KEY = "AIzaSyAKDIZslBwLtudndenShD_TNsJh_X4y3qA";
         const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent";
 
+        // Constants
         const SET_NAMES = ["শহীদ ওসমান হাদী", "শহীদ মীর মুগ্ধ", "শহীদ আবু সাঈদ", "শহীদ আবরার ফাহাদ"];
         const SUBJECTS = ["বাংলা", "ইংরেজি", "গণিত", "পদার্থবিজ্ঞান", "রসায়ন", "জীববিজ্ঞান", "উচ্চতর গণিত", "ICT", "ইসলাম ও নৈতিক শিক্ষা", "বাংলাদেশ ও বিশ্বপরিচয়", "অন্যান্য"];
         const CLASSES = ["ষষ্ঠ শ্রেণি", "সপ্তম শ্রেণি", "অষ্টম শ্রেণি", "নবম শ্রেণি", "দশম শ্রেণি", "একাদশ শ্রেণি", "দ্বাদশ শ্রেণি"];
         const OPTIONS = ['ক', 'খ', 'গ', 'ঘ'];
 
-        // --- Lucide Icon Helper ---
+        // ─── LUCIDE ICON WRAPPER (For HTML usage) ───────────────────────────────────
         const Icon = ({ name, size = 24, className = "" }) => {
             const elRef = useRef(null);
             useEffect(() => {
@@ -103,110 +123,61 @@
                     elRef.current.appendChild(iconNode);
                 }
             }, [name, size, className]);
-            return <span ref={elRef} className="inline-flex items-center justify-center"></span>;
+            return <span ref={elRef} className={`inline-flex items-center justify-center ${className}`}></span>;
         };
 
-        // --- Prompt Engineering Core ---
+        // ─── PROMPT ENGINEERING (STRICT FOR ROLL & SET) ─────────────────────────────
         const buildPass1Prompt = (totalQuestions, setNames) => `
-You are an expert OMR (Optical Mark Recognition) evaluation AI with 20 years of experience reading Bangladeshi MCQ answer sheets. Your task is to analyze this sheet with maximum accuracy.
+You are an expert OMR (Optical Mark Recognition) evaluation AI using Gemini 3.1 Pro's advanced reasoning.
+Analyze this sheet with maximum accuracy.
 
 ══════════════════════════════════
-BUBBLE DETECTION CRITERIA (STRICT)
+STEP 1 — ROLL NUMBER (CRITICAL - BUBBLE GRID ONLY)
 ══════════════════════════════════
-A bubble is considered FILLED if:
-  ✓ More than 40% of its circular area is darkened/shaded/penned
-  ✓ It is visually darker than the other bubbles in the same row
-  ✓ Even light pencil shading counts if it's clearly darker than empty bubbles
-
-A bubble is EMPTY if:
-  ✗ It has little or no shading
-  ✗ It appears as just a printed circle outline
-
-CONFLICT RULE: If TWO bubbles appear equally filled in one row → pick the DARKER one AND add that question number to the "uncertain" array.
-BLANK RULE: If NO bubble is filled in a row → record "?" and add to "uncertain".
+Location: Find the "রোল নম্বর" section.
+Method: It has multiple COLUMNS. Each column contains bubbles for digits 0-9 vertically.
+For each column LEFT to RIGHT: find the ONE darkened bubble.
+Concatenate all column digits into a continuous string.
+⛔ ABSOLUTE RULE: DO NOT read handwritten numbers. ONLY READ THE BUBBLE GRID.
 
 ══════════════════════════════════
-STEP 1 — STUDENT NAME
+STEP 2 — SET IDENTIFICATION & NAME
 ══════════════════════════════════
-Read the printed "নাম" field. Output exactly what is written.
+Extract Student Name from the text field.
+Identify Set Name from filled bubbles. Available sets: ${setNames.join(', ')}
 
 ══════════════════════════════════
-STEP 2 — ROLL NUMBER (CRITICAL - BUBBLE GRID ONLY)
+STEP 3 — ANSWER EXTRACTION (Q1 to Q${totalQuestions})
 ══════════════════════════════════
-Location: Find the "রোল নম্বর" section which has a PRINTED GRID of bubbles.
-Method:
-  1. The grid has multiple COLUMNS (typically 6 columns for a 6-digit roll)
-  2. Each column contains bubbles for digits 0 through 9 arranged vertically
-  3. For each column LEFT to RIGHT: find the ONE darkened bubble → that digit is the roll digit
-  4. Concatenate all column digits → the complete roll number
+Check bubbles for options: ক, খ, গ, ঘ. Record the DARKEST filled bubble.
+If two are filled, pick the darker one and add question number to "uncertain".
+If blank, output "?" and add to "uncertain".
 
-⛔ ABSOLUTE PROHIBITION: Do NOT read any handwritten numbers, pre-printed roll numbers, or stickers. ONLY read from the bubble grid.
-
-If a column has no filled bubble → use "0" as default for that position.
-
-══════════════════════════════════
-STEP 3 — SET IDENTIFICATION  
-══════════════════════════════════
-Available sets: ${setNames.join(', ')}
-Look for a dedicated "সেট" selection area. Match the filled bubble to one of the above sets.
-If unclear, make your best judgment and add "set" to the uncertain array.
-
-══════════════════════════════════
-STEP 4 — ANSWER EXTRACTION (Q1 to Q${totalQuestions})
-══════════════════════════════════
-Method:
-  1. Find question row 1. Check bubbles for options: ক, খ, গ, ঘ
-  2. Apply BUBBLE DETECTION CRITERIA above
-  3. Record the answer. Move to next row.
-  4. Repeat for ALL ${totalQuestions} questions without skipping.
-  5. Double-check rows you were unsure about. Add those question numbers to "uncertain".
-
-Do NOT skip any question. Every question from 1 to ${totalQuestions} must have an entry.
-
-══════════════════════════════════
-OUTPUT FORMAT (JSON ONLY - NO MARKDOWN)
-══════════════════════════════════
-Return ONLY valid JSON. No text before or after. No \`\`\`json fences:
+OUTPUT STRICT JSON FORMAT:
 {
-  "name": "student name here",
-  "roll": "6-digit roll from bubble grid",
-  "set": "exact set name from the list",
-  "answers": {
-    "1": "ক",
-    "2": "খ",
-    "3": "গ"
-  },
-  "uncertain": ["3", "7", "15"]
+  "name": "student name",
+  "roll": "6-digit-roll-from-bubbles",
+  "set": "exact set name",
+  "answers": { "1": "ক", "2": "খ" },
+  "uncertain": ["3", "7"]
 }
 `.trim();
 
         const buildPass2Prompt = (uncertainList, totalQ) => `
-You are re-examining an OMR answer sheet. In a previous scan, these specific question numbers were flagged as UNCERTAIN or AMBIGUOUS: [${uncertainList.join(', ')}]
+Re-examine this OMR sheet. Previously these questions were uncertain: [${uncertainList.join(', ')}].
+Look specifically at these rows and find the true intended answer (the darkest, most deliberate bubble among ক, খ, গ, ঘ).
 
-YOUR TASK: Look ONLY at these question rows and determine the correct answer with fresh eyes.
+Also, re-verify the ROLL NUMBER by carefully checking the columns of the bubble grid again.
 
-For each flagged question:
-  1. Locate that specific row on the sheet
-  2. Examine all 4 option bubbles (ক, খ, গ, ঘ) with extreme care
-  3. Look for the DARKEST / most filled bubble
-  4. If two bubbles are truly equally dark, pick the one that appears INTENTIONALLY filled (rounder, more uniform shading)
-  5. Record your final answer
-
-Also re-check the ROLL NUMBER bubble grid one more time:
-  - Verify each column has exactly ONE filled bubble
-  - Output the corrected roll if it differs from previous reading
-
-Return ONLY valid JSON (no markdown):
+OUTPUT STRICT JSON FORMAT:
 {
-  "roll_verified": "6-digit roll from bubbles",
-  "answers": {
-    ${uncertainList.map(q => `"${q}": "ক"`).join(',\n    ')}
-  }
+  "roll_verified": "6-digit-roll-from-bubbles",
+  "answers": { "${uncertainList[0] || '1'}": "ক" }
 }
 `.trim();
 
+        // ─── COMPONENTS ─────────────────────────────────────────────────────────────
 
-        // --- Custom Select Component ---
         const CustomExamSelect = ({ exams, selected, onSelect, onNew }) => {
             const [isOpen, setIsOpen] = useState(false);
             const [searchTerm, setSearchTerm] = useState("");
@@ -222,7 +193,7 @@ Return ONLY valid JSON (no markdown):
 
             return (
                 <div className="relative w-full" ref={dropdownRef}>
-                    <div onClick={() => setIsOpen(!isOpen)} className="glass-panel w-full rounded-3xl p-5 flex items-center justify-between cursor-pointer hover:bg-white/60 transition-all group">
+                    <div onClick={() => setIsOpen(!isOpen)} className="glass-panel w-full rounded-3xl p-5 flex items-center justify-between cursor-pointer hover:bg-white/60 transition-all group shadow-sm">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-white/60 rounded-2xl text-[#059669] border border-white/80 shadow-sm group-hover:scale-105 transition-all">
                                 <Icon name="BookOpen" size={24} />
@@ -240,7 +211,7 @@ Return ONLY valid JSON (no markdown):
                     </div>
 
                     {isOpen && (
-                        <div className="absolute top-full left-0 right-0 mt-3 glass-panel rounded-[35px] shadow-2xl z-50 overflow-hidden">
+                        <div className="absolute top-full left-0 right-0 mt-3 glass-panel rounded-[35px] shadow-2xl z-50 overflow-hidden border border-white/80 animate-in fade-in zoom-in-95">
                             <div className="p-4 border-b border-white/60 bg-white/40">
                                 <div className="flex items-center gap-3 bg-white/60 border border-white/80 rounded-2xl px-4 py-2 focus-within:bg-white transition-all shadow-inner">
                                     <Icon name="Search" size={18} className="text-[#047857]" />
@@ -262,7 +233,7 @@ Return ONLY valid JSON (no markdown):
                                     ))
                                 )}
                             </div>
-                            <div onClick={() => { onNew(); setIsOpen(false); }} className="p-5 bg-white/40 text-[#059669] border-t border-white/40 text-center font-black cursor-pointer hover:bg-white/60 transition-all flex items-center justify-center gap-2">
+                            <div onClick={() => { onNew(); setIsOpen(false); }} className="p-5 bg-white/40 text-[#059669] border-t border-white/60 text-center font-black cursor-pointer hover:bg-white/60 transition-all flex items-center justify-center gap-2">
                                 <Icon name="Plus" size={20} /> নতুন পরীক্ষা তৈরি করুন
                             </div>
                         </div>
@@ -271,37 +242,25 @@ Return ONLY valid JSON (no markdown):
             );
         };
 
-        // --- Progress Overlay ---
         const ScanProgressOverlay = ({ step, pass, totalPasses }) => {
             const progressPct = pass === 1 ? 40 : pass === 2 ? 80 : 100;
-            const stepLabels = {
-                1: "১ম পাস: সম্পূর্ণ খাতা বিশ্লেষণ",
-                2: "২য় পাস: অনিশ্চিত উত্তর যাচাই",
-                3: "ফলাফল প্রস্তুত হচ্ছে"
-            };
-            
             return (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/50 backdrop-blur-xl rounded-[50px] border border-white/80 shadow-2xl animate-fade-in">
                     <div className="relative w-28 h-28 mb-6">
                         <div className="absolute inset-0 border-8 border-white/60 rounded-full shadow-inner"></div>
                         <div className="absolute inset-0 border-8 border-[#10b981] rounded-full border-t-transparent animate-spin"></div>
                         <div className="absolute inset-0 flex items-center justify-center text-[#059669]">
-                            {pass === 2 ? <div className="animate-pulse"><Icon name="Shield" size={36} /></div> : <div className="animate-pulse"><Icon name="Cpu" size={36} /></div>}
+                            <div className="animate-pulse"><Icon name={pass === 2 ? "Shield" : "Cpu"} size={36} /></div>
                         </div>
                     </div>
-                    
-                    <h3 className="text-xl font-black text-[#022c22] mb-2 uppercase tracking-widest drop-shadow-sm">Gemini 3.1 Pro Processing</h3>
-                    <p className="text-sm font-bold text-[#047857] mb-5 bg-white/60 px-4 py-1 rounded-full shadow-sm">{stepLabels[pass] || step}</p>
-                    
-                    <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${progressPct}%` }}></div>
-                    </div>
+                    <h3 className="text-xl font-black text-[#022c22] mb-2 uppercase tracking-widest drop-shadow-sm">Gemini 3.1 Pro</h3>
+                    <p className="text-sm font-bold text-[#047857] mb-5 bg-white/60 px-4 py-1 rounded-full shadow-sm">{step}</p>
+                    <div className="progress-bar"><div className="progress-fill" style={{ width: `${progressPct}%` }}></div></div>
                     <p className="text-[10px] font-bold text-[#059669] uppercase tracking-widest mt-2">পাস {pass}/{totalPasses}</p>
                 </div>
             );
         };
 
-        // --- Correction Grid ---
         const AnswerCorrectionGrid = ({ answers, uncertain, totalQ, onChange }) => {
             return (
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-72 overflow-y-auto custom-scrollbar pr-1">
@@ -313,11 +272,7 @@ Return ONLY valid JSON (no markdown):
                                 <span className={`text-[10px] font-black uppercase tracking-wider ${isUncertain ? 'text-amber-600' : 'text-[#059669]'}`}>
                                     {isUncertain ? '⚠ Q' : 'Q'}{i + 1}
                                 </span>
-                                <select
-                                    value={answers[q] || ''}
-                                    onChange={e => onChange(q, e.target.value)}
-                                    className={`w-full bg-transparent font-black text-xl outline-none cursor-pointer text-center appearance-none rounded-lg ${isUncertain ? 'text-amber-700' : 'text-[#022c22]'}`}
-                                >
+                                <select value={answers[q] || ''} onChange={e => onChange(q, e.target.value)} className={`w-full bg-transparent font-black text-xl outline-none cursor-pointer text-center appearance-none rounded-lg ${isUncertain ? 'text-amber-700' : 'text-[#022c22]'}`}>
                                     <option value="">-</option>
                                     {OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                                 </select>
@@ -328,7 +283,7 @@ Return ONLY valid JSON (no markdown):
             );
         };
 
-        // --- Main App Component ---
+        // ─── MAIN APP INSTANCE ──────────────────────────────────────────────────────
         const App = () => {
             const [user, setUser] = useState(null);
             const [activeTab, setActiveTab] = useState('scan');
@@ -352,13 +307,20 @@ Return ONLY valid JSON (no markdown):
             const fileInputRef = useRef(null);
             const keyImageInputRef = useRef(null);
 
-            // Auth
+            // Authentication
             useEffect(() => {
                 const initAuth = async () => {
                     try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await auth.signInWithCustomToken(__initial_auth_token);
-                        else await auth.signInAnonymously();
-                    } catch (err) { console.error("Auth Fail:", err); }
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            // Check if anonymous auth is enabled in console
+                            await auth.signInAnonymously();
+                        }
+                    } catch (err) { 
+                        console.error("Auth Fail:", err); 
+                        showStatus('error', 'ফায়ারবেস অথেনটিকেশন ব্যর্থ হয়েছে। দয়া করে Anonymous Auth চালু করুন।');
+                    }
                 };
                 initAuth();
                 return auth.onAuthStateChanged(setUser);
@@ -370,9 +332,7 @@ Return ONLY valid JSON (no markdown):
                 
                 const unsubExams = db.collection(`artifacts/${appId}/public/data/exams`).onSnapshot((snap) => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
-                        const t1 = a.createdAt?.seconds || 0;
-                        const t2 = b.createdAt?.seconds || 0;
-                        return t2 - t1;
+                        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
                     });
                     setExams(data);
                     if (!selectedExam && data.length > 0) setSelectedExam(data[0]);
@@ -385,7 +345,7 @@ Return ONLY valid JSON (no markdown):
                 return () => { unsubExams(); unsubResults(); };
             }, [user]);
 
-            // Load Answer Keys
+            // Keys Listener
             useEffect(() => {
                 if (!user || !selectedExam) return;
                 db.collection(`artifacts/${appId}/public/data/answerKeys`).doc(selectedExam.examId).get().then(snap => {
@@ -412,11 +372,11 @@ Return ONLY valid JSON (no markdown):
                     try { return JSON.parse(cleaned); } catch (_) {}
                     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
                     if (jsonMatch) return JSON.parse(jsonMatch[0]);
-                    throw new Error("No valid JSON found");
-                } catch (e) { throw new Error("AI দিয়ে ডেটা পার্স করা সম্ভব হয়নি।"); }
+                    throw new Error("Invalid JSON");
+                } catch (e) { throw new Error("AI ডেটা পার্স করতে সমস্যা হয়েছে।"); }
             };
 
-            // GEMINI 3.1 PRO NATIVE API CALL
+            // GEMINI 3.1 PRO CALL
             const callGemini = async (prompt, b64, mimeType, temperature = 0.1) => {
                 const res = await fetch(GEMINI_URL, {
                     method: 'POST',
@@ -431,11 +391,7 @@ Return ONLY valid JSON (no markdown):
                                 ...(b64 ? [{ inlineData: { mimeType: mimeType || 'image/jpeg', data: b64 } }] : [])
                             ]
                         }],
-                        generationConfig: {
-                            temperature,
-                            topP: 0.8,
-                            topK: 10,
-                        }
+                        generationConfig: { temperature, topP: 0.8, topK: 10 }
                     })
                 });
                 const data = await res.json();
@@ -458,14 +414,12 @@ Return ONLY valid JSON (no markdown):
                         reader.onload = () => resolve(reader.result.split(',')[1]);
                         reader.onerror = reject;
                     });
-                    const mimeType = file.type || 'image/jpeg';
 
-                    // PASS 1
                     setScanStep("১ম পাস: সম্পূর্ণ খাতা বিশ্লেষণ...");
                     setScanPass(1);
 
                     const prompt1 = buildPass1Prompt(selectedExam.totalQuestions, SET_NAMES);
-                    const raw1 = await callGemini(prompt1, b64, mimeType, 0.1);
+                    const raw1 = await callGemini(prompt1, b64, file.type, 0.1);
                     const pass1 = safeJsonParse(raw1);
 
                     const answers = {};
@@ -481,29 +435,24 @@ Return ONLY valid JSON (no markdown):
                     let finalRoll = pass1.roll || '';
                     let finalAnswers = { ...answers };
 
-                    // PASS 2
                     if (uncertainList.length > 0) {
                         setScanStep(`২য় পাস: ${uncertainList.length}টি অনিশ্চিত উত্তর যাচাই...`);
                         setScanPass(2);
 
                         const prompt2 = buildPass2Prompt(uncertainList, selectedExam.totalQuestions);
                         try {
-                            const raw2 = await callGemini(prompt2, b64, mimeType, 0.05); 
+                            const raw2 = await callGemini(prompt2, b64, file.type, 0.05); 
                             const pass2 = safeJsonParse(raw2);
 
                             if (pass2.answers) {
                                 Object.entries(pass2.answers).forEach(([q, a]) => {
-                                    if (a && a !== '?') {
-                                        finalAnswers[String(q)] = a;
-                                    }
+                                    if (a && a !== '?') finalAnswers[String(q)] = a;
                                 });
                             }
                             if (pass2.roll_verified && /^\d{6}$/.test(pass2.roll_verified)) {
                                 finalRoll = pass2.roll_verified;
                             }
-                        } catch (pass2Err) {
-                            console.warn("Pass 2 failed, using pass 1 results:", pass2Err);
-                        }
+                        } catch (pass2Err) { console.warn("Pass 2 failed:", pass2Err); }
                     }
 
                     setScanStep("ফলাফল প্রস্তুত হচ্ছে...");
@@ -525,10 +474,10 @@ Return ONLY valid JSON (no markdown):
                     });
 
                     setShowConfirmModal(true);
-                    setIsScanning(false);
                 } catch (err) {
                     console.error("Scan error:", err);
                     showStatus('error', `স্ক্যান ব্যর্থ: ছবি পরিষ্কার ও সঠিকভাবে দিন।`);
+                } finally {
                     setIsScanning(false);
                 }
             };
@@ -593,32 +542,13 @@ Return ONLY valid JSON (no markdown):
                 if (!selectedExam) return;
                 setIsGeneratingKeys(true);
                 try {
-                    const prompt = `You are extracting answer keys from a Bangladeshi MCQ answer sheet.
-Extract answers for questions 1 to ${selectedExam.totalQuestions}.
-Each answer is one of: ক, খ, গ, ঘ
-Return ONLY valid JSON (no markdown):
-{"1": "ক", "2": "খ", ...for all ${selectedExam.totalQuestions} questions}
-
-Input: ${type === 'text' ? `Text input: ${data}` : 'Image attached below'}`;
-
+                    const prompt = `You are extracting answer keys from a Bangladeshi MCQ answer sheet. Extract answers for questions 1 to ${selectedExam.totalQuestions}. Each answer is one of: ক, খ, গ, ঘ. Return ONLY valid JSON (no markdown): {"1": "ক", "2": "খ", ...}`;
                     let res;
                     if (type === 'image') {
                         res = await callGemini(prompt, data, 'image/jpeg', 0.05);
                     } else {
-                        const r = await fetch(GEMINI_URL, {
-                            method: 'POST', headers: { 
-                                'Content-Type': 'application/json',
-                                'X-goog-api-key': USER_API_KEY
-                            },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: prompt }] }],
-                                generationConfig: { temperature: 0.05 }
-                            })
-                        });
-                        const d = await r.json();
-                        res = d?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        res = await callGemini(`${prompt}\nInput: ${data}`, null, null, 0.05);
                     }
-
                     const parsed = safeJsonParse(res);
                     const newKeys = { ...multiSetKeys, [targetSet]: parsed };
                     await db.collection(`artifacts/${appId}/public/data/answerKeys`).doc(selectedExam.examId).set(newKeys);
@@ -633,7 +563,6 @@ Input: ${type === 'text' ? `Text input: ${data}` : 'Image attached below'}`;
 
             return (
                 <div className="min-h-screen text-[#022c22] font-sans relative z-10 overflow-hidden pb-24">
-                    <div className="bg-shapes"><div className="shape-1"></div><div className="shape-2"></div></div>
                     
                     {/* NAVBAR */}
                     <nav className="glass-nav sticky top-0 z-40 transition-all duration-300">
