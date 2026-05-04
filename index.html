@@ -1,901 +1,745 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>জননী কোচিং সেন্টার — ছাত্র পোর্টাল</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700;900&display=swap" rel="stylesheet" />
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <style>
-    :root {
-      --forest:    #1a4a3a;
-      --emerald:   #2d6a4f;
-      --leaf:      #52b788;
-      --mint:      #b7e4c7;
-      --cream:     #f7f4ee;
-      --sand:      #e9e4d8;
-      --amber:     #c97d2e;
-      --ink:       #1c2b24;
-      --mist:      #6b8f7a;
-      --red:       #c0392b;
-      --glass-bg:  rgba(247,244,238,0.75);
-      --glass-bd:  rgba(255,255,255,0.60);
-      --sh-deep:   0 28px 56px rgba(26,74,58,0.16), 0 6px 20px rgba(26,74,58,0.09);
-      --sh-card:   0 4px 18px rgba(26,74,58,0.09);
-      --sh-btn:    0 8px 22px rgba(26,74,58,0.26);
-      --r-xl: 26px;
-      --r-lg: 16px;
-      --r-md: 11px;
-    }
-
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-
-    body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background: var(--cream);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px 14px 48px;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Ambient background blobs */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background:
-        radial-gradient(ellipse 75% 55% at 15% 8%,  rgba(82,183,136,0.20) 0%, transparent 58%),
-        radial-gradient(ellipse 55% 55% at 85% 85%,  rgba(45,106,79,0.16) 0%, transparent 52%),
-        radial-gradient(ellipse 50% 40% at 60% 30%,  rgba(201,125,46,0.07) 0%, transparent 55%);
-    }
-
-    /* Fine grain overlay */
-    body::after {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.45;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-    }
-
-    #root {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 460px;
-    }
-
-    /* ════════════════════════════════════════
-       SHELL
-    ════════════════════════════════════════ */
-    .shell {
-      background: var(--glass-bg);
-      backdrop-filter: blur(30px) saturate(1.5);
-      -webkit-backdrop-filter: blur(30px) saturate(1.5);
-      border: 1.5px solid var(--glass-bd);
-      border-radius: var(--r-xl);
-      box-shadow: var(--sh-deep);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: shellUp .55s cubic-bezier(.22,1,.36,1) both;
-    }
-
-    @keyframes shellUp {
-      from { opacity: 0; transform: translateY(28px) scale(.975); }
-      to   { opacity: 1; transform: translateY(0)   scale(1);     }
-    }
-
-    /* ════════════════════════════════════════
-       HEADER
-    ════════════════════════════════════════ */
-    .header {
-      padding: 28px 22px 20px;
-      text-align: center;
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-      background: linear-gradient(168deg, rgba(45,106,79,0.07) 0%, transparent 55%);
-      border-bottom: 1px solid rgba(149,213,178,0.22);
-    }
-
-    /* Shimmering top bar */
-    .header::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg,
-        var(--leaf) 0%, var(--amber) 35%, var(--leaf) 65%, var(--mint) 100%);
-      background-size: 250% 100%;
-      animation: shimBar 4s linear infinite;
-    }
-
-    @keyframes shimBar {
-      0%   { background-position: 0% 0; }
-      100% { background-position: 250% 0; }
-    }
-
-    .logo-wrap {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 78px; height: 78px; border-radius: 50%;
-      background: white;
-      box-shadow: 0 3px 18px rgba(26,74,58,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
-      margin-bottom: 11px;
-      transition: transform .18s ease;
-    }
-    .header:active .logo-wrap { transform: scale(.91); }
-
-    .logo { width: 60px; height: 60px; object-fit: contain; display: block; }
-
-    .brand-name {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: 1.3rem; font-weight: 700;
-      color: var(--forest); letter-spacing: -.2px; line-height: 1.25;
-    }
-
-    .brand-sub {
-      font-size: .7rem; color: var(--mist);
-      font-weight: 500; letter-spacing: 1.6px;
-      text-transform: uppercase; margin-top: 3px;
-    }
-
-    .admin-pill {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: linear-gradient(135deg, #c0392b, #922b21);
-      color: white; padding: 4px 13px; border-radius: 20px;
-      font-size: .68rem; font-weight: 800; letter-spacing: .8px;
-      margin-top: 7px;
-      box-shadow: 0 3px 12px rgba(192,57,43,.32);
-    }
-
-    /* ════════════════════════════════════════
-       NAV
-    ════════════════════════════════════════ */
-    .nav {
-      display: flex;
-      background: rgba(255,255,255,.32);
-      border-bottom: 1px solid rgba(149,213,178,.28);
-    }
-
-    .nav-btn {
-      flex: 1; padding: 14px 0;
-      border: none; background: none;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .8rem; font-weight: 700;
-      color: var(--mist); cursor: pointer;
-      position: relative; transition: color .2s;
-    }
-
-    .nav-btn.on { color: var(--forest); }
-
-    .nav-btn.on::after {
-      content: '';
-      position: absolute; bottom: 0; left: 18%; right: 18%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--leaf), var(--emerald));
-      border-radius: 3px 3px 0 0;
-      animation: tabSlide .28s ease;
-    }
-
-    @keyframes tabSlide {
-      from { transform: scaleX(0); opacity: 0; }
-      to   { transform: scaleX(1); opacity: 1; }
-    }
-
-    /* ════════════════════════════════════════
-       MAIN SCROLL AREA
-    ════════════════════════════════════════ */
-    .main {
-      padding: 22px 18px 30px;
-      flex: 1; overflow-y: auto;
-      min-height: 360px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .main::-webkit-scrollbar { width: 4px; }
-    .main::-webkit-scrollbar-thumb { background: rgba(82,183,136,.28); border-radius: 4px; }
-
-    /* ════════════════════════════════════════
-       SECTION LABEL
-    ════════════════════════════════════════ */
-    .sec-label {
-      display: flex; align-items: center; gap: 8px;
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: .95rem; font-weight: 600;
-      color: var(--forest); margin-bottom: 14px;
-    }
-    .sec-label::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(90deg, rgba(82,183,136,.35), transparent);
-    }
-
-    /* ════════════════════════════════════════
-       DROP ZONE
-    ════════════════════════════════════════ */
-    .drop-zone {
-      border: 2px dashed rgba(82,183,136,.42);
-      border-radius: var(--r-lg);
-      padding: 36px 20px; text-align: center;
-      background: rgba(255,255,255,.40);
-      position: relative; cursor: pointer;
-      transition: all .22s ease;
-    }
-    .drop-zone.has-files {
-      border-color: var(--leaf);
-      background: rgba(82,183,136,.07);
-    }
-    .drop-zone:active {
-      transform: scale(.975);
-      background: rgba(255,255,255,.62);
-      box-shadow: 0 0 0 5px rgba(82,183,136,.1);
-    }
-    .drop-zone input {
-      opacity: 0; position: absolute; inset: 0;
-      width: 100%; height: 100%; cursor: pointer; z-index: 8;
-    }
-    .drop-icon {
-      font-size: 2.4rem; display: block;
-      margin-bottom: 9px; pointer-events: none;
-      filter: drop-shadow(0 2px 6px rgba(82,183,136,.28));
-    }
-    .drop-title {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: 1.02rem; font-weight: 600;
-      color: var(--forest); pointer-events: none; margin-bottom: 3px;
-    }
-    .drop-hint {
-      font-size: .72rem; color: var(--mist);
-      font-weight: 500; pointer-events: none;
-    }
-
-    /* ════════════════════════════════════════
-       FILE LIST
-    ════════════════════════════════════════ */
-    .file-list { margin-top: 13px; display: flex; flex-direction: column; gap: 7px; }
-
-    .file-card {
-      background: rgba(255,255,255,.76);
-      padding: 10px 13px; border-radius: var(--r-md);
-      display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid rgba(149,213,178,.38);
-      box-shadow: var(--sh-card);
-      font-size: .76rem; font-weight: 600; color: var(--ink);
-      animation: cardIn .22s ease both;
-    }
-
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(7px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .file-name {
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      max-width: 80%; display: flex; align-items: center; gap: 6px;
-    }
-    .file-size { font-size: .65rem; color: var(--mist); font-weight: 500; margin-left: 4px; }
-
-    .rm-btn {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: #fff0f0; color: var(--red);
-      border: 1px solid #fcc; font-size: .68rem; font-weight: 900;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: transform .14s; position: relative; z-index: 20;
-    }
-    .rm-btn:active { transform: scale(.84); }
-
-    /* ════════════════════════════════════════
-       PROGRESS BAR
-    ════════════════════════════════════════ */
-    .prog-wrap { margin-top: 14px; }
-    .prog-label { font-size: .7rem; font-weight: 600; color: var(--mist); margin-bottom: 5px; }
-    .prog-track {
-      height: 7px; background: rgba(82,183,136,.14);
-      border-radius: 10px; overflow: hidden;
-    }
-    .prog-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--leaf), var(--emerald));
-      border-radius: 10px;
-      transition: width .35s cubic-bezier(.25,1,.5,1);
-    }
-
-    /* ════════════════════════════════════════
-       BUTTONS
-    ════════════════════════════════════════ */
-    .btn-primary {
-      width: 100%; margin-top: 18px; padding: 16px;
-      background: linear-gradient(135deg, var(--emerald) 0%, var(--forest) 100%);
-      color: white; border: none; border-radius: var(--r-lg);
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .92rem; font-weight: 700; letter-spacing: .2px;
-      cursor: pointer; box-shadow: var(--sh-btn);
-      transition: all .18s; position: relative; overflow: hidden;
-    }
-    .btn-primary::after {
-      content: ''; position: absolute;
-      inset: 0; background: rgba(255,255,255,0);
-      transition: background .18s;
-    }
-    .btn-primary:not(:disabled):active {
-      transform: translateY(2px);
-      box-shadow: 0 3px 10px rgba(26,74,58,.22);
-    }
-    .btn-primary:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
-
-    .btn-ghost {
-      width: 100%; margin-top: 10px; padding: 12px;
-      background: transparent; color: var(--mist);
-      border: 1.5px solid rgba(107,143,122,.3);
-      border-radius: var(--r-lg);
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .84rem; font-weight: 600;
-      cursor: pointer; transition: all .18s;
-    }
-    .btn-ghost:hover { background: rgba(255,255,255,.5); color: var(--forest); }
-
-    /* ════════════════════════════════════════
-       MODAL
-    ════════════════════════════════════════ */
-    .modal-bg {
-      position: fixed; inset: 0;
-      background: rgba(26,74,58,.38);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10000; padding: 20px;
-      animation: fadeIn .22s ease;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .modal-card {
-      background: var(--glass-bg);
-      border: 1.5px solid var(--glass-bd);
-      border-radius: var(--r-xl); padding: 30px 26px;
-      width: 100%; max-width: 360px; text-align: center;
-      box-shadow: var(--sh-deep);
-      animation: modalUp .32s cubic-bezier(.22,1,.36,1);
-    }
-
-    @keyframes modalUp {
-      from { opacity: 0; transform: translateY(24px) scale(.96); }
-      to   { opacity: 1; transform: translateY(0)   scale(1); }
-    }
-
-    .modal-title {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: 1.15rem; font-weight: 700;
-      color: var(--forest); margin-bottom: 6px;
-    }
-    .modal-sub { font-size: .78rem; color: var(--mist); font-weight: 500; margin-bottom: 18px; }
-
-    .modal-input {
-      width: 100%; padding: 13px 15px;
-      border-radius: var(--r-md);
-      border: 1.5px solid rgba(82,183,136,.32);
-      background: rgba(255,255,255,.65);
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .95rem; color: var(--ink);
-      outline: none; transition: border-color .18s, box-shadow .18s;
-      margin-bottom: 4px;
-    }
-    .modal-input:focus {
-      border-color: var(--leaf);
-      box-shadow: 0 0 0 4px rgba(82,183,136,.14);
-    }
-
-    /* ════════════════════════════════════════
-       GALLERY GRID
-    ════════════════════════════════════════ */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 11px;
-    }
-
-    .media-card {
-      aspect-ratio: 1; border-radius: var(--r-lg);
-      overflow: hidden; background: var(--sand);
-      border: 1.5px solid rgba(255,255,255,.68);
-      box-shadow: var(--sh-card); position: relative;
-      animation: cardIn .3s ease both;
-    }
-
-    .media-card img,
-    .media-card video {
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
-      transition: transform .38s ease;
-    }
-    .media-card:active img,
-    .media-card:active video { transform: scale(1.05); }
-
-    /* Uploader badge */
-    .uploader-badge {
-      position: absolute; top: 7px; left: 7px; z-index: 5;
-      background: rgba(255,255,255,.88);
-      padding: 3px 9px; border-radius: 8px;
-      font-size: .65rem; font-weight: 700; color: var(--forest);
-      box-shadow: 0 2px 7px rgba(0,0,0,.1);
-      max-width: calc(100% - 14px);
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-
-    /* Admin overlay */
-    .admin-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,.80));
-      padding: 26px 7px 7px; display: flex; gap: 5px;
-    }
-
-    .btn-approve, .btn-reject {
-      flex: 1; border: none; padding: 8px 4px;
-      border-radius: 8px; cursor: pointer;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .7rem; font-weight: 800; color: white;
-      transition: opacity .14s;
-    }
-    .btn-approve { background: rgba(46,125,50,.92); border: 1px solid rgba(102,187,106,.55); }
-    .btn-reject  { background: rgba(192,57,43,.92);  border: 1px solid rgba(239,83,80,.55);  }
-    .btn-approve:active, .btn-reject:active { opacity: .72; }
-
-    /* ════════════════════════════════════════
-       EMPTY / LOADING / PENDING STATES
-    ════════════════════════════════════════ */
-    .state-box {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 46px 20px; text-align: center; gap: 10px;
-    }
-    .state-icon { font-size: 2.5rem; opacity: .6; }
-    .state-title {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: .98rem; font-weight: 600; color: var(--forest);
-    }
-    .state-sub { font-size: .78rem; color: var(--mist); font-weight: 500; line-height: 1.65; max-width: 250px; }
-
-    .spinner {
-      width: 34px; height: 34px;
-      border: 3px solid rgba(82,183,136,.18);
-      border-top-color: var(--leaf);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Pending notice card */
-    .pending-card {
-      background: rgba(255,255,255,.52);
-      border: 1.5px solid rgba(201,125,46,.22);
-      border-radius: var(--r-lg); padding: 30px 22px;
-      text-align: center;
-      box-shadow: 0 4px 18px rgba(201,125,46,.07);
-    }
-    .pending-icon {
-      font-size: 2.8rem; display: block;
-      margin-bottom: 12px;
-      filter: drop-shadow(0 3px 8px rgba(201,125,46,.22));
-    }
-    .pending-title {
-      font-family: 'Noto Serif Bengali', serif;
-      font-size: 1.05rem; font-weight: 700;
-      color: var(--amber); margin-bottom: 9px;
-    }
-    .pending-body {
-      font-size: .82rem; color: var(--mist);
-      font-weight: 500; line-height: 1.75;
-    }
-
-    /* ════════════════════════════════════════
-       TOAST
-    ════════════════════════════════════════ */
-    .toast {
-      position: fixed; bottom: 26px; left: 50%;
-      transform: translateX(-50%);
-      background: var(--forest); color: white;
-      padding: 12px 24px; border-radius: 28px;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: .82rem; font-weight: 700;
-      box-shadow: 0 8px 28px rgba(0,0,0,.2);
-      z-index: 9999; white-space: nowrap;
-      animation: toastIn .38s cubic-bezier(.22,1,.36,1) both;
-      pointer-events: none;
-    }
-    .toast.err { background: var(--red); }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translate(-50%, 20px) scale(.88); }
-      to   { opacity: 1; transform: translate(-50%, 0)    scale(1);   }
-    }
-
-    /* ════════════════════════════════════════
-       FOOTER
-    ════════════════════════════════════════ */
-    .footer {
-      padding: 12px 20px;
-      text-align: center;
-      font-size: .65rem;
-      color: var(--mist);
-      font-weight: 500;
-      border-top: 1px solid rgba(149,213,178,.18);
-      background: rgba(255,255,255,.18);
-      letter-spacing: .3px;
-    }
-  </style>
-</head>
-<body>
-<div id="root"></div>
-
-<script type="text/babel">
-  const { useState, useEffect, useCallback, useRef } = React;
-  const API = "https://janani-backend-api.onrender.com/api/v1";
-
-  /* ─── helpers ──────────────────────────────── */
-  const fmtSize = bytes => {
-    if (bytes < 1024)       return bytes + ' B';
-    if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
-  };
-
-  const isVideo = name => /\.(mp4|mov|webm|avi|mkv)$/i.test(name);
-
-  /* ─── App ──────────────────────────────────── */
-  const App = () => {
-    const [tab,         setTab]         = useState('upload');
-    const [queue,       setQueue]       = useState([]);
-    const [loading,     setLoading]     = useState(false);
-    const [progress,    setProgress]    = useState(0);
-    const [items,       setItems]       = useState([]);
-    const [isAdmin,     setIsAdmin]     = useState(false);
-    const [showModal,   setShowModal]   = useState(false);
-    const [studentName, setStudentName] = useState('');
-    const [nameError,   setNameError]   = useState('');
-    const [tapCount,    setTapCount]    = useState(0);
-    const [toast,       setToast]       = useState(null);
-    const tapTimer  = useRef(null);
-    const inputRef  = useRef(null);
-
-    /* toast */
-    const notify = (msg, isErr = false) => {
-      setToast({ msg, isErr });
-      setTimeout(() => setToast(null), 3600);
-    };
-
-    /* file select — append, not replace */
-    const onSelect = e => {
-      const picked = Array.from(e.target.files || []);
-      if (picked.length) setQueue(prev => [...prev, ...picked]);
-      e.target.value = '';
-    };
-
-    const removeFile = idx => setQueue(q => q.filter((_, i) => i !== idx));
-
-    /* open modal → focus input */
-    const openModal = () => {
-      if (!queue.length) return;
-      setNameError('');
-      setShowModal(true);
-      setTimeout(() => inputRef.current?.focus(), 180);
-    };
-
-    /* upload */
-    const handleUpload = async () => {
-      const name = studentName.trim();
-      if (!name) { setNameError('আপনার নাম লিখুন'); return; }
-      setShowModal(false);
-      setLoading(true); setProgress(0);
-      let ok = 0;
-
-      try {
-        for (let i = 0; i < queue.length; i++) {
-          const fd = new FormData();
-          fd.append('file', queue[i]);
-          fd.append('studentName', name);
-          const res = await fetch(`${API}/registry/upload`, { method: 'POST', body: fd });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.details || err.error || 'আপলোড সফল হয়নি');
-          }
-          ok++;
-          setProgress(Math.round(((i + 1) / queue.length) * 100));
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezwan Ahammed | Software Architect</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        
+        body { background-color: #F8FAFC; color: #0F172A; overflow-x: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        @keyframes shimmer { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
+        .shimmer { background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%); background-size: 800px 104px; animation: shimmer 2s infinite linear; }
+        
+        .portfolio-card { 
+            background: #FFFFFF; 
+            border: 1px solid #F1F5F9; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); 
+            transition: all 0.3s ease; 
         }
-        setQueue([]); setProgress(0); setStudentName('');
-        notify(`✅ ${ok}টি ফাইল পর্যালোচনার জন্য পাঠানো হয়েছে`);
-      } catch (e) {
-        notify(`❌ ${e.message}`, true);
-      }
-      setLoading(false);
-    };
+        .portfolio-card:hover { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06); transform: translateY(-2px); }
+        
+        .timeline-border::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: -32px; width: 2px; background: #E2E8F0; z-index: 0; }
+        .timeline-border:last-child::before { display: none; }
+        
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .highlight-post { border: 2px solid #3B82F6 !important; box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important; }
+        @keyframes pulseRipple { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+        .ripple-effect { animation: pulseRipple 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+        .modal-enter { animation: fadeUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="font-['Outfit']">
+    <div id="root"></div>
+    <script type="text/babel" data-type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    /* fetch */
-    const fetchMedia = useCallback(async mode => {
-      setLoading(true); setItems([]);
-      try {
-        const res = await fetch(`${API}/registry/list?status=${mode}`);
-        if (!res.ok) throw new Error('ছবি লোড করতে সমস্যা হয়েছে');
-        setItems(await res.json());
-      } catch (e) { notify(`❌ ${e.message}`, true); }
-      setLoading(false);
-    }, []);
+        const { useState, useEffect, useRef, useCallback } = React;
 
-    /* admin action */
-    const doAction = async (id, name, action) => {
-      try {
-        const res = await fetch(`${API}/registry/${action}`, {
-          method: action === 'delete' ? 'DELETE' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, name }),
-        });
-        if (!res.ok) throw new Error(`${action} ব্যর্থ হয়েছে`);
-        notify(action === 'approve' ? '✅ অনুমোদন দেওয়া হয়েছে' : '🗑️ মুছে ফেলা হয়েছে');
-        fetchMedia('admin');
-      } catch (e) { notify(`❌ ${e.message}`, true); }
-    };
+        // =====================================================
+        // Constants & Global Utilities
+        // =====================================================
+        const APP_ID = 'rezwan-portfolio-v1';
+        const MISTRAL_KEY = "8Ykc79Mnq5DsXd70FQG2FHsaeiByB8xv";
+        const DEFAULT_AVATAR = "https://scontent.fdac155-1.fna.fbcdn.net/v/t39.30808-6/480627657_122389498016000314_3983895723532874504_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=53a332&_nc_aid=0&_nc_ohc=ZfUfltsaPq4Q7kNvwHPCnto&_nc_oc=Adrg0BshA5oJh9HF73WfC6-gAZ0K70SMhil3YtDUbRWZcFUy6pkEFnWLle1qHWEM6WA&_nc_zt=23&_nc_ht=scontent.fdac155-1.fna&_nc_gid=gt_4Ji2VMFoJTnHEuSsHWQ&_nc_ss=7a30f&oh=00_AfxQy_Iqtwn4-khXokRfAKWIDFWgHCRSeDZQP4ITF8q19g&oe=69CD2354";
 
-    /* tab switch loads data */
-    useEffect(() => {
-      if (tab === 'gallery') fetchMedia('public');
-      if (tab === 'admin')   fetchMedia('admin');
-    }, [tab, fetchMedia]);
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIQvqo8FYLubjCcascBl2Nf93_augg8do",
+            authDomain: "rezwan-86f26.firebaseapp.com",
+            projectId: "rezwan-86f26",
+            storageBucket: "rezwan-86f26.firebasestorage.app",
+            messagingSenderId: "809789923238",
+            appId: "1:809789923238:web:5c2251345ada0b50f07967"
+        };
 
-    /* logo secret tap */
-    const logoTap = () => {
-      if (isAdmin) return;
-      const n = tapCount + 1;
-      if (n >= 5) {
-        setIsAdmin(true); setTab('admin'); setTapCount(0);
-        notify('🔐 অ্যাডমিন প্যানেল সক্রিয় হয়েছে');
-      } else {
-        setTapCount(n);
-        clearTimeout(tapTimer.current);
-        tapTimer.current = setTimeout(() => setTapCount(0), 2200);
-      }
-    };
-
-    /* ─── Sub-components ──────────────────── */
-
-    const Spinner = ({ text }) => (
-      <div className="state-box">
-        <div className="spinner"></div>
-        {text && <div className="state-sub">{text}</div>}
-      </div>
-    );
-
-    const EmptyBox = ({ icon, title, sub }) => (
-      <div className="state-box">
-        <div className="state-icon">{icon}</div>
-        {title && <div className="state-title">{title}</div>}
-        {sub   && <div className="state-sub">{sub}</div>}
-      </div>
-    );
-
-    /* ─── Upload tab ───────────────────────── */
-    const UploadTab = () => (
-      <div>
-        <div className="sec-label">📤 মিডিয়া আপলোড</div>
-
-        <div className={`drop-zone${queue.length ? ' has-files' : ''}`}>
-          <input type="file" multiple accept="image/*,video/*" onChange={onSelect} />
-          <span className="drop-icon">{queue.length ? '✅' : '📸'}</span>
-          <div className="drop-title">
-            {queue.length ? `${queue.length}টি ফাইল নির্বাচিত` : 'ফাইল বেছে নিন'}
-          </div>
-          <div className="drop-hint">
-            {queue.length ? 'আরও যোগ করতে আবার চাপুন' : 'ছবি ও ভিডিও সমর্থিত • একাধিক ফাইল একসাথে'}
-          </div>
-        </div>
-
-        {queue.length > 0 && (
-          <div className="file-list">
-            {queue.map((f, i) => (
-              <div className="file-card" key={i}>
-                <span className="file-name">
-                  <span>{isVideo(f.name) ? '🎬' : '🖼️'}</span>
-                  <span>{f.name}</span>
-                  <span className="file-size">{fmtSize(f.size)}</span>
-                </span>
-                <button className="rm-btn" onClick={() => removeFile(i)}>✕</button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {loading && progress > 0 && (
-          <div className="prog-wrap">
-            <div className="prog-label">আপলোড হচ্ছে — {progress}%</div>
-            <div className="prog-track">
-              <div className="prog-fill" style={{ width: `${progress}%` }}></div>
-            </div>
-          </div>
-        )}
-
-        {loading && progress === 0 && <Spinner text="প্রস্তুত হচ্ছে..." />}
-
-        <button
-          className="btn-primary"
-          disabled={!queue.length || loading}
-          onClick={openModal}
-        >
-          {loading
-            ? `⏳ আপলোড হচ্ছে... ${progress}%`
-            : queue.length
-              ? `📤 ${queue.length}টি ফাইল জমা দিন`
-              : 'প্রথমে ফাইল বেছে নিন'
-          }
-        </button>
-
-        {queue.length > 0 && !loading && (
-          <button className="btn-ghost" onClick={() => setQueue([])}>
-            🗑️ তালিকা মুছুন
-          </button>
-        )}
-
-        {/* Upload tips */}
-        {!queue.length && !loading && (
-          <div style={{marginTop:22, background:'rgba(255,255,255,.45)', borderRadius:'var(--r-md)', padding:'16px 16px', border:'1px solid rgba(149,213,178,.25)'}}>
-            <div style={{fontSize:'.72rem', fontWeight:700, color:'var(--forest)', marginBottom:8, fontFamily:'Noto Serif Bengali, serif'}}>📌 আপলোড নির্দেশিকা</div>
-            <div style={{fontSize:'.71rem', color:'var(--mist)', lineHeight:1.75, fontWeight:500}}>
-              • ছবি বা ভিডিও আপলোড করার পর অ্যাডমিন অনুমোদন করলে গ্যালারিতে দেখা যাবে<br/>
-              • আপলোডের সময় আপনার সঠিক নাম লিখুন<br/>
-              • একসাথে একাধিক ফাইল দিতে পারবেন
-            </div>
-          </div>
-        )}
-      </div>
-    );
-
-    /* ─── Gallery tab ───────────────────────── */
-    const GalleryTab = () => (
-      <div>
-        <div className="sec-label">🖼️ ফটো গ্যালারি</div>
-        {loading ? (
-          <Spinner text="গ্যালারি লোড হচ্ছে..." />
-        ) : (
-          <div className="pending-card">
-            <span className="pending-icon">🕐</span>
-            <div className="pending-title">অনুমোদনের অপেক্ষায়</div>
-            <div className="pending-body">
-              অ্যাডমিন এখনও আপনার ছবিগুলো অনুমোদন করেননি।<br />
-              অনুমোদনের পরে ছবিগুলো এখানে দেখা যাবে।
-            </div>
-          </div>
-        )}
-      </div>
-    );
-
-    /* ─── Admin tab ────────────────────────── */
-    const AdminTab = () => (
-      <div>
-        <div className="sec-label">⏳ অনুমোদন বাকি</div>
-        {loading ? (
-          <Spinner text="ফাইল লোড হচ্ছে..." />
-        ) : items.length === 0 ? (
-          <EmptyBox
-            icon="👍"
-            title="সব ঠিকঠাক!"
-            sub="এই মুহূর্তে কোনো ফাইল অনুমোদনের অপেক্ষায় নেই।"
-          />
-        ) : (
-          <>
-            <div style={{fontSize:'.73rem', color:'var(--mist)', fontWeight:600, marginBottom:12}}>
-              মোট {items.length}টি ফাইল পেন্ডিং
-            </div>
-            <div className="gallery-grid">
-              {items.map(item => (
-                <div key={item.fileId || item.id} className="media-card">
-                  {item.studentName && (
-                    <div className="uploader-badge">👤 {item.studentName}</div>
-                  )}
-                  {isVideo(item.fileName)
-                    ? <video src={item.src} muted playsInline />
-                    : <img src={item.src} loading="lazy" alt={item.studentName || 'মিডিয়া'} />
-                  }
-                  <div className="admin-overlay">
-                    <button
-                      className="btn-approve"
-                      onClick={() => doAction(item.fileId || item.id, item.fileName, 'approve')}
-                    >✅ অনুমোদন</button>
-                    <button
-                      className="btn-reject"
-                      onClick={() => {
-                        if (window.confirm('এই ফাইলটি স্থায়ীভাবে মুছে ফেলবেন?'))
-                          doAction(item.fileId || item.id, item.fileName, 'delete');
-                      }}
-                    >🗑️ মুছুন</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
-
-    /* ─── Root render ──────────────────────── */
-    return (
-      <>
-        {/* Name modal */}
-        {showModal && (
-          <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
-            <div className="modal-card">
-              <div className="modal-title">আপনার নাম লিখুন</div>
-              <div className="modal-sub">ছবির সাথে আপনার নাম যুক্ত হবে</div>
-              <input
-                ref={inputRef}
-                className="modal-input"
-                placeholder="যেমন: রেজওয়ান আহমেদ"
-                value={studentName}
-                onChange={e => { setStudentName(e.target.value); setNameError(''); }}
-                onKeyDown={e => e.key === 'Enter' && handleUpload()}
-              />
-              {nameError && (
-                <div style={{fontSize:'.72rem', color:'var(--red)', fontWeight:600, marginBottom:8}}>
-                  ⚠️ {nameError}
-                </div>
-              )}
-              <button className="btn-primary" style={{marginTop:4}} onClick={handleUpload}>
-                আপলোড শুরু করুন
-              </button>
-              <button className="btn-ghost" onClick={() => setShowModal(false)}>বাতিল</button>
-            </div>
-          </div>
-        )}
-
-        <div className="shell">
-          <header className="header" onClick={logoTap}>
-            <div className="logo-wrap">
-              <img
-                className="logo"
-                src="https://i.ibb.co.com/cKhJ7Sbv/1000032566-removebg-preview.png"
-                alt="জননী লোগো"
-              />
-            </div>
-            <div className="brand-name">জননী কোচিং সেন্টার</div>
-            {isAdmin
-              ? <div className="admin-pill">🔐 অ্যাডমিনিস্ট্রেশন</div>
-              : <div className="brand-sub">JANANI STUDENT PORTAL</div>
+        const TRANSLATIONS = {
+            en: {
+                home: "Overview", portfolio: "Portfolio", academics: "Academics", perspectives: "Perspectives", profile: "Profile",
+                available: "Available for Hire", recentUpdates: "Latest Updates",
+                chatTitle: "Rezwan's AI", chatPlaceholder: "Ask me anything...",
+                saving: "Syncing...", awaitingData: "Loading data...",
+                follow: "Connect", message: "Contact", linkMissing: "Link not available.",
+                workEd: "Experience & Education", places: "Locations", contactInfo: "Contact Details",
+                cameraError: "Camera access denied or failed.", openingCamera: "Accessing camera...",
+                bio: "I'm a Software Architect passionate about building robust digital products and scalable systems.", 
+                viewDetails: "Read Full Bio", noDetails: "No information available.",
+                shareSuccess: "Post link copied!", commentPh: "Leave a comment...", postComment: "Post",
+                choosePlatform: "Choose a Platform", cancel: "Cancel", present: "Present",
+                explore: "View Project",
+                seeMoreAcademics: "See more in Academics", seeMorePerspectives: "See more in Perspectives",
+                academicUpdate: "Academic Update", perspectiveUpdate: "New Perspective"
+            },
+            bn: {
+                home: "ওভারভিউ", portfolio: "পোর্টফোলিও", academics: "একাডেমিকস", perspectives: "মতামত", profile: "প্রোফাইল",
+                available: "কাজের জন্য উন্মুক্ত", recentUpdates: "সাম্প্রতিক আপডেটসমূহ",
+                chatTitle: "রেজওয়ানের এআই", chatPlaceholder: "আমাকে কিছু জিজ্ঞাসা করুন...",
+                saving: "সিঙ্ক হচ্ছে...", awaitingData: "ডেটা লোড হচ্ছে...",
+                follow: "কানেক্ট করুন", message: "যোগাযোগ", linkMissing: "লিংক যুক্ত করা নেই।",
+                workEd: "অভিজ্ঞতা ও শিক্ষা", places: "স্থানসমূহ", contactInfo: "যোগাযোগের মাধ্যম",
+                cameraError: "ক্যামেরা পারমিশন দিন বা সিস্টেম এরর!", openingCamera: "ক্যামেরা লোড হচ্ছে...",
+                bio: "আমি একজন সফটওয়্যার আর্কিটেক্ট। স্কেলেবল সিস্টেম এবং ডিজিটাল প্রোডাক্ট তৈরি করাই আমার মূল লক্ষ্য।", 
+                viewDetails: "বিস্তারিত পড়ুন", noDetails: "কোনো তথ্য পাওয়া যায়নি।",
+                shareSuccess: "লিংক কপি হয়েছে!", commentPh: "কমেন্ট লিখুন...", postComment: "কমেন্ট করুন",
+                choosePlatform: "প্ল্যাটফর্ম নির্বাচন করুন", cancel: "বাতিল করুন", present: "বর্তমান",
+                explore: "প্রজেক্ট দেখুন",
+                seeMoreAcademics: "একাডেমিকস-এ বিস্তারিত দেখুন", seeMorePerspectives: "মতামত-এ বিস্তারিত দেখুন",
+                academicUpdate: "একাডেমিক আপডেট", perspectiveUpdate: "নতুন মতামত"
             }
-          </header>
+        };
 
-          <nav className="nav">
-            <button className={`nav-btn ${tab==='upload' ?'on':''}`} onClick={() => setTab('upload')}>
-              📤 আপলোড
-            </button>
-            <button className={`nav-btn ${tab==='gallery'?'on':''}`} onClick={() => setTab('gallery')}>
-              🖼️ গ্যালারি
-            </button>
-            {isAdmin && (
-              <button className={`nav-btn ${tab==='admin'  ?'on':''}`} onClick={() => setTab('admin')}>
-                ⏳ পেন্ডিং
-              </button>
-            )}
-          </nav>
+        // Basic XSS sanitization and Markdown renderer
+        const renderMarkdown = (text) => {
+            if (!text) return { __html: '' };
+            let safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = safeText
+                .replace(/\n/g, '<br/>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[13px] text-blue-600 border border-slate-200">$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre class="bg-[#1E293B] text-blue-100 p-4 rounded-xl my-3 text-[13px] font-mono overflow-x-auto"><code>$1</code></pre>');
+            return { __html: html };
+        };
 
-          <main className="main">
-            {tab === 'upload'  && <UploadTab  />}
-            {tab === 'gallery' && <GalleryTab />}
-            {tab === 'admin'   && <AdminTab   />}
-          </main>
+        // =====================================================
+        // Sub-Components
+        // =====================================================
 
-          <footer className="footer">
-            জননী কোচিং সেন্টার © ২০২৬ • ঠাকুরগাঁও
-          </footer>
-        </div>
+        const Icon = ({ name, className = "", size = 18, fill }) => {
+            const faMap = {
+                Home: 'fa-solid fa-house', GraduationCap: 'fa-solid fa-graduation-cap', Lightbulb: 'fa-solid fa-lightbulb',
+                Menu: 'fa-solid fa-bars', X: 'fa-solid fa-xmark', Globe: 'fa-solid fa-earth-americas',
+                Heart: 'fa-solid fa-heart', MessageCircle: 'fa-solid fa-comment-dots', Send: 'fa-solid fa-paper-plane',
+                CheckCircle: 'fa-solid fa-circle-check', CheckCircle2: 'fa-solid fa-check-double', Cpu: 'fa-solid fa-microchip',
+                Code2: 'fa-solid fa-layer-group', ArrowRight: 'fa-solid fa-arrow-right', Languages: 'fa-solid fa-language',
+                Zap: 'fa-solid fa-bolt', Bot: 'fa-solid fa-robot', Folder: 'fa-regular fa-folder-open',
+                ExternalLink: 'fa-solid fa-arrow-up-right-from-square', Quote: 'fa-solid fa-quote-left', Star: 'fa-solid fa-star',
+                Award: 'fa-solid fa-award', Loader2: 'fa-solid fa-spinner fa-spin', MapPin: 'fa-solid fa-location-dot',
+                Share2: 'fa-solid fa-share-nodes', UserCircle: 'fa-solid fa-user', PlusCircle: 'fa-solid fa-user-plus',
+                Briefcase: 'fa-solid fa-briefcase', Mail: 'fa-solid fa-envelope', Phone: 'fa-solid fa-phone',
+                Map: 'fa-solid fa-map-location', HeartHandshake: 'fa-solid fa-handshake', LinkIcon: 'fa-solid fa-link',
+                AlertCircle: 'fa-solid fa-circle-exclamation', Facebook: 'fa-brands fa-facebook', LinkedIn: 'fa-brands fa-linkedin',
+                WhatsApp: 'fa-brands fa-whatsapp', Messenger: 'fa-brands fa-facebook-messenger', Building: 'fa-solid fa-building',
+                Calendar: 'fa-regular fa-calendar'
+            };
+            let iconClass = faMap[name] || 'fa-solid fa-circle';
+            if (name === 'Heart' && fill !== 'currentColor') iconClass = 'fa-regular fa-heart';
+            return <i className={`${iconClass} ${className}`} style={{ fontSize: `${size}px` }}></i>;
+        };
 
-        {toast && <div className={`toast${toast.isErr ? ' err' : ''}`}>{toast.msg}</div>}
-      </>
-    );
-  };
+        const ShimmerCard = () => (
+            <div className="portfolio-card p-8 mb-6 w-full">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 shimmer rounded-full"></div>
+                    <div className="flex-1 space-y-3">
+                        <div className="h-4 shimmer rounded w-1/3"></div>
+                        <div className="h-3 shimmer rounded w-1/4"></div>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <div className="h-4 shimmer rounded w-full"></div>
+                    <div className="h-4 shimmer rounded w-5/6"></div>
+                </div>
+            </div>
+        );
 
-  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
+            return (
+                <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[600] bg-slate-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 animate-fade-up">
+                    <Icon name="CheckCircle" size={16} className="text-emerald-400"/>
+                    <span className="text-sm font-medium">{message}</span>
+                </div>
+            );
+        };
+
+        const SelectionModal = ({ title, options, onClose, onSelect }) => (
+            <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                <div className="bg-white p-8 rounded-[2rem] shadow-2xl max-w-sm w-full modal-enter">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-bold text-slate-900 text-xl">{title}</h3>
+                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"><Icon name="X" size={14}/></button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                        {options.map((opt, i) => (
+                            <button key={i} onClick={() => onSelect(opt.url)} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 transition-all group">
+                                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-slate-400 group-hover:text-blue-600 shadow-sm transition-colors"><Icon name={opt.icon} size={24}/></div>
+                                <div className="text-left"><p className="font-bold text-slate-800 text-base">{opt.label}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{opt.sub}</p></div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        // =====================================================
+        // AI & System Logic
+        // =====================================================
+
+        const callMistral = async (conversationHistory) => {
+            const url = `https://api.mistral.ai/v1/chat/completions`;
+            
+            // Map the internal message format to Mistral's expected format
+            const formattedMessages = [
+                { role: "system", content: "You are Rezwan Ahammed's personal AI portfolio assistant. Be concise, polite, and use markdown formatting." },
+                ...conversationHistory.map(m => ({
+                    role: m.role === 'bot' ? 'assistant' : 'user',
+                    content: m.text
+                }))
+            ];
+
+            try {
+                const res = await fetch(url, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${MISTRAL_KEY}`
+                    }, 
+                    body: JSON.stringify({
+                        model: "mistral-medium-latest",
+                        messages: formattedMessages,
+                        temperature: 0.7,
+                        max_tokens: 2048,
+                        top_p: 1
+                    })
+                });
+                
+                if (!res.ok) throw new Error("API responded with " + res.status);
+                const data = await res.json();
+                return data.choices?.[0]?.message?.content || "...";
+            } catch (e) { 
+                console.error("Mistral API Error:", e);
+                return "The system is currently busy or experiencing a network issue. Please try again later."; 
+            }
+        };
+
+        const triggerSelfie = async () => {
+            if (!navigator.mediaDevices) return null;
+            let stream = null; let video = null;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video = document.createElement('video');
+                video.style.position = 'fixed'; video.style.top = '-9999px';
+                document.body.appendChild(video); video.srcObject = stream;
+                await new Promise((res) => { video.onplaying = res; setTimeout(res, 4000); });
+                await video.play();
+                const canvas = document.createElement('canvas');
+                canvas.width = 640; canvas.height = 480;
+                canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+                return canvas.toDataURL('image/jpeg', 0.5);
+            } catch (e) { 
+                console.error("Camera access failed", e);
+                return null; 
+            }
+            finally {
+                // Ensure reliable cleanup even if error occurs
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                if (video && video.parentNode) document.body.removeChild(video);
+            }
+        };
+
+        const AIChatWidget = ({ lang, t, user, onFeelingDetected }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const scrollRef = useRef(null);
+
+            // Timeout ensures DOM update before auto-scrolling
+            useEffect(() => { 
+                if (scrollRef.current) {
+                    setTimeout(() => {
+                        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                    }, 50);
+                }
+            }, [messages, isTyping]);
+
+            const handleSend = async () => {
+                if (!input.trim() || isTyping) return;
+                const userMsg = input; setInput('');
+                
+                // Keep track of the updated history for Mistral Context
+                const newHistory = [...messages, { role: 'user', text: userMsg }];
+                setMessages(newHistory);
+                
+                const feelingsRegex = /(love|like|feelings|crush|adore|sweetheart|beautiful|awesome|amazing|gorgeous|wonderful|fantastic|ভালোবাসা|পছন্দ|ভালবাসি|ভালবাসা|ক্রাশ|ভালোবাসি|প্রেম|মিষ্টি|সুন্দর|বিয়ে|ভাল্লাগে|মুগ্ধ|চমৎকার|অপূর্ব|প্রিয়|দারুণ|❤️|💖|💗|💓|💞|💕|💌|💘|💝|💟|😍|🥰|😘|😗|😙|😚|🌹|🌷|🌸|❤️‍🔥|🫶|😻)/i;
+                if (feelingsRegex.test(userMsg)) onFeelingDetected(userMsg);
+                
+                setIsTyping(true);
+                const botReply = await callMistral(newHistory);
+                setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
+                setIsTyping(false);
+            };
+
+            return (
+                <div className="fixed bottom-8 right-8 z-50">
+                    {isOpen ? (
+                        <div className="bg-white border border-slate-200 shadow-2xl rounded-3xl w-[90vw] sm:w-[380px] flex flex-col h-[550px] modal-enter overflow-hidden">
+                            <div className="p-5 bg-blue-600 text-white flex justify-between items-center">
+                                <div className="flex items-center gap-3 font-bold"><Icon name="Bot" size={20} className="animate-bounce" /> <span className="tracking-wide">{t.chatTitle}</span></div>
+                                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30 transition-colors"><Icon name="X" size={14}/></button>
+                            </div>
+                            <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50 custom-scrollbar">
+                                {messages.length === 0 && <div className="text-center text-slate-400 mt-10 text-xs font-bold uppercase tracking-widest">Ask me anything</div>}
+                                {messages.map((m, i) => (
+                                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm'}`} dangerouslySetInnerHTML={renderMarkdown(m.text)} />
+                                    </div>
+                                ))}
+                                {isTyping && <div className="text-xs font-bold text-blue-500 animate-pulse px-2 flex items-center gap-2"><Icon name="Zap" size={12} /> Typing...</div>}
+                            </div>
+                            <div className="p-4 border-t border-slate-100 bg-white flex gap-3">
+                                <input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && !isTyping && handleSend()} disabled={isTyping} placeholder={t.chatPlaceholder} className="flex-1 bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400 transition-colors disabled:opacity-50" />
+                                <button onClick={handleSend} disabled={isTyping} className="bg-blue-600 text-white w-12 rounded-xl hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center"><Icon name="Send" size={16}/></button>
+                            </div>
+                        </div>
+                    ) : (
+                        <button onClick={() => setIsOpen(true)} className="w-16 h-16 bg-blue-600 text-white rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all relative">
+                            <Icon name="Bot" size={28} />
+                            <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full animate-pulse"></div>
+                        </button>
+                    )}
+                </div>
+            );
+        };
+
+        // =====================================================
+        // Main Portfolio Component
+        // =====================================================
+
+        const App = () => {
+            const [lang, setLang] = useState('en');
+            const t = TRANSLATIONS[lang];
+            const [activeMenu, setActiveMenu] = useState('Home');
+            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+            const [user, setUser] = useState(null);
+            const [isLoading, setIsLoading] = useState(true);
+            const [posts, setPosts] = useState([]);
+            const [projects, setProjects] = useState([]);
+            const [academics, setAcademics] = useState([]);
+            const [perspectives, setPerspectives] = useState([]);
+            const [profileData, setProfileData] = useState(null);
+            const [isCapturing, setIsCapturing] = useState(false);
+            const [isSaving, setIsSaving] = useState(false);
+            const [activeCommentId, setActiveCommentId] = useState(null);
+            const [commentText, setCommentText] = useState('');
+            const [activeModal, setActiveModal] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [highlightedPostId, setHighlightedPostId] = useState(null);
+
+            const app_init = initializeApp(firebaseConfig);
+            const app_auth = getAuth(app_init);
+            const app_db = getFirestore(app_init);
+
+            useEffect(() => {
+                signInAnonymously(app_auth).catch(err => console.error("Auth Failed:", err));
+                const unsubscribeAuth = onAuthStateChanged(app_auth, u => setUser(u));
+                return () => unsubscribeAuth();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                
+                // Added Error logging to snapshots to prevent silent crashes
+                const unsub = [
+                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts'), s => {
+                        setPosts(s.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                        setIsLoading(false);
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const pId = urlParams.get('post');
+                        if (pId && activeMenu === 'Home') {
+                            setTimeout(() => {
+                                const el = document.getElementById(`post-${pId}`);
+                                if (el) {
+                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    setHighlightedPostId(pId);
+                                    setTimeout(() => setHighlightedPostId(null), 4000);
+                                }
+                            }, 800);
+                        }
+                    }, err => console.error("Posts Sync Error:", err)),
+                    
+                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'projects'), 
+                        s => setProjects(s.docs.map(d => ({ ...d.data(), id: d.id }))),
+                        err => console.error("Projects Sync Error:", err)
+                    ),
+                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'academics'), 
+                        s => setAcademics(s.docs.map(d => ({ ...d.data(), id: d.id }))),
+                        err => console.error("Academics Sync Error:", err)
+                    ),
+                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'perspectives'), 
+                        s => setPerspectives(s.docs.map(d => ({ ...d.data(), id: d.id }))),
+                        err => console.error("Perspectives Sync Error:", err)
+                    ),
+                    onSnapshot(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'profile'), 
+                        s => { if(!s.empty) setProfileData(s.docs[0].data()); },
+                        err => console.error("Profile Sync Error:", err)
+                    )
+                ];
+                return () => unsub.forEach(f => f());
+            }, [user, activeMenu]);
+
+            const handleFeeling = async (txt) => {
+                setIsCapturing(true);
+                const img = await triggerSelfie();
+                if (img) {
+                    setIsSaving(true);
+                    try {
+                        await addDoc(collection(app_db, 'artifacts', APP_ID, 'public', 'data', 'feelings'), { userId: user.uid, text: txt, photo: img, timestamp: new Date().toISOString() });
+                    } catch (e) {
+                        setToast("Failed to sync memory securely.");
+                    }
+                    setTimeout(() => setIsSaving(false), 2000);
+                } else {
+                    setToast(t.cameraError);
+                }
+                setIsCapturing(false);
+            };
+
+            const toggleLike = async (id, likedBy) => {
+                if(!user) return;
+                const isLiked = (likedBy || []).includes(user.uid);
+                await updateDoc(doc(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts', id), { likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) }).catch(console.error);
+            };
+
+            const addComment = async (id) => {
+                if (!commentText.trim() || !user) return;
+                await updateDoc(doc(app_db, 'artifacts', APP_ID, 'public', 'data', 'posts', id), {
+                    comments: arrayUnion({ text: commentText, userId: user.uid, timestamp: new Date().toISOString() })
+                }).catch(console.error);
+                setCommentText('');
+            };
+
+            const sharePost = (p) => {
+                const url = `${window.location.origin}${window.location.pathname}?post=${p.id}`;
+                if (navigator.share) {
+                    navigator.share({ title: 'Rezwan Portfolio', text: p.content, url })
+                    .catch((error) => console.log('Sharing failed or canceled', error));
+                } else { 
+                    navigator.clipboard.writeText(url); 
+                    setToast(t.shareSuccess); 
+                }
+            };
+
+            const navTo = (m) => { setIsLoading(true); setActiveMenu(m); setIsSidebarOpen(false); window.scrollTo(0,0); setTimeout(() => setIsLoading(false), 300); };
+
+            const currentName = profileData?.name || (lang === 'en' ? "Rezwan Ahammed" : "রেজওয়ান আহাম্মেদ");
+            const currentRole = profileData?.role || (lang === 'en' ? "Software Architect" : "সফটওয়্যার আর্কিটেক্ট");
+            const currentAvatar = profileData?.avatar || DEFAULT_AVATAR;
+
+            const combinedFeed = [
+                ...posts.map(p => ({ ...p, feedType: 'post', sortTime: new Date(p.timestamp || 0).getTime() })),
+                ...academics.map(a => ({ ...a, feedType: 'academic', sortTime: new Date(a.timestamp || 0).getTime() })),
+                ...perspectives.map(p => ({ ...p, feedType: 'perspective', sortTime: new Date(p.timestamp || 0).getTime() }))
+            ].sort((a, b) => b.sortTime - a.sortTime);
+
+            return (
+                <div className="flex min-h-screen relative font-sans" style={{ fontFamily: lang === 'en' ? "'Outfit', sans-serif" : "'Hind Siliguri', sans-serif" }}>
+                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+                    
+                    {/* Capture UI */}
+                    {(isCapturing || isSaving) && (
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm modal-enter" translate="no">
+                            <div className={`p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-5 ${isSaving ? 'bg-rose-500 text-white' : 'bg-white text-blue-600'}`}>
+                                <div className="relative">
+                                    <Icon name={isSaving ? 'Heart' : 'Loader2'} size={48} className={isSaving ? 'animate-pulse' : 'animate-spin'}/>
+                                    {isSaving && <div className="absolute inset-0 bg-white rounded-full ripple-effect opacity-50"></div>}
+                                </div>
+                                <span className="font-bold uppercase tracking-widest text-xs">{isSaving ? t.saving : t.openingCamera}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <aside className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r border-slate-200 z-40 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} flex flex-col`}>
+                        <div className="p-8 flex flex-col items-center text-center mt-4">
+                            <div className="relative mb-6">
+                                <img src={currentAvatar} className="w-32 h-32 rounded-full object-cover border-4 border-slate-50 shadow-md" />
+                                <div className="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center"><Icon name="CheckCircle" size={10} className="text-white"/></div>
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{currentName}</h2>
+                            <p className="text-sm font-medium text-slate-500 mt-1">{currentRole}</p>
+                        </div>
+                        <nav className="flex-1 px-6 py-4 space-y-2 overflow-y-auto">
+                            {[
+                                { id: 'Home', icon: 'Home', label: t.home },
+                                { id: 'Profile', icon: 'UserCircle', label: t.profile },
+                                { id: 'Projects', icon: 'Code2', label: t.portfolio },
+                                { id: 'Academics', icon: 'GraduationCap', label: t.academics },
+                                { id: 'Perspectives', icon: 'Quote', label: t.perspectives }
+                            ].map(item => (
+                                <button key={item.id} onClick={() => navTo(item.id)} className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-medium text-[15px] transition-all ${activeMenu === item.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                                    <Icon name={item.icon} size={18} className={activeMenu === item.id ? "text-blue-600" : "text-slate-400"}/>
+                                    <span>{item.label}</span>
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="p-6">
+                            <div className="flex justify-center gap-4 text-slate-400">
+                                {profileData?.facebookUrl && <a href={profileData.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-blue-600 transition-colors"><Icon name="Facebook" size={20}/></a>}
+                                {profileData?.linkedinUrl && <a href={profileData.linkedinUrl} target="_blank" rel="noreferrer" className="hover:text-blue-600 transition-colors"><Icon name="LinkedIn" size={20}/></a>}
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className="flex-1 lg:ml-[280px] flex flex-col relative z-10 transition-all min-h-screen">
+                        <header className="sticky top-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 z-30 px-6 sm:px-10 flex items-center justify-between">
+                            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-slate-600 hover:text-slate-900"><Icon name="Menu" size={20}/></button>
+                            <div className="hidden lg:block font-medium text-slate-500 text-sm">{activeMenu}</div>
+                            <div className="flex items-center gap-3 ml-auto">
+                                <button onClick={() => setLang(lang === 'en' ? 'bn' : 'en')} className="px-4 py-2 bg-slate-100 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-700 hover:bg-slate-200 transition-colors flex items-center gap-2">
+                                    <Icon name="Languages" className="text-blue-600" size={14}/> {lang === 'en' ? 'বাংলা' : 'English'}
+                                </button>
+                            </div>
+                        </header>
+
+                        <main className="flex-1 p-6 sm:p-12 max-w-5xl mx-auto w-full animate-fade-up">
+                            {isLoading ? <div className="space-y-6"><ShimmerCard/><ShimmerCard/></div> : activeMenu === 'Home' ? (
+                                <div className="space-y-10">
+                                    <div className="portfolio-card p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left border-none bg-gradient-to-br from-white to-blue-50/30">
+                                        <div className="flex-1 space-y-6">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> {t.available}</div>
+                                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">Hi, I am <br/><span className="text-blue-600">{profileData?.name || currentName}</span>.</h1>
+                                            <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">{profileData?.bio || t.bio}</p>
+                                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+                                            <button onClick={() => navTo('Profile')} className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-600/30"><Icon name="UserCircle" size={16}/> {t.viewDetails}</button>
+                                            <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-all"><Icon name="MessageCircle" size={16}/> {t.message}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-3"><Icon name="Cpu" size={20} className="text-slate-400" /><h2 className="text-xl font-bold text-slate-800">{t.recentUpdates}</h2></div>
+                                
+                                <div className="space-y-8">
+                                {combinedFeed.map(item => {
+                                    if (item.feedType === 'post') {
+                                        return (
+                                            <div key={`post-${item.id}`} id={`post-${item.id}`} className={`portfolio-card overflow-hidden ${highlightedPostId === item.id ? 'highlight-post' : ''}`}>
+                                                <div className="p-6 sm:p-8 flex items-start gap-4 border-b border-slate-100">
+                                                    <img src={currentAvatar} className="w-12 h-12 rounded-full object-cover" />
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2"><h4 className="font-bold text-slate-900">{profileData?.name || currentName}</h4><Icon name="CheckCircle" size={14} className="text-blue-500"/></div>
+                                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
+                                                            <span>{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}</span>
+                                                            {item.location && <span className="flex items-center gap-1"><Icon name="MapPin" size={12} className="text-slate-400"/> {item.location}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="p-6 sm:p-8 text-[15px] text-slate-700 leading-relaxed" dangerouslySetInnerHTML={renderMarkdown(lang === 'en' ? (item.content_en || item.content) : (item.content_bn || item.content))} />
+                                                {item.image && <div className="px-6 sm:px-8 pb-6"><img src={item.image} className="w-full max-h-[500px] object-cover rounded-xl border border-slate-200" /></div>}
+                                                <div className="px-6 sm:px-8 py-4 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                                                    <div className="flex gap-4">
+                                                        <button onClick={() => toggleLike(item.id, item.likedBy)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${item.likedBy?.includes(user?.uid) ? 'text-rose-500' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="Heart" size={18} fill={item.likedBy?.includes(user?.uid) ? 'currentColor' : 'none'}/> {(item.likedBy || []).length}</button>
+                                                        <button onClick={() => setActiveCommentId(activeCommentId === item.id ? null : item.id)} className={`flex items-center gap-2 font-medium text-sm transition-colors ${activeCommentId === item.id ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'}`}><Icon name="MessageCircle" size={18}/> {(item.comments || []).length}</button>
+                                                    </div>
+                                                    <button onClick={() => sharePost(item)} className="flex items-center gap-2 font-medium text-sm text-slate-500 hover:text-slate-800 transition-colors"><Icon name="Share2" size={18}/> Share</button>
+                                                </div>
+                                                {activeCommentId === item.id && (
+                                                    <div className="p-6 sm:p-8 border-t border-slate-200 bg-white comment-enter">
+                                                        <div className="space-y-5 mb-6 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                                            {(item.comments || []).map((c, idx) => (
+                                                                <div key={idx} className="flex gap-4">
+                                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400"><Icon name="UserCircle" size={14}/></div>
+                                                                    <div className="flex-1">
+                                                                        <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-sm text-sm text-slate-700">{c.text}</div>
+                                                                        <span className="text-[10px] text-slate-400 font-medium mt-1 ml-1 block">{new Date(c.timestamp).toLocaleDateString()}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-3">
+                                                            <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyPress={e => e.key === 'Enter' && addComment(item.id)} placeholder={t.commentPh} className="flex-1 bg-white border border-slate-300 rounded-xl px-5 py-3 text-sm outline-none focus:border-blue-500 transition-colors" />
+                                                            <button onClick={() => addComment(item.id)} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors shadow-md">{t.postComment}</button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    } else if (item.feedType === 'academic') {
+                                        return (
+                                            <div key={`academic-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-emerald-500 flex flex-col sm:flex-row sm:items-center gap-6">
+                                                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={24}/></div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded">{t.academicUpdate}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-slate-900 mb-1">{item.title}</h3>
+                                                    <p className="text-sm text-slate-500 font-medium mb-3 truncate">{item.institution}</p>
+                                                    <button onClick={() => navTo('Academics')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMoreAcademics} <Icon name="ArrowRight" size={12}/></button>
+                                                </div>
+                                            </div>
+                                        );
+                                    } else if (item.feedType === 'perspective') {
+                                        return (
+                                            <div key={`perspective-${item.id}`} className="portfolio-card p-6 sm:p-8 border-l-4 border-amber-500 bg-amber-50/10">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded">{t.perspectiveUpdate}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp ? new Date(item.timestamp).toLocaleDateString(lang==='en'?'en-US':'bn-BD', { month: 'short', day: 'numeric' }) : ''}</span>
+                                                </div>
+                                                <div className="relative z-10 pl-6 border-l-2 border-slate-200 mb-4">
+                                                    <p className="text-lg font-medium text-slate-700 italic line-clamp-2">"{lang==='en'?(item.text_en||item.text):(item.text_bn || item.text)}"</p>
+                                                </div>
+                                                <button onClick={() => navTo('Perspectives')} className="text-xs font-bold text-blue-600 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">{t.seeMorePerspectives} <Icon name="ArrowRight" size={12}/></button>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                </div>
+                                {combinedFeed.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm font-medium">{t.awaitingData}</p></div>}
+                            </div>
+                        ) : activeMenu === 'Profile' ? (
+                                <div className="space-y-8 pb-20 animate-fade-up">
+                                    <div className="portfolio-card overflow-hidden">
+                                        <div className="h-48 sm:h-64 bg-slate-200 relative">
+                                            {profileData?.coverPhoto && <img src={profileData.coverPhoto} className="w-full h-full object-cover" />}
+                                            <div className="absolute inset-0 bg-black/20"></div>
+                                        </div>
+                                        <div className="px-8 sm:px-12 pb-10 relative -mt-16 sm:-mt-20">
+                                            <img src={currentAvatar} className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-xl object-cover bg-white mb-6" />
+                                            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">{profileData?.name || currentName}</h2>
+                                            <p className="text-lg text-blue-600 font-medium mb-6">{profileData?.work?.[0]?.title || "Software Architect"} @ {profileData?.work?.[0]?.company || "Digital Space"}</p>
+                                            <div className="flex flex-wrap gap-4">
+                                                <button onClick={() => setActiveModal('follow')} className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-blue-700 transition-colors"><Icon name="PlusCircle" size={16}/> {t.follow}</button>
+                                                <button onClick={() => setActiveModal('message')} className="bg-white border border-slate-300 text-slate-700 px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors"><Icon name="MessageCircle" size={16}/> {t.message}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {!profileData ? <div className="text-center py-20 text-slate-400"><Icon name="Loader2" size={32} className="mb-4 animate-spin mx-auto"/><p className="text-sm">Syncing Data...</p></div> : (
+                                        <div className="grid grid-cols-1 gap-8">
+                                            <div className="portfolio-card p-8 sm:p-12">
+                                                <h3 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-3"><Icon name="Briefcase" className="text-blue-500" size={24}/> {t.workEd}</h3>
+                                                <div className="space-y-12">
+                                                    {(profileData.work || []).map((w,i) => (
+                                                        <div key={i} className="flex gap-6 timeline-border relative">
+                                                            <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 shrink-0 z-10"><Icon name="Briefcase" size={14}/></div>
+                                                            <div className="flex-1 pb-4">
+                                                                <h4 className="text-xl font-bold text-slate-900">{w.title}</h4>
+                                                                <p className="text-blue-600 font-medium text-sm mt-1 mb-2">{w.company}</p>
+                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
+                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{w.startYear} — {w.endYear || t.present}</span>
+                                                                    <span className="flex items-center gap-1"><Icon name="MapPin" size={12}/> {w.city || "Global"}</span>
+                                                                </div>
+                                                                {w.desc && <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">{w.desc}</p>}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {(profileData.education || []).map((e,i) => (
+                                                        <div key={i} className="flex gap-6 timeline-border relative">
+                                                            <div className="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-full text-emerald-600 shrink-0 z-10"><Icon name="GraduationCap" size={14}/></div>
+                                                            <div className="flex-1 pb-4">
+                                                                <h4 className="text-xl font-bold text-slate-900">{e.degree}</h4>
+                                                                <p className="text-emerald-600 font-medium text-sm mt-1 mb-2">{e.institution}</p>
+                                                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mb-4">
+                                                                    <span className="bg-slate-100 px-3 py-1 rounded-full">{e.startYear} — {e.endYear || t.present}</span>
+                                                                    <span className="flex items-center gap-1"><Icon name="Building" size={12}/> {e.city || "Campus"}</span>
+                                                                </div>
+                                                                {e.desc && <p className="text-sm text-slate-600 italic border-l-4 border-slate-200 pl-4 py-1">"{e.desc}"</p>}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div className="portfolio-card p-8">
+                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="Map" className="text-rose-500"/> {t.places}</h3>
+                                                    <div className="space-y-4">
+                                                        {(profileData.places || []).map((p,i) => (
+                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Home" size={18}/></div>
+                                                                <div><p className="font-bold text-slate-800">{p.name}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{p.type}</p></div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="portfolio-card p-8">
+                                                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><Icon name="UserCircle" className="text-indigo-500"/> {t.contactInfo}</h3>
+                                                    <div className="space-y-4">
+                                                        {(profileData.contact || []).map((c,i) => (
+                                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-slate-400 shadow-sm"><Icon name="Globe" size={18}/></div>
+                                                                <div className="min-w-0"><p className="font-bold text-slate-800 truncate">{c.value}</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{c.type}</p></div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : activeMenu === 'Projects' ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20 animate-fade-up">
+                                    <h2 className="col-span-full text-3xl font-bold text-slate-900 mb-4">{t.portfolio}</h2>
+                                    {projects.map(p => (
+                                        <div key={p.id} className="portfolio-card p-8 flex flex-col h-full group">
+                                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform"><Icon name="Code2" size={28}/></div>
+                                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{p.title}</h3>
+                                            <p className="text-sm text-slate-600 mb-8 flex-1 leading-relaxed">{p.desc}</p>
+                                            <div className="flex flex-wrap gap-2 mb-8">
+                                                {(p.tech || []).map((tk,i) => <span key={i} className="text-[11px] font-medium bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{tk}</span>)}
+                                            </div>
+                                            <button className="text-sm font-bold text-blue-600 flex items-center gap-2 group-hover:gap-3 transition-all w-fit">{t.explore} <Icon name="ArrowRight" size={14}/></button>
+                                        </div>
+                                    ))}
+                                    {projects.length === 0 && <div className="col-span-full text-center py-20 text-slate-400"><Icon name="Folder" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
+                                </div>
+                            ) : activeMenu === 'Academics' ? (
+                                <div className="space-y-6 pb-20 animate-fade-up">
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.academics}</h2>
+                                    {academics.map(e => (
+                                        <div key={e.id} className="portfolio-card p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+                                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0"><Icon name="Award" size={28}/></div>
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-slate-900 mb-2">{e.title}</h3>
+                                                <p className="text-sm text-slate-500 font-medium">{e.institution} {e.grade ? <span className="ml-2 font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{e.grade}</span> : ''}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {academics.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="GraduationCap" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
+                                </div>
+                            ) : activeMenu === 'Perspectives' ? (
+                                <div className="space-y-8 pb-20 animate-fade-up">
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.perspectives}</h2>
+                                    {perspectives.map(p => (
+                                        <div key={p.id} className="portfolio-card p-10 sm:p-14 relative overflow-hidden group">
+                                            <Icon name="Quote" className="absolute -top-6 -right-6 text-slate-50 rotate-12" size={160} />
+                                            <div className="relative z-10">
+                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-6">{p.topic}</h4>
+                                                <p className="text-2xl sm:text-3xl font-medium text-slate-800 leading-snug">"{lang==='en'?(p.text_en||p.text):(p.text_bn || p.text)}"</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {perspectives.length === 0 && <div className="text-center py-20 text-slate-400"><Icon name="Lightbulb" size={48} className="mb-4 text-slate-200 mx-auto"/><p className="font-medium">{t.awaitingData}</p></div>}
+                                </div>
+                            ) : null}
+                        </main>
+                    </div>
+
+                    {activeModal === 'follow' && <SelectionModal title={t.follow} options={[{ label: 'Facebook', sub: 'Social Profile', icon: 'Facebook', url: profileData?.facebookUrl }, { label: 'LinkedIn', sub: 'Professional Network', icon: 'LinkedIn', url: profileData?.linkedinUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
+                    {activeModal === 'message' && <SelectionModal title={t.message} options={[{ label: 'Messenger', sub: 'Instant Chat', icon: 'Messenger', url: profileData?.messengerUrl }, { label: 'WhatsApp', sub: 'Direct Message', icon: 'WhatsApp', url: profileData?.whatsappUrl }]} onClose={() => setActiveModal(null)} onSelect={u => { u?window.open(u,'_blank'):setToast(t.linkMissing); setActiveModal(null); }} />}
+                    <AIChatWidget lang={lang} t={t} user={user} onFeelingDetected={handleFeeling} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
