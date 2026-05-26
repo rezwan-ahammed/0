@@ -19,9 +19,8 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const appId = "salami-portal-final";
 
-// --- AI (MISTRAL) CONFIGURATION ---
-export const AI_API_KEY = "8Ykc79Mnq5DsXd70FQG2FHsaeiByB8xv";
-export const AI_MODEL = "pixtral-large-latest"; // Mistral Best Vision Model
 
-// --- PROFANITY DICTIONARY ---
+export const AI_API_KEY = "8Ykc79Mnq5DsXd70FQG2FHsaeiByB8xv";
+export const AI_MODEL = "pixtral-large-latest";
+
 export const BAD_WORDS = ['শালা', 'বাল', 'মাগি', 'খানকি', 'চুদ', 'চুদা', 'কুত্তা', 'শুয়োর', 'বেশ্যা', 'হালারপো', 'fuck', 'bitch', 'asshole', 'bastard'];
