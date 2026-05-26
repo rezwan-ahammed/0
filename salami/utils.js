@@ -1,4 +1,4 @@
-import { GEMINI_API_KEY } from './config.js';
+import { AI_API_KEY, AI_MODEL, BAD_WORDS } from './config.js';
 
 export const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -41,9 +41,10 @@ export const createCollage = async (b1, b2, b3) => {
     return canvas.toDataURL('image/jpeg', 0.6); 
 };
 
-export const verifyWithGemini = async (combinedBase64, taskDesc) => {
-    if (!GEMINI_API_KEY) return { isSamePerson: true, isTaskCompleted: true, reason: "এআই পুলিশ ঘুমাচ্ছে!" };
-    const base64Data = combinedBase64.split(',')[1];
+// Generic AI function so you never have to change function names in app.jsx
+export const verifyWithAI = async (combinedBase64, taskDesc) => {
+    if (!AI_API_KEY) return { isSamePerson: true, isTaskCompleted: true, reason: "এআই পুলিশ ঘুমাচ্ছে!" };
+    
     const prompt = `This image contains 3 photos side-by-side. Left: Gallery photo. Middle: Live selfie (Captured in background). Right: User performing a task.
     Assigned Task: "${taskDesc}". Analyze deeply and act as a strict, sarcastic Bengali AI guard:
     1. Are the persons in all 3 photos EXACTLY the same individual?
@@ -51,21 +52,36 @@ export const verifyWithGemini = async (combinedBase64, taskDesc) => {
     Return ONLY a valid JSON: {"isSamePerson": boolean, "isTaskCompleted": boolean, "reason": "If false, scold them in funny satirical Bengali. If true, praise them."}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+        const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+            method: 'POST', 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AI_API_KEY}`
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }],
-                generationConfig: { responseMimeType: "application/json" }
+                model: AI_MODEL,
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: prompt },
+                            { type: "image_url", image_url: { url: combinedBase64 } }
+                        ]
+                    }
+                ],
+                response_format: { type: "json_object" } 
             })
         });
+
         if (!response.ok) throw new Error('API Error');
         const data = await response.json();
-        return JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text);
-    } catch (error) { return { isSamePerson: true, isTaskCompleted: true, reason: "সার্ভার বিজি!" }; }
+        return JSON.parse(data.choices[0].message.content);
+    } catch (error) { 
+        return { isSamePerson: true, isTaskCompleted: true, reason: "সার্ভার বিজি! ফাঁকি দিসনাই আশা করি।" }; 
+    }
 };
 
-const badWords = ['শালা', 'বাল', 'মাগি', 'খানকি', 'চুদ', 'চুদা', 'কুত্তা', 'শুয়োর', 'বেশ্যা', 'হালারপো', 'fuck', 'bitch', 'asshole', 'bastard'];
 export const checkProfanity = (text) => {
     if (!text) return false;
-    return badWords.some(word => text.toLowerCase().includes(word));
+    return BAD_WORDS.some(word => text.toLowerCase().includes(word));
 };
