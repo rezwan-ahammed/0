@@ -1,5 +1,5 @@
 import { auth, db, appId } from './config.js';
-import { compressImage, createCollage, verifyWithGemini, checkProfanity } from './utils.js';
+import { compressImage, createCollage, verifyWithAI, checkProfanity } from './utils.js';
 import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { collection, doc, setDoc, getDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -174,8 +174,10 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
 
             setLoadingState('combining');
             const combinedBase64 = await createCollage(photos.p1, bgPhoto, photos.p2);
+            
             setLoadingState('ai_checking');
-            const aiResult = await verifyWithGemini(combinedBase64, taskData.task);
+            // AI verify logic abstract kora hoyeche, so ekhane kono change lagbe na.
+            const aiResult = await verifyWithAI(combinedBase64, taskData.task);
             
             if (!aiResult.isSamePerson || !aiResult.isTaskCompleted) { setAiRejection(aiResult.reason); setLoading(false); return; }
 
