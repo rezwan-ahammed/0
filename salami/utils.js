@@ -1,3 +1,5 @@
+
+
 import { AI_API_KEY, AI_MODEL, BAD_WORDS } from './config.js';
 
 export const compressImage = (file) => {
@@ -41,15 +43,28 @@ export const createCollage = async (b1, b2, b3) => {
     return canvas.toDataURL('image/jpeg', 0.6); 
 };
 
-// Generic AI function so you never have to change function names in app.jsx
 export const verifyWithAI = async (combinedBase64, taskDesc) => {
     if (!AI_API_KEY) return { isSamePerson: true, isTaskCompleted: true, reason: "এআই পুলিশ ঘুমাচ্ছে!" };
     
-    const prompt = `This image contains 3 photos side-by-side. Left: Gallery photo. Middle: Live selfie (Captured in background). Right: User performing a task.
-    Assigned Task: "${taskDesc}". Analyze deeply and act as a strict, sarcastic Bengali AI guard:
-    1. Are the persons in all 3 photos EXACTLY the same individual?
-    2. Is the person in the Right-most photo ACTUALLY doing the assigned task?
-    Return ONLY a valid JSON: {"isSamePerson": boolean, "isTaskCompleted": boolean, "reason": "If false, scold them in funny satirical Bengali. If true, praise them."}`;
+    // আপডেটেড এবং স্মার্ট প্রম্পট ইঞ্জিনিয়ারিং
+    const prompt = `You are a funny, sarcastic, but extremely fair and LENIENT Bengali AI guard evaluating an Eid Salami request.
+    The image contains 3 photos side-by-side. 
+    Left: Gallery photo. Middle: Live hidden selfie. Right: User performing a task.
+    
+    Assigned Task: "${taskDesc}". 
+    
+    Evaluate based on these rules:
+    1. Are the persons in all 3 photos the EXACT same individual? (Be reasonably confident).
+    2. Is the person in the Right-most photo performing the Assigned Task? 
+       *CRITICAL RULE*: Be VERY LENIENT. If the user makes ANY visible effort to do the task, consider it a pass (true). 
+       For example, if the task asks for an "extreme grimace/ভেংচি", just sticking the tongue out, closing one eye, or making ANY silly face MUST be accepted as true. Do NOT demand perfection or extreme acting. If they did anything related to the task, "isTaskCompleted" MUST be true.
+       
+    Return ONLY a valid JSON object without any markdown formatting: 
+    {
+        "isSamePerson": boolean, 
+        "isTaskCompleted": boolean, 
+        "reason": "If false, scold them in funny satirical Bengali. If true, praise them sarcastically in Bengali (e.g., 'তোর ভেংচি দেখে তো কাকও ভয় পাবে, যাই হোক পাস করেছিস!' or 'যাক, বান্দরের মতো হলেও অন্তত চেষ্টা তো করেছিস, ভেরিফাইড!')."
+    }`;
 
     try {
         const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
