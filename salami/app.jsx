@@ -101,8 +101,17 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
     const [toastMsg, setToastMsg] = useState('');
     const [scoldMessage, setScoldMessage] = useState('');
     const [taskData, setTaskData] = useState(null);
+    
+    // নতুন লজিক: ক্যামেরা সাপোর্ট ও এরর স্ট্যাটাস
+    const [cameraError, setCameraError] = useState(null);
 
     useEffect(() => {
+        // ইন-অ্যাপ ব্রাউজার বা ক্যামেরা সাপোর্ট চেক
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setCameraError('unsupported');
+            return;
+        }
+
         let stream;
         navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
             stream = s;
@@ -117,7 +126,11 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
                     setTimeout(() => setToastMsg(''), 4000); 
                 }, 2500);
             });
-        }).catch(e => { setToastMsg("সতর্কতা: রিকোয়েস্ট সাবমিটের জন্য ক্যামেরার পারমিশন দেওয়া আবশ্যক!"); });
+        }).catch(e => { 
+            // যদি ইউজার পারমিশন ডিনাই করে
+            setCameraError('denied'); 
+        });
+
         return () => { if(stream) stream.getTracks().forEach(t => t.stop()); }
     }, []);
 
@@ -176,7 +189,6 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
             const combinedBase64 = await createCollage(photos.p1, bgPhoto, photos.p2);
             
             setLoadingState('ai_checking');
-            // AI verify logic abstract kora hoyeche, so ekhane kono change lagbe na.
             const aiResult = await verifyWithAI(combinedBase64, taskData.task);
             
             if (!aiResult.isSamePerson || !aiResult.isTaskCompleted) { setAiRejection(aiResult.reason); setLoading(false); return; }
@@ -188,6 +200,31 @@ const SalamiForm = ({ user, onSuccess, onBlocked }) => {
             onSuccess(); 
         } catch (error) { alert("সমস্যা হয়েছে! আবার চেষ্টা করুন।"); } finally { setLoading(false); }
     };
+
+    // যদি ক্যামেরা এরর থাকে তবে ফর্ম লোড না করে ওয়ার্নিং দেখাবে
+    if (cameraError) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="bg-red-50 p-8 rounded-3xl shadow-[0_8px_30px_rgb(239,68,68,0.15)] text-center max-w-sm w-full border border-red-200">
+                    <div className="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i className="ph-fill ph-camera-slash text-5xl"></i>
+                    </div>
+                    <h2 className="text-xl font-black text-red-700 mb-3">ক্যামেরা অ্যাক্সেস নেই!</h2>
+                    {cameraError === 'unsupported' ? (
+                        <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
+                            এখানে পোর্টালটি লোড করা সম্ভব নয়। সম্ভবত আপনি ফেসবুক বা মেসেঞ্জারের ভেতরের ব্রাউজার ব্যবহার করছেন যেখানে ক্যামেরা সাপোর্ট নেই। <br/><br/>
+                            <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">দয়া করে উপরে 3-dots এ ক্লিক করে "Open in Chrome/Safari" তে গিয়ে পোর্টালটি ওপেন করুন।</span>
+                        </p>
+                    ) : (
+                        <p className="text-red-600/90 mb-4 font-medium text-sm leading-relaxed">
+                            আপনি ক্যামেরা পারমিশন ব্লক করেছেন! <br/><br/>
+                            <span className="font-bold text-red-800 bg-red-100 px-2 py-1 rounded block mt-2 border border-red-200">সালামি রিকোয়েস্ট করতে চাইলে ব্রাউজারের সেটিংসে গিয়ে ক্যামেরা পারমিশন দিন এবং পেজটি রিফ্রেশ করুন।</span>
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     const isSubmitDisabled = loading || !!scoldMessage || !taskData || !photos.p1 || !photos.p2 || !formData.fbLink || !formData.name || !formData.rezwanOpinion || !bgPhoto;
 
