@@ -4,93 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admission Dashboard</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Hind Siliguri for Bengali Text -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Google Material Symbols (Rounded) for Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     
     <style>
-        body {
-            font-family: 'Hind Siliguri', sans-serif;
-            background-color: #FDF8F5;
-        }
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #FDF8F5; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* আইকনের সাইজ ঠিক রাখার জন্য */
-        .material-symbols-rounded {
-            font-size: 24px; 
-        }
+        .material-symbols-rounded { font-size: 24px; }
     </style>
 </head>
 <body class="text-[#2D3748] max-w-md mx-auto relative min-h-screen bg-[#FDF8F5] pb-20">
 
-    <!-- Header & Search -->
+    <!-- Header & Search (আগের মতোই থাকবে) -->
     <header class="p-5 pt-8">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-2xl font-bold">অ্যাডমিশন ড্যাশবোর্ড</h1>
                 <p class="text-gray-500 text-sm">শিক্ষার্থী</p>
             </div>
-            <!-- Profile Avatar -->
             <div class="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile" class="w-full h-full">
             </div>
         </div>
-
-        <!-- Search Bar -->
-        <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-2 border border-gray-100">
-            <span class="material-symbols-rounded text-gray-400 text-xl">search</span>
-            <input type="text" placeholder="কোর্স বা বিষয় খুঁজুন..." class="bg-transparent outline-none w-full text-sm">
-        </div>
     </header>
 
-    <!-- Upload Section -->
+    <!-- Upload Section with Hidden Inputs -->
     <section class="px-5 mb-6 flex gap-3">
+        <!-- Hidden Inputs for Files -->
+        <input type="file" id="routineInput" accept="image/*, application/pdf" class="hidden">
+        <input type="file" id="examInput" accept="image/*" class="hidden">
+
         <button id="uploadRoutineBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#C57B5C] text-[#C57B5C] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[#FDF8F5]">
             <span class="material-symbols-rounded" style="font-size: 18px;">description</span> রুটিন আপলোড
         </button>
         <button id="uploadExamBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#2ECC71] text-[#2ECC71] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-green-50">
-            <span class="material-symbols-rounded" style="font-size: 18px;">quiz</span> খাতা আপলোড
+            <span class="material-symbols-rounded" style="font-size: 18px;">quiz</span> খাতা অ্যানালাইসিস
         </button>
     </section>
+
+    <!-- AI Loading Modal (লুকানো থাকবে, AI কাজ করার সময় দেখাবে) -->
+    <div id="aiLoading" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-2xl flex flex-col items-center shadow-lg w-3/4">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C57B5C] mb-4"></div>
+            <h3 class="text-lg font-bold text-[#C57B5C]">এআই কাজ করছে...</h3>
+            <p class="text-sm text-gray-500 text-center mt-2" id="loadingText">ফাইলটি স্ক্যান করা হচ্ছে</p>
+        </div>
+    </div>
 
     <!-- Timeline Section -->
     <section class="px-5">
         <div class="flex justify-between items-center mb-5">
-            <h2 class="text-lg font-bold">আজকের টাইমলাইন</h2>
-            <button class="bg-[#C57B5C] text-white text-xs px-3 py-1.5 rounded font-semibold shadow-sm">রুটিন দেখুন</button>
+            <h2 class="text-lg font-bold">আমার টাইমলাইন</h2>
+            <button class="bg-[#C57B5C] text-white text-xs px-3 py-1.5 rounded font-semibold shadow-sm">সব দেখুন</button>
         </div>
-
-        <!-- Timeline Container -->
         <div id="timelineContainer" class="flex flex-col gap-0">
-            <!-- Cards will be injected here by app.js -->
+            <!-- Timeline Cards -->
         </div>
     </section>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-100 flex justify-around p-3 pb-5 z-50">
-        <button class="flex flex-col items-center text-[#C57B5C]">
-            <span class="material-symbols-rounded">home</span>
-            <span class="text-[10px] mt-1 font-semibold">হোম</span>
-        </button>
-        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C] transition-colors">
-            <span class="material-symbols-rounded">menu_book</span>
-            <span class="text-[10px] mt-1">আমার কোর্স</span>
-        </button>
-        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C] transition-colors">
-            <span class="material-symbols-rounded">download</span>
-            <span class="text-[10px] mt-1">ডাউনলোড</span>
-        </button>
-        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C] transition-colors">
-            <span class="material-symbols-rounded">notifications</span>
-            <span class="text-[10px] mt-1">নোটিফিকেশন</span>
-        </button>
+    <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-100 flex justify-around p-3 pb-5 z-40">
+        <!-- ... আগের ন্যাভিগেশন কোড ... -->
     </nav>
 
-    <script src="app.js"></script>
+    <!-- মডিউল হিসেবে JS কল করা -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
