@@ -15,9 +15,9 @@
         .material-symbols-rounded { font-size: 24px; }
     </style>
 </head>
-<body class="text-[#2D3748] max-w-md mx-auto relative min-h-screen bg-[#FDF8F5] pb-20">
+<body class="text-[#2D3748] max-w-md mx-auto relative min-h-screen bg-[#FDF8F5] pb-24">
 
-    <!-- Header & Search (আগের মতোই থাকবে) -->
+    <!-- Header & Search -->
     <header class="p-5 pt-8">
         <div class="flex justify-between items-center mb-6">
             <div>
@@ -32,24 +32,39 @@
 
     <!-- Upload Section with Hidden Inputs -->
     <section class="px-5 mb-6 flex gap-3">
-        <!-- Hidden Inputs for Files -->
-        <input type="file" id="routineInput" accept="image/*, application/pdf" class="hidden">
+        <input type="file" id="routineInput" accept="image/*" class="hidden">
         <input type="file" id="examInput" accept="image/*" class="hidden">
 
-        <button id="uploadRoutineBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#C57B5C] text-[#C57B5C] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[#FDF8F5]">
+        <button id="uploadRoutineBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#C57B5C] text-[#C57B5C] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[#FDF8F5] transition">
             <span class="material-symbols-rounded" style="font-size: 18px;">description</span> রুটিন আপলোড
         </button>
-        <button id="uploadExamBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#2ECC71] text-[#2ECC71] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-green-50">
+        <button id="uploadExamBtn" class="flex-1 flex justify-center items-center gap-1 bg-white border border-[#2ECC71] text-[#2ECC71] py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-green-50 transition">
             <span class="material-symbols-rounded" style="font-size: 18px;">quiz</span> খাতা অ্যানালাইসিস
         </button>
     </section>
 
-    <!-- AI Loading Modal (লুকানো থাকবে, AI কাজ করার সময় দেখাবে) -->
-    <div id="aiLoading" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-2xl flex flex-col items-center shadow-lg w-3/4">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C57B5C] mb-4"></div>
-            <h3 class="text-lg font-bold text-[#C57B5C]">এআই কাজ করছে...</h3>
-            <p class="text-sm text-gray-500 text-center mt-2" id="loadingText">ফাইলটি স্ক্যান করা হচ্ছে</p>
+    <!-- AI Loading Modal -->
+    <div id="aiLoading" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[90] flex justify-center items-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-3xl flex flex-col items-center shadow-2xl w-3/4 max-w-xs transform scale-105 transition-all">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-[#C57B5C] mb-4"></div>
+            <h3 class="text-lg font-bold text-[#2D3748]">এআই কাজ করছে...</h3>
+            <p class="text-sm text-gray-500 text-center mt-1" id="loadingText">ফাইলটি স্ক্যান করা হচ্ছে</p>
+        </div>
+    </div>
+
+    <!-- Custom Dialog Box / Error Modal -->
+    <div id="customDialog" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[100] flex justify-center items-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-3xl w-11/12 max-w-sm shadow-2xl transform transition-all flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+                <span id="dialogIcon" class="material-symbols-rounded text-4xl"></span>
+                <h3 id="dialogTitle" class="text-xl font-bold">টাইটেল</h3>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl max-h-[50vh] overflow-y-auto no-scrollbar border border-gray-100">
+                <p id="dialogMessage" class="text-gray-700 text-sm font-mono whitespace-pre-wrap word-break"></p>
+            </div>
+            <div class="flex justify-end mt-2">
+                <button id="closeDialogBtn" class="bg-[#C57B5C] hover:bg-[#a6654a] text-white px-6 py-2 rounded-xl text-sm font-bold shadow-md transition">ঠিক আছে</button>
+            </div>
         </div>
     </div>
 
@@ -57,7 +72,7 @@
     <section class="px-5">
         <div class="flex justify-between items-center mb-5">
             <h2 class="text-lg font-bold">আমার টাইমলাইন</h2>
-            <button class="bg-[#C57B5C] text-white text-xs px-3 py-1.5 rounded font-semibold shadow-sm">সব দেখুন</button>
+            <button class="bg-[#C57B5C] text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow-sm">সব দেখুন</button>
         </div>
         <div id="timelineContainer" class="flex flex-col gap-0">
             <!-- Timeline Cards -->
@@ -65,11 +80,25 @@
     </section>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-100 flex justify-around p-3 pb-5 z-40">
-        <!-- ... আগের ন্যাভিগেশন কোড ... -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-100 flex justify-around p-3 pb-5 z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button class="flex flex-col items-center text-[#C57B5C]">
+            <span class="material-symbols-rounded">home</span>
+            <span class="text-[10px] mt-1 font-semibold">হোম</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C]">
+            <span class="material-symbols-rounded">menu_book</span>
+            <span class="text-[10px] mt-1">আমার কোর্স</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C]">
+            <span class="material-symbols-rounded">download</span>
+            <span class="text-[10px] mt-1">ডাউনলোড</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-[#C57B5C]">
+            <span class="material-symbols-rounded">notifications</span>
+            <span class="text-[10px] mt-1">নোটিফিকেশন</span>
+        </button>
     </nav>
 
-    <!-- মডিউল হিসেবে JS কল করা -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
