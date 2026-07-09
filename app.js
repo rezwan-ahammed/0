@@ -1,82 +1,185 @@
-// ডামি ডেটা (ভবিষ্যতে এই ডেটা Gemini AI থেকে আসবে)
-const timelineData = [
-    {
-        time: "10:00",
-        period: "AM",
-        subject: "উচ্চতর গণিত ১ম পত্র",
-        topic: "ম্যাট্রিক্স ও নির্ণায়ক - লাইভ",
-        status: "upcoming",
-        // ইমোজির বদলে HTML স্প্যান আইকন
-        buttonContent: `যুক্ত হোন <span class="material-symbols-rounded" style="font-size: 16px; margin-left: 4px;">play_arrow</span>`
-    },
-    {
-        time: "03:00",
-        period: "PM",
-        subject: "রসায়ন ১ম পত্র",
-        topic: "গুণগত রসায়ন-১ (উদ্ভাস পরীক্ষা)",
-        status: "upcoming",
-        buttonContent: `আসন <span class="material-symbols-rounded" style="font-size: 16px; margin-left: 4px;">hourglass_bottom</span>`
-    },
-    {
-        time: "08:00",
-        period: "PM",
-        subject: "পদার্থবিজ্ঞান ১ম পত্র",
-        topic: "ভেক্টর - ডট গুণন (MCQ টেস্ট)",
-        status: "completed",
-        buttonContent: `<span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">check_circle</span> সম্পন্ন`
-    }
-];
+// Firebase ES Module Import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+// আপনার দেওয়া Firebase Config (ওয়েবের জন্য কনভার্ট করা)
+const firebaseConfig = {
+    apiKey: "AIzaSyDML6tbSONWaW8-5_SfaIC63MtVk4Oq_Xs",
+    authDomain: "general-57884.firebaseapp.com",
+    databaseURL: "https://general-57884-default-rtdb.firebaseio.com",
+    projectId: "general-57884",
+    storageBucket: "general-57884.firebasestorage.app",
+    messagingSenderId: "5002724584",
+    appId: "1:5002724584:web:YOUR_WEB_APP_ID" // এটি Android এর দেওয়া, কাজ না করলে Firebase থেকে Web App ID নিতে হবে
+};
+
+// Firebase Initialize
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Gemini API Configuration
+const GEMINI_API_KEY = "AQ.Ab8RN6LzF0wBhS-StnT3jlXKaK7T4kPyBL6lLyCglI4b_40RBw";
+const GEMINI_MODEL = "gemini-3-flash";
+
+// DOM Elements
 const timelineContainer = document.getElementById('timelineContainer');
+const aiLoading = document.getElementById('aiLoading');
+const loadingText = document.getElementById('loadingText');
 
+// UI Render Function
 function renderTimeline(data) {
     timelineContainer.innerHTML = ''; 
+    if(!data || data.length === 0) {
+        timelineContainer.innerHTML = '<p class="text-gray-400 text-center mt-5">কোনো রুটিন পাওয়া যায়নি।</p>';
+        return;
+    }
 
     data.forEach((item, index) => {
-        // বাটনের কালার লজিক
         let btnClass = "bg-[#C57B5C] text-white";
-        if (item.status === "completed") {
-            btnClass = "bg-green-100 text-[#2ECC71]";
-        } else if (item.buttonContent.includes("আসন")) {
-            btnClass = "bg-gray-400 text-white";
-        }
+        if (item.status === "completed") btnClass = "bg-green-100 text-[#2ECC71]";
+        else if (item.buttonContent.includes("আসন")) btnClass = "bg-gray-400 text-white";
 
         const cardHTML = `
             <div class="flex gap-4 mb-4">
-                <!-- Time & Line -->
                 <div class="flex flex-col items-center min-w-[50px]">
                     <span class="text-[#C57B5C] font-semibold text-sm">${item.time}</span>
                     <span class="text-[#C57B5C] font-semibold text-xs mb-2">${item.period}</span>
                     <div class="w-3 h-3 bg-[#C57B5C] rounded-full z-10 ring-4 ring-[#FDF8F5]"></div>
                     ${index !== data.length - 1 ? `<div class="w-0.5 h-full bg-gray-300 -mt-1"></div>` : `<div class="h-full"></div>`}
                 </div>
-
-                <!-- Content Card -->
                 <div class="bg-white rounded-2xl shadow-sm p-4 w-full border border-gray-100">
                     <h4 class="text-[#C57B5C] text-xs font-semibold mb-1">${item.subject}</h4>
                     <h2 class="text-[#2D3748] text-[16px] font-bold mb-4">${item.topic}</h2>
-                    
                     <div class="flex justify-end">
                         <button class="${btnClass} px-4 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center justify-center">
                             ${item.buttonContent}
                         </button>
                     </div>
                 </div>
-            </div>
-        `;
-        
+            </div>`;
         timelineContainer.insertAdjacentHTML('beforeend', cardHTML);
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    renderTimeline(timelineData);
+// Database থেকে রিয়েলটাইম ডেটা আনা
+const routinesRef = ref(db, 'user_routines');
+onValue(routinesRef, (snapshot) => {
+    const data = snapshot.val();
+    if(data) {
+        const routineArray = Object.values(data);
+        renderTimeline(routineArray);
+    } else {
+        renderTimeline([]);
+    }
 });
 
+// ফাইল Base64 এ কনভার্ট করার ফাংশন
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Gemini AI Call Function
+async function callGemini(base64Image, mimeType, prompt) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    
+    // Base64 স্ট্রিং থেকে `data:image/jpeg;base64,` অংশটুকু বাদ দেওয়া
+    const base64Data = base64Image.split(',')[1];
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    { inlineData: { mimeType: mimeType, data: base64Data } }
+                ]
+            }]
+        })
+    });
+
+    const result = await response.json();
+    return result.candidates[0].content.parts[0].text;
+}
+
+// রুটিন আপলোড ইভেন্ট
 document.getElementById('uploadRoutineBtn').addEventListener('click', () => {
-    alert("রুটিন আপলোডের কাজ এখানে হবে।");
+    document.getElementById('routineInput').click();
 });
 
+document.getElementById('routineInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    aiLoading.classList.remove('hidden');
+    loadingText.innerText = "রুটিন থেকে ডেটা বের করা হচ্ছে...";
+
+    try {
+        const base64 = await fileToBase64(file);
+        
+        // AI কে প্রম্পট দেওয়া
+        const prompt = `
+            Analyze this routine image. Extract the upcoming classes or exams.
+            Return ONLY a valid JSON array matching exactly this format (no markdown, no extra text):
+            [
+              {
+                "time": "10:00",
+                "period": "AM",
+                "subject": "বিষয়",
+                "topic": "টপিকের নাম",
+                "status": "upcoming",
+                "buttonContent": "যুক্ত হোন <span class='material-symbols-rounded' style='font-size: 16px; margin-left: 4px;'>play_arrow</span>"
+              }
+            ]
+        `;
+
+        const aiResponseText = await callGemini(base64, file.type, prompt);
+        
+        // JSON পরিষ্কার করা (যদি AI Markdown এ দেয়)
+        const jsonText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const extractedData = JSON.parse(jsonText);
+
+        // Firebase এ সেভ করা
+        extractedData.forEach(item => {
+            const newRoutineRef = push(routinesRef);
+            set(newRoutineRef, item);
+        });
+
+        alert("রুটিন সফলভাবে সেভ হয়েছে!");
+    } catch (error) {
+        console.error(error);
+        alert("এআই রুটিন পড়তে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+    } finally {
+        aiLoading.classList.add('hidden');
+    }
+});
+
+// খাতা অ্যানালাইসিস আপলোড ইভেন্ট (Future Implementation)
 document.getElementById('uploadExamBtn').addEventListener('click', () => {
-    alert("খাতা আপলোডের কাজ এখানে হবে।");
+    document.getElementById('examInput').click();
+});
+
+document.getElementById('examInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    aiLoading.classList.remove('hidden');
+    loadingText.innerText = "খাতা স্ক্যান করে ভুল ধরা হচ্ছে...";
+
+    try {
+        const base64 = await fileToBase64(file);
+        const prompt = "This is a student's exam paper. Tell me briefly what are the mistakes in Bengali language.";
+        const feedback = await callGemini(base64, file.type, prompt);
+        
+        alert("এআই ফিডব্যাক:\n\n" + feedback);
+    } catch(error) {
+        alert("খাতা অ্যানালাইসিসে সমস্যা হয়েছে।");
+    } finally {
+        aiLoading.classList.add('hidden');
+    }
 });
